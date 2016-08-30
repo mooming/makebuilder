@@ -48,15 +48,14 @@ namespace Builder
 			using namespace Util;
 			string  name(file.path);
 
-			if (EndsWith(ToLowerCase(name), string(".c")))
+			if (EndsWith(ToLowerCase(name), ".c")
+				|| EndsWith(ToLowerCase(name), ".cpp"))
 			{
 				srcFiles.push_back(file);
 			}
-			else if (EndsWith(ToLowerCase(name), string(".cpp")))
-			{
-				srcFiles.push_back(file);
-			}
-			else if (EndsWith(ToLowerCase(name), string(".h")))
+			else if (EndsWith(ToLowerCase(name), ".h")
+				|| EndsWith(ToLowerCase(name), ".hpp")
+				|| EndsWith(ToLowerCase(name), ".inl"))
 			{
 				headerFiles.push_back(file);
 			}

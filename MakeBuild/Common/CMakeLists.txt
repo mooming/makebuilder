@@ -2,13 +2,9 @@ cmake_minimum_required (VERSION 2.6)
 project (Common)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "${ CMAKE_CXX_FLAGS } -Werror")
+	set(CMAKE_CXX_FLAGS "${ CMAKE_CXX_FLAGS } -Wall -Werror")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 add_definitions (-std=c++14)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
@@ -29,7 +25,7 @@ add_library (Common STATIC
  StringUtil.h
 )
 
-if(APPLE)
+if (APPLE)
 include_directories ( /System/Library/Frameworks )
 endif (APPLE)
 
