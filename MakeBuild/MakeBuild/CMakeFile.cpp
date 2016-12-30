@@ -89,8 +89,17 @@ namespace CMake
 		ofs << "	set(CMAKE_CXX_FLAGS \"${ CMAKE_CXX_FLAGS } -Wall -Werror\")" << endl;
 		ofs << "endif(CMAKE_COMPILER_IS_GNUCXX)" << endl;
 
-		ofs << "add_definitions (-std=c++14)" << endl;
-		ofs << endl;
+        auto& definesList = dir.DefinitionsList();
+        if (!definesList.empty())
+        {
+            ofs << "add_definitions (";
+            for (auto& def : definesList)
+            {
+                ofs << def << " ";
+            }
+            ofs << ")" << endl;
+        }
+        ofs << endl;
 
 		ofs << "include_directories (";
 		ofs << " " << basePath << endl;

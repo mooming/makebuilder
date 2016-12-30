@@ -43,6 +43,7 @@ namespace Builder
 
 	ProjectDir::ProjectDir(const Directory& dir) : Directory(dir), buildType(NONE)
 	{
+        Files files;
 		for (const auto& file : FileList())
 		{
 			using namespace Util;
@@ -59,16 +60,30 @@ namespace Builder
 			{
 				headerFiles.push_back(file);
 			}
+            else
+            {
+                files.push_back(file);
+            }
 		}
 
-		SetUpBuildType();
+		SetUpBuildType(files);
 	}
 
-	void ProjectDir::SetUpBuildType()
+	void ProjectDir::SetUpBuildType(const Files& files)
 	{
-		for (const auto& element : FileList())
+		for (const auto& element : files)
 		{
 			using namespace Util;
+
+            if (EqualsIgnoreCase(element.path, "definitions.txt"))
+            {
+                string filePath = path;
+                filePath.append("/");
+                filePath.append(element.path);
+
+                LoadList(filePath.c_str(), definitions);
+                continue;
+            }
 
 			if (EqualsIgnoreCase(element.path, "dependencies.txt"))
 			{

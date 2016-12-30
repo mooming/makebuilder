@@ -39,6 +39,7 @@ namespace Builder
 		Strings dependencies;
 		Strings libraries;
 		Strings frameworks;
+        Strings definitions;
 
 		BuildType buildType;
 
@@ -54,12 +55,13 @@ namespace Builder
 		inline ProjDirs& ProjDirList() { return projDirs; }
 		inline const ProjDirs& ProjDirList() const { return projDirs; }
 
+        inline const Strings& DefinitionsList() const { return definitions; }
 		inline const Strings& DependencyList() const { return dependencies; }
 		inline const Strings& LibraryList() const { return libraries; }
 		inline const Strings& FrameworkList() const { return frameworks; }
 
 	private:
-		void SetUpBuildType();
+		void SetUpBuildType(const OS::Files& files);
 		void LoadList(const char* filePath, Strings& list);
 	};
 
