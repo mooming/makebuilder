@@ -9,20 +9,18 @@
 #include "OSAbstractLayer.h"
 
 #include "StringUtil.h"
-
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+
 
 using namespace std;
 using namespace Util;
 
 namespace OS
 {
-
 	string GetFullPath(string path)
 	{
-
 #ifdef WINDOWS
 		char fullPath[MAX_PATH];
 		GetFullPathNameA(path.c_str(), MAX_PATH, fullPath, NULL);
@@ -41,12 +39,10 @@ namespace OS
 
 		return TrimPath(fullPath);
 #endif // POSIX
-
 	}
 
 	bool IsDirectory(const char* path)
 	{
-
 #ifdef WINDOWS
 		DWORD fileType = GetFileAttributesA(path);
 		if (fileType == INVALID_FILE_ATTRIBUTES)
@@ -73,7 +69,6 @@ namespace OS
 
 		return false;
 #endif //POSIX
-
 	}
 
 	vector<string> ListFilesInDirectory(const char* path)

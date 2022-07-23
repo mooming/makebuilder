@@ -11,14 +11,16 @@
 #include "OSAbstractLayer.h"
 #include "StringUtil.h"
 
+
 using namespace std;
 
 namespace OS
 {
-
-	Directory::Directory(const char* path) : path(Util::TrimPath(path))
+	Directory::Directory(const char* path)
+        : path(Util::TrimPath(path))
 	{
 		auto list = ListFilesInDirectory(path);
+        
 		for (const auto& element : list)
 		{
 			const char* name = element.c_str();
@@ -41,5 +43,4 @@ namespace OS
 			}
 		}
 	}
-
 }

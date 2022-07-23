@@ -1,10 +1,4 @@
-//
-//  Build.cpp
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 15..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
 #include "Build.h"
 
@@ -14,12 +8,15 @@
 #include <iostream>
 #include <string>
 
+
 using namespace std;
 
 namespace Builder
 {
 
-	Build::Build(const char* path) : baseDir(path), projectDirs()
+	Build::Build(const char* path)
+        : baseDir(path)
+        , projectDirs()
 	{
 		TraverseDirTree(baseDir, "");
 		projectDirs.shrink_to_fit();
@@ -28,6 +25,7 @@ namespace Builder
 		cout << "=== Project Directories Found ===" << endl;
 
 		int i = 0;
+
 		for (const ProjectDir& element : projectDirs)
 		{
 			cout << i++ << " : " << element.path << endl;
@@ -81,12 +79,12 @@ namespace Builder
 		bool isBaseIncludeDir = false;
 		for (const auto& element : dir.FileList())
 		{
-			if (Util::EqualsIgnoreCase(element.path, "ignore.txt"))
+			if (Util::EqualsIgnoreCase(element.GetPath(), "ignore.txt"))
 			{
 				return false;
 			}
 
-			if (Util::EqualsIgnoreCase(element.path, "include.txt"))
+			if (Util::EqualsIgnoreCase(element.GetPath(), "include.txt"))
 			{
 				isBaseIncludeDir = true;
 			}

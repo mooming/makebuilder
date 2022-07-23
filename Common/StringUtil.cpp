@@ -9,8 +9,8 @@
 #include "StringUtil.h"
 
 #include "OSAbstractLayer.h"
-
 #include <algorithm>
+
 
 using namespace std;
 
@@ -44,8 +44,7 @@ namespace Util
 
 	string ToLowerCase(string src)
 	{
-		auto ToLowerChar = [](char ch) -> char
-		{
+		auto ToLowerChar = [](char ch) {
 			constexpr char delta = 'A' - 'a';
 
 			if ('A' <= ch && ch <= 'Z')

@@ -28,6 +28,7 @@ namespace OS
 
 	public:
 		Directory(const char* path);
+		virtual ~Directory() = default;
 
 		inline const Files& FileList() const { return fileList; }
 		inline const Dirs& DirList() const { return dirList; }

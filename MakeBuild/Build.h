@@ -1,22 +1,16 @@
-//
-//  Build.h
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 15..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
-#ifndef Build_h
-#define Build_h
+#pragma once
 
 #include "ProjectDir.h"
 
 #include <string>
 #include <vector>
 
+
 namespace Builder
 {
-	class Build
+	class Build final
 	{
 		using ProjDirs = std::vector<ProjectDir>;
 		using Paths = std::vector<std::string>;
@@ -28,11 +22,11 @@ namespace Builder
 
 	public:
 		Build(const char* path);
+		~Build() = default;
+
 		void BuildCMakeFiles();
 
 	private:
 		bool TraverseDirTree(const OS::Directory& dir, std::string header);
 	};
-
 }
-#endif /* Build_h */

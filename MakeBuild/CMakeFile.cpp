@@ -1,10 +1,4 @@
-//
-//  CMakeFile.cpp
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 15..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
 #include "CMakeFile.h"
 
@@ -14,6 +8,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
 
 using namespace std;
 using namespace Builder;
@@ -62,7 +57,10 @@ namespace CMake
 {
 
 	CMakeFile::CMakeFile(const Build& build, const ProjectDir& targetDir)
-		: build(build), dir(targetDir)
+		: requiredCmakeVersion("3.1")
+		, cxxStandardVersion("17")
+		, build(build)
+		, dir(targetDir)
 	{
 	}
 
@@ -81,13 +79,15 @@ namespace CMake
 		cout << "Creating: " << filePath.c_str() << "(" << BuildTypeStr(buildType) << ")" << endl;
 
 		ofstream ofs (filePath.c_str(), ofstream::out);
-		ofs << "cmake_minimum_required (VERSION 2.6)" << endl;
+		ofs << "cmake_minimum_required (VERSION " << requiredCmakeVersion << ")" << endl;
 		ofs << "project (" << projName << ")" << endl;
 		ofs << endl;
 
 		ofs << "if(CMAKE_COMPILER_IS_GNUCXX)" << endl;
 		ofs << "	set(CMAKE_CXX_FLAGS \"${ CMAKE_CXX_FLAGS } -Wall -Werror\")" << endl;
 		ofs << "endif(CMAKE_COMPILER_IS_GNUCXX)" << endl;
+
+		ofs << "set (CMAKE_CXX_STANDARD " << cxxStandardVersion << ")" << endl;
 
         auto& definesList = dir.DefinitionsList();
         if (!definesList.empty())
@@ -104,10 +104,12 @@ namespace CMake
 		ofs << "include_directories (";
 		ofs << " " << basePath << endl;
 		ofs << " " << basePath << "/include" << endl;
+        
 		for (const auto& element : build.includeDirs)
 		{
 			ofs << " " << TranslatePath(element) << endl;
 		}
+        
 		ofs << " )" << endl;
 		ofs << endl;
 
@@ -134,12 +136,12 @@ namespace CMake
 
 				for (const auto& element : dir.SrcFileList())
 				{
-					ofs << " " << PathToName(element.path.c_str()) << endl;
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				for (const auto& element : dir.HeaderFileList())
 				{
-					ofs << " " << PathToName(element.path.c_str()) << endl;
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				ofs << ")" << endl << endl;
@@ -154,12 +156,12 @@ namespace CMake
 
 				for (const auto& element : dir.SrcFileList())
 				{
-					ofs << " " << PathToName(element.path.c_str()) << endl;
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				for (const auto& element : dir.HeaderFileList())
 				{
-					ofs << " " << PathToName(element.path.c_str()) << endl;
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				ofs << ")" << endl << endl;
@@ -174,12 +176,12 @@ namespace CMake
 
 				for (const auto& element : dir.SrcFileList())
 				{
-					ofs << " " << PathToName(element.path.c_str()) << endl;
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				for (const auto& element : dir.HeaderFileList())
 				{
-					ofs << " " << PathToName(element.path.c_str()) << endl;
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				ofs << ")" << endl << endl;
@@ -195,7 +197,7 @@ namespace CMake
 
 				for (const auto& element : dir.HeaderFileList())
 				{
-					ofs << " " << PathToName(element.path.c_str()) << endl;
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				ofs << ")" << endl;
@@ -204,6 +206,7 @@ namespace CMake
 			default:
 				break;
 		};
+        
 		ofs << endl << endl;
 
 		auto& dependencyList = dir.DependencyList();

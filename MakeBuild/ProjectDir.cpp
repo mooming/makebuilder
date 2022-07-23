@@ -1,17 +1,12 @@
-//
-//  ProjectDir.cpp
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 15..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
 #include "ProjectDir.h"
 
 #include "StringUtil.h"
-
+#include <algorithm>
 #include <fstream>
 #include <iostream>
+
 
 using namespace std;
 using namespace OS;
@@ -37,17 +32,15 @@ namespace Builder
 		}
 	}
 
-	ProjectDir::ProjectDir(const char* path) : ProjectDir(Directory(path))
-	{
-	}
-
-	ProjectDir::ProjectDir(const Directory& dir) : Directory(dir), buildType(NONE)
+	ProjectDir::ProjectDir(const Directory& dir)
+		: Directory(dir)
+        , buildType(NONE)
 	{
         Files files;
 		for (const auto& file : FileList())
 		{
 			using namespace Util;
-			string  name(file.path);
+			string  name(file.GetPath());
 
 			if (EndsWith(ToLowerCase(name), ".c")
 				|| EndsWith(ToLowerCase(name), ".cpp"))
@@ -66,50 +59,59 @@ namespace Builder
             }
 		}
 
+		sort(srcFiles.begin(), srcFiles.end());
+		sort(headerFiles.begin(), headerFiles.end());
+		sort(files.begin(), files.end());
+
 		SetUpBuildType(files);
 	}
 
 	void ProjectDir::SetUpBuildType(const Files& files)
 	{
+        definitions.empty();
+        dependencies.empty();
+        libraries.empty();
+        frameworks.empty();
+        
 		for (const auto& element : files)
 		{
 			using namespace Util;
 
-            if (EqualsIgnoreCase(element.path, "definitions.txt"))
+            if (EqualsIgnoreCase(element.GetPath(), "definitions.txt"))
             {
                 string filePath = path;
                 filePath.append("/");
-                filePath.append(element.path);
+                filePath.append(element.GetPath());
 
                 LoadList(filePath.c_str(), definitions);
                 continue;
             }
 
-			if (EqualsIgnoreCase(element.path, "dependencies.txt"))
+			if (EqualsIgnoreCase(element.GetPath(), "dependencies.txt"))
 			{
 				string filePath = path;
 				filePath.append("/");
-				filePath.append(element.path);
+				filePath.append(element.GetPath());
 
 				LoadList(filePath.c_str(), dependencies);
 				continue;
 			}
 
-			if (EqualsIgnoreCase(element.path, "libraries.txt"))
+			if (EqualsIgnoreCase(element.GetPath(), "libraries.txt"))
 			{
 				string filePath = path;
 				filePath.append("/");
-				filePath.append(element.path);
+				filePath.append(element.GetPath());
 
 				LoadList(filePath.c_str(), libraries);
 				continue;
 			}
 
-			if (EqualsIgnoreCase(element.path, "frameworks.txt"))
+			if (EqualsIgnoreCase(element.GetPath(), "frameworks.txt"))
 			{
 				string filePath = path;
 				filePath.append("/");
-				filePath.append(element.path);
+				filePath.append(element.GetPath());
 
 				LoadList(filePath.c_str(), frameworks);
 				continue;
@@ -117,22 +119,22 @@ namespace Builder
 
 			if (buildType == NONE)
 			{
-				if (EqualsIgnoreCase(element.path, "ignore.txt"))
+				if (EqualsIgnoreCase(element.GetPath(), "ignore.txt"))
 				{
 					buildType = IGNORE;
 				}
 
-				if (EqualsIgnoreCase(element.path, "executable.txt"))
+				if (EqualsIgnoreCase(element.GetPath(), "executable.txt"))
 				{
 					buildType = EXECUTABLE;
 				}
 
-				if (EqualsIgnoreCase(element.path, "static_library.txt"))
+				if (EqualsIgnoreCase(element.GetPath(), "static_library.txt"))
 				{
 					buildType = STATIC_LIBRARY;
 				}
 
-				if (EqualsIgnoreCase(element.path, "shared_library.txt"))
+				if (EqualsIgnoreCase(element.GetPath(), "shared_library.txt"))
 				{
 					buildType = SHARED_LIBRARY;
 				}
@@ -143,6 +145,8 @@ namespace Builder
 		{
 			buildType = HEADER_ONLY;
 		}
+        
+        Sort();
 	}
 
 	void ProjectDir::LoadList(const char* filePath, Strings& list)
@@ -171,5 +175,18 @@ namespace Builder
 			if (ifs.eof())
 				break;
 		}
+	}
+
+	void ProjectDir::Sort()
+	{
+		auto SortVector = [](auto& v)
+		{
+			sort(v.begin(), v.end());
+		};
+		
+		SortVector(dependencies);
+		SortVector(libraries);
+		SortVector(frameworks);
+		SortVector(definitions);
 	}
 }

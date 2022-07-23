@@ -1,16 +1,10 @@
-//
-//  ProjectDir.h
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 15..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
-#ifndef ProjectDir_h
-#define ProjectDir_h
+#pragma once
 
 #include "Directory.h"
 #include "File.h"
+
 
 namespace Builder
 {
@@ -44,8 +38,8 @@ namespace Builder
 		BuildType buildType;
 
 	public:
-		ProjectDir(const char* path);
 		ProjectDir(const OS::Directory& dir);
+		virtual ~ProjectDir() = default;
 
 		inline const BuildType GetBuildType() const { return buildType; }
 
@@ -63,8 +57,6 @@ namespace Builder
 	private:
 		void SetUpBuildType(const OS::Files& files);
 		void LoadList(const char* filePath, Strings& list);
+		void Sort();
 	};
-
 }
-
-#endif /* ProjectDir_h */
