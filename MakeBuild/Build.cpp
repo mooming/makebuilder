@@ -14,6 +14,19 @@ using namespace std;
 
 namespace Builder
 {
+	namespace
+	{
+		void TravesAllChildren(ProjectDir& dir, Build::ProjDirs& projectDirs)
+		{
+			projectDirs.push_back(&dir);
+
+			auto& subList = dir.ProjDirList();
+			for (auto& sub : subList)
+			{
+				TravesAllChildren(sub, projectDirs);
+			}
+		};
+	}
 
 	Build::Build(const char* path)
         : config(path)
@@ -26,30 +39,35 @@ namespace Builder
 		cout << endl;
 		cout << "=== Project Directories Found ===" << endl;
 
-		int i = 0;
+		baseDir.PrintSubDirs(" ");
 
-		for (const ProjectDir& element : projectDirs)
+		TravesAllChildren(baseDir, projectDirs);
+
+		int i = 0;
+		for (auto element : projectDirs)
 		{
-			cout << i++ << " : " << element.path << endl;
+			assert(element != nullptr);
+
+			cout << i++ << " : " << element->path << endl;
 		}
 	}
 
 	void Build::BuildCMakeFiles()
 	{
-		for (const ProjectDir& element : projectDirs)
+		for (auto element : projectDirs)
 		{
+			assert(element != nullptr);
+
 			using namespace CMake;
 
-			CMakeFile cmf(*this, element);
+			CMakeFile cmf(*this, *element);
 			cmf.Make();
 		}
 	}
 
-	bool Build::TraverseDirTree(const OS::Directory& dir, string header)
+	bool Build::TraverseDirTree(ProjectDir& projDir, string header)
 	{
 		bool havingProjDir = false;
-
-		ProjectDir projDir(dir);
 
 		if (!projDir.SrcFileList().empty() || !projDir.HeaderFileList().empty())
 		{
@@ -79,7 +97,7 @@ namespace Builder
 		}
 
 		bool isBaseIncludeDir = false;
-		for (const auto& element : dir.FileList())
+		for (const auto& element : projDir.FileList())
 		{
 			if (Util::EqualsIgnoreCase(element.GetPath(), "ignore.txt"))
 			{
@@ -94,22 +112,22 @@ namespace Builder
 
 		if (isBaseIncludeDir)
 		{
-			includeDirs.push_back(dir.path);
+			includeDirs.push_back(projDir.path);
 		}
 
-		for (const auto& element : dir.DirList())
+		for (const auto& element : projDir.DirList())
 		{
+			ProjectDir childProjDir(element); 
 			string newHeader = header;
-			if (TraverseDirTree(element, newHeader.append("  ")))
-			{
-				projDir.ProjDirList().push_back(element);
+			newHeader.append("  ");
+
+			if (TraverseDirTree(childProjDir, newHeader.append("  ")))
+			{		
+				auto& projList = projDir.ProjDirList();
+				projList.push_back(childProjDir);
+				
 				havingProjDir = true;
 			}
-		}
-
-		if (havingProjDir)
-		{
-			projectDirs.push_back(projDir);
 		}
 
 		return havingProjDir;

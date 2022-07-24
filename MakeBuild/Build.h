@@ -13,7 +13,8 @@ namespace Builder
 {
 	class Build final
 	{
-		using ProjDirs = std::vector<ProjectDir>;
+	public:
+		using ProjDirs = std::vector<ProjectDir*>;
 		using Paths = std::vector<std::string>;
 
 	public:
@@ -29,6 +30,6 @@ namespace Builder
 		void BuildCMakeFiles();
 
 	private:
-		bool TraverseDirTree(const OS::Directory& dir, std::string header);
+		bool TraverseDirTree(ProjectDir& dir, std::string header);
 	};
 }

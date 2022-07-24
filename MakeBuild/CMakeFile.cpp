@@ -118,15 +118,17 @@ namespace CMake
 			ofs << "link_directories (" << basePath << "/lib)" << endl;
 			ofs << endl;
 		}
+		
 		ofs << endl;
 
 		for (const auto& subDir : dir.ProjDirList())
 		{
-			if (!subDir.SrcFileList().empty())
-			{
-				ofs << "add_subdirectory (" << PathToName(subDir.path.c_str()) << ")" << endl;
-			}
+			if (!subDir.HasSourceFileRecursive())
+				continue;
+
+			ofs << "add_subdirectory (" << PathToName(subDir.path.c_str()) << ")" << endl;
 		}
+
 		ofs << endl;
 
 		switch(buildType)

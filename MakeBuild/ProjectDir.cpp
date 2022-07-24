@@ -37,6 +37,7 @@ namespace Builder
         , buildType(NONE)
 	{
         Files files;
+
 		for (const auto& file : FileList())
 		{
 			using namespace Util;
@@ -64,6 +65,31 @@ namespace Builder
 		sort(files.begin(), files.end());
 
 		SetUpBuildType(files);
+	}
+
+	bool ProjectDir::HasSourceFileRecursive() const
+	{
+		if (!srcFiles.empty() || !headerFiles.empty())
+			return true;
+		
+		for (auto& subDir : projDirs)
+		{
+			if (subDir.HasSourceFileRecursive())
+				return true;
+		}
+
+		return false;
+	}
+
+	void ProjectDir::PrintSubDirs(const std::string& header) const
+	{
+		cout << "[DIR]" << header << path << endl;
+		for (auto& subDir : projDirs)
+		{
+			auto newHeader = header;
+			newHeader.append(" ");
+			subDir.PrintSubDirs(newHeader);
+		}
 	}
 
 	void ProjectDir::SetUpBuildType(const Files& files)

@@ -41,6 +41,9 @@ namespace Builder
 		ProjectDir(const OS::Directory& dir);
 		virtual ~ProjectDir() = default;
 
+		bool HasSourceFileRecursive() const;
+		void PrintSubDirs(const std::string& header) const;
+
 		inline const BuildType GetBuildType() const { return buildType; }
 
 		inline const OS::Files& SrcFileList() const { return srcFiles; }
