@@ -3,8 +3,9 @@
 #include "MakeBuildConfig.h"
 
 #include <fstream>
+#include <functional>
 #include <iostream>
-
+#include <unordered_map>
 
 namespace Builder
 {
@@ -14,11 +15,11 @@ namespace Builder
         auto lastChar = filePath.back();
         if (lastChar == '/' || lastChar == '\\')
         {
-            filePath.append("MakeBuildConfig.txt");    
+            filePath.append("MakeBuild.Config");    
         }
         else
         {
-            filePath.append("/MakeBuildConfig.txt");
+            filePath.append("/MakeBuild.Config");
         }
 
         ReadConfigFile(filePath.c_str());
@@ -42,9 +43,10 @@ namespace Builder
 			string line;
 			getline(ifs, line);
 
-            auto ParseLine = [&line]()
+            using TKeyValue = pair<string, string>;
+            auto ParseLine = [&line]() -> TKeyValue
             {
-                pair<string, string> keyValue;
+                TKeyValue keyValue;
                 if (line.empty())
                     return keyValue;
 
@@ -54,6 +56,7 @@ namespace Builder
                 
                 keyValue.first = line.substr(0, separator);
                 keyValue.second = line.substr(separator + 1);
+                return keyValue;
             };
 
             auto keyValue = ParseLine();
@@ -67,16 +70,40 @@ namespace Builder
 
     void MakeBuildConfig::ParseKeyValue(const std::string& key, const std::string& value)
     {
-        using namespace std;
-
-        cout << "Config: " << key << " = " << value << endl;
-
         if (key.empty())
             return;
 
         if (value.empty())
             return;
 
+        using namespace std;
+        cout << "Config: " << key << " = " << value << endl;
+
+        using TSingleParser = function<void(MakeBuildConfig&, const string&)>;
+        static unordered_map<string, TSingleParser> parsers;
+        if (parsers.empty())
+        {
+            parsers["requiredCMakeVersion"] = [](MakeBuildConfig& config, const string& value)
+            {
+                if (value.empty())
+                    return;
+
+                config.requiredCMakeVersion = value;
+            };
+
+            parsers["cxxStandard"] = [](MakeBuildConfig& config, const string& value)
+            {
+                if (value.empty())
+                    return;
+
+                config.cxxStandard = value;
+            };
+        }
+
+        auto found = parsers.find(key);
+        if (found == parsers.end())
+            return;
         
+        found->second(*this, value);
     }
 }

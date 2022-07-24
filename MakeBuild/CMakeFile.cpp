@@ -57,8 +57,8 @@ namespace CMake
 {
 
 	CMakeFile::CMakeFile(const Build& build, const ProjectDir& targetDir)
-		: requiredCmakeVersion("3.1")
-		, cxxStandardVersion("17")
+		: requiredCmakeVersion(build.config.GetRequiredCMakeVersion())
+		, cxxStandardVersion(build.config.GetCXXStandard())
 		, build(build)
 		, dir(targetDir)
 	{

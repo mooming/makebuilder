@@ -3,6 +3,7 @@
 #include "Build.h"
 
 #include "CMakeFile.h"
+#include "MakeBuildConfig.h"
 #include "StringUtil.h"
 
 #include <iostream>
@@ -15,7 +16,8 @@ namespace Builder
 {
 
 	Build::Build(const char* path)
-        : baseDir(path)
+        : config(path)
+		, baseDir(path)
         , projectDirs()
 	{
 		TraverseDirTree(baseDir, "");

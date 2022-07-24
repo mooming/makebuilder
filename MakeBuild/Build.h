@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "MakeBuildConfig.h"
 #include "ProjectDir.h"
 
 #include <string>
@@ -16,6 +17,7 @@ namespace Builder
 		using Paths = std::vector<std::string>;
 
 	public:
+		const MakeBuildConfig config;
 		ProjectDir baseDir;
 		ProjDirs projectDirs;
 		Paths includeDirs;

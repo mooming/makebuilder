@@ -19,9 +19,11 @@ add_executable (MakeBuild
  Build.cpp
  CMakeFile.cpp
  MakeBuild.cpp
+ MakeBuildConfig.cpp
  ProjectDir.cpp
  Build.h
  CMakeFile.h
+ MakeBuildConfig.h
  ProjectDir.h
 )
 
