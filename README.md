@@ -10,6 +10,7 @@ Module Specifier
 executable.txt - It describes the current module is a executable module having "main()" entry-point.
 static_library.txt - It denotes the current module should be compiled and linked as a static library.
 shared_library.txt - It denotes the current module should be compiled and linked as a shared library.
+include.txt - This directory path shall be set as an include path of its children and itself.
 ignore.txt - This directory shall be ignored and not processed as a module.
 
 
