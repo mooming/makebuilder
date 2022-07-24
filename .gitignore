@@ -8,11 +8,10 @@ cmakebuild
 MakeFile
 install_manifest.txt
 .DS_Store
+MakeBuild/MakeBuild
 
 .vscode
 .vs
 *.a
 *.lib
 *.cmake
-
-MakeBuild
