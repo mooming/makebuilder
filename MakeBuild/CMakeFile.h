@@ -11,9 +11,6 @@ namespace CMake
 	class CMakeFile final
 	{
 	private:
-		std::string requiredCmakeVersion;
-		std::string cxxStandardVersion;
-
 		const Builder::Build& build;
 		const Builder::ProjectDir& dir;
 

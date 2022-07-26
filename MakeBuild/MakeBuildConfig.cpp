@@ -10,6 +10,10 @@
 namespace Builder
 {
     MakeBuildConfig::MakeBuildConfig(const char* basePath)
+        : requiredCMakeVersion("3.12")
+        , cxxStandard("14")
+        , compileOptions("-Wall -Werror")
+        , msvcCompileOptions("/W4 /WX")
     {
         std::string filePath(basePath);
         auto lastChar = filePath.back();
@@ -83,20 +87,37 @@ namespace Builder
         static unordered_map<string, TSingleParser> parsers;
         if (parsers.empty())
         {
-            parsers["requiredCMakeVersion"] = [](MakeBuildConfig& config, const string& value)
+            auto setValue = [](string& outDest, const string& value)
             {
                 if (value.empty())
                     return;
 
-                config.requiredCMakeVersion = value;
+                outDest = value;
             };
 
-            parsers["cxxStandard"] = [](MakeBuildConfig& config, const string& value)
+            parsers["requiredCMakeVersion"] = [setValue](MakeBuildConfig& config, const string& value)
             {
-                if (value.empty())
-                    return;
+                setValue(config.requiredCMakeVersion, value);
+            };
 
-                config.cxxStandard = value;
+            parsers["cxxStandard"] = [setValue](MakeBuildConfig& config, const string& value)
+            {
+                setValue(config.cxxStandard, value);
+            };
+
+            parsers["compileOptions"] = [setValue](MakeBuildConfig& config, const string& value)
+            {
+                setValue(config.compileOptions, value);
+            };
+
+            parsers["msvcCompileOptions"] = [setValue](MakeBuildConfig& config, const string& value)
+            {
+                setValue(config.msvcCompileOptions, value);
+            };
+
+            parsers["precompileDefinitions"] = [setValue](MakeBuildConfig& config, const string& value)
+            {
+                setValue(config.precompileDefinitions, value);
             };
         }
 

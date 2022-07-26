@@ -57,15 +57,14 @@ namespace CMake
 {
 
 	CMakeFile::CMakeFile(const Build& build, const ProjectDir& targetDir)
-		: requiredCmakeVersion(build.config.GetRequiredCMakeVersion())
-		, cxxStandardVersion(build.config.GetCXXStandard())
-		, build(build)
+		: build(build)
 		, dir(targetDir)
 	{
 	}
 
 	void CMakeFile::Make()
 	{
+		const auto& buildConfig = build.config;
 		const BuildType buildType = dir.GetBuildType();
 
 		const char* basePath = "${CMAKE_SOURCE_DIR}";
@@ -79,7 +78,8 @@ namespace CMake
 		cout << "Creating: " << filePath.c_str() << "(" << BuildTypeStr(buildType) << ")" << endl;
 
 		ofstream ofs (filePath.c_str(), ofstream::out);
-		ofs << "cmake_minimum_required (VERSION " << requiredCmakeVersion << ")" << endl;
+		ofs << "cmake_minimum_required (VERSION "
+			<< buildConfig.GetRequiredCMakeVersion() << ")" << endl;
 		ofs << "project (" << projName << ")" << endl;
 		ofs << endl;
 
@@ -87,20 +87,51 @@ namespace CMake
 		ofs << "	set(CMAKE_CXX_FLAGS \"${ CMAKE_CXX_FLAGS } -Wall -Werror\")" << endl;
 		ofs << "endif(CMAKE_COMPILER_IS_GNUCXX)" << endl;
 
-		ofs << "set (CMAKE_CXX_STANDARD " << cxxStandardVersion << ")" << endl;
+		ofs << "set (CMAKE_CXX_STANDARD " << buildConfig.GetCXXStandard() << ")" << endl;
+		ofs << endl;
+		ofs << "if (MSVC)" << endl;
+		
+		auto& compileOptions = buildConfig.GetCompileOptions();
+		auto& msvcCompileOptions = buildConfig.GetMSVCCompileOptions();
+		
+		if (!msvcCompileOptions.empty())
+		{
+			ofs << "\tadd_compile_options (";
+			ofs << msvcCompileOptions;
+			ofs << ")" << endl;
+		}
 
+		ofs << "else (MSVC)" << endl;
+
+		if (!compileOptions.empty())
+		{
+			ofs << "\tadd_compile_options (";
+			ofs << compileOptions;
+			ofs << ")" << endl;	
+		}
+
+		ofs << "endif (MSVC)" << endl;
+		ofs << endl;
+		
+		auto& precompileDefs = buildConfig.GetPrecompileDefinitions();
         auto& definesList = dir.DefinitionsList();
-        if (!definesList.empty())
+        if (!precompileDefs.empty() || !definesList.empty())
         {
-            ofs << "add_definitions (";
+            ofs << "add_compile_definitions (";
+
+			if (!precompileDefs.empty())
+			{
+				ofs << precompileDefs << " ";
+			}
+
             for (auto& def : definesList)
             {
                 ofs << def << " ";
             }
+
             ofs << ")" << endl;
         }
-        ofs << endl;
-
+        
 		ofs << "include_directories (";
 		ofs << " " << basePath << endl;
 		ofs << " " << basePath << "/include" << endl;
@@ -111,7 +142,6 @@ namespace CMake
 		}
         
 		ofs << " )" << endl;
-		ofs << endl;
 
 		if (buildType != HEADER_ONLY)
 		{
@@ -119,8 +149,6 @@ namespace CMake
 			ofs << endl;
 		}
 		
-		ofs << endl;
-
 		for (const auto& subDir : dir.ProjDirList())
 		{
 			if (!subDir.HasSourceFileRecursive())
