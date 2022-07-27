@@ -1,18 +1,13 @@
-//
-//  StringUtil.h
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 14..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
-#ifndef StringUtil_h
-#define StringUtil_h
+#pragma once
 
 #include <string>
 
+
 namespace Util
 {
+	std::string Trim(const std::string& str);
 	std::string TrimPath(std::string path);
 	std::string ToLowerCase(std::string src);
 
@@ -23,5 +18,3 @@ namespace Util
 
 	std::string PathToName(std::string path);
 }
-
-#endif /* StringUtil_h */

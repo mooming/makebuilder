@@ -3,7 +3,6 @@
 #include "CMakeFile.h"
 
 #include "StringUtil.h"
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -56,33 +55,33 @@ namespace
 namespace CMake
 {
 
-	CMakeFile::CMakeFile(const Build& build, const ProjectDir& targetDir)
+	CMakeFile::CMakeFile(const Build& build, const Module& module)
 		: build(build)
-		, dir(targetDir)
+		, module(module)
 	{
 	}
 
 	void CMakeFile::Make()
 	{
 		const auto& buildConfig = build.config;
-		const BuildType buildType = dir.GetBuildType();
+		const BuildType buildType = module.GetBuildType();
 
 		const char* basePath = "${CMAKE_SOURCE_DIR}";
 		using namespace Util;
 
-		string filePath(dir.path);
-		string projName(PathToName(dir.path));
+		string filePath(module.path);
+		string moduleName = module.GetName();
 
 		filePath.append("/CMakeLists.txt");
 
-		cout << "Creating: " << filePath.c_str() << "(" << BuildTypeStr(buildType) << ")" << endl;
+		cout << "Creating: [" << moduleName << "] " << filePath.c_str() << "(" << BuildTypeToString(buildType) << ")" << endl;
 
 		ofstream ofs (filePath.c_str(), ofstream::out);
-		
+
 		auto requiredCMakeVersion = buildConfig.GetValue("requiredCMakeVersion", "3.12");
 		ofs << "cmake_minimum_required (VERSION "
 			<< requiredCMakeVersion << ")" << endl;
-		ofs << "project (" << projName << ")" << endl;
+		ofs << "project (" << moduleName << ")" << endl;
 		ofs << endl;
 
 		auto cxxStandard = buildConfig.GetValue("cxxStandard", "17");
@@ -113,8 +112,8 @@ namespace CMake
 		ofs << endl;
 		
 		auto precompileDefs = buildConfig.GetValue("precompileDefinitions");
-        auto& definesList = dir.DefinitionsList();
-        if (precompileDefs.has_value() || !definesList.empty())
+        auto& moduleDefs = module.GetPrecompileDefinitions();
+        if (precompileDefs.has_value() || !moduleDefs.empty())
         {
             ofs << "add_compile_definitions (";
 
@@ -123,10 +122,10 @@ namespace CMake
 				ofs << *precompileDefs << " ";
 			}
 
-            for (auto& def : definesList)
-            {
-                ofs << def << " ";
-            }
+			if (!moduleDefs.empty())
+			{
+				ofs << moduleDefs << " ";
+			}
 
             ofs << ")" << endl;
         }
@@ -142,13 +141,13 @@ namespace CMake
         
 		ofs << " )" << endl;
 
-		if (buildType != HEADER_ONLY)
+		if (buildType != BuildType::HeaderOnly)
 		{
 			ofs << "link_directories (" << basePath << "/lib)" << endl;
 			ofs << endl;
 		}
 		
-		for (const auto& subDir : dir.ProjDirList())
+		for (const auto& subDir : module.SubModuleList())
 		{
 			if (!subDir.HasSourceFileRecursive())
 				continue;
@@ -160,71 +159,71 @@ namespace CMake
 
 		switch(buildType)
 		{
-			case EXECUTABLE:
-				ofs << "add_executable (" << projName.c_str() << endl;
+			case BuildType::Executable:
+				ofs << "add_executable (" << moduleName.c_str() << endl;
 
-				for (const auto& element : dir.SrcFileList())
+				for (const auto& element : module.SrcFileList())
 				{
 					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
-				for (const auto& element : dir.HeaderFileList())
-				{
-					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
-				}
-
-				ofs << ")" << endl << endl;
-
-				AddFrameworks(ofs, projName, dir.FrameworkList());
-
-				ofs << "install (TARGETS " << projName << " DESTINATION " << basePath << "/bin)" << endl;
-				break;
-
-			case STATIC_LIBRARY:
-				ofs << "add_library (" << projName.c_str() << " STATIC " << endl;
-
-				for (const auto& element : dir.SrcFileList())
-				{
-					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
-				}
-
-				for (const auto& element : dir.HeaderFileList())
+				for (const auto& element : module.HeaderFileList())
 				{
 					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				ofs << ")" << endl << endl;
 
-				AddFrameworks(ofs, projName, dir.FrameworkList());
+				AddFrameworks(ofs, moduleName, module.FrameworkList());
 
-				ofs << "install (TARGETS " << projName << " DESTINATION " << basePath << "/lib)" << endl;
+				ofs << "install (TARGETS " << moduleName << " DESTINATION " << basePath << "/bin)" << endl;
 				break;
 
-			case SHARED_LIBRARY:
-				ofs << "add_library (" << projName.c_str() << " SHARED " << endl;
+			case BuildType::StaticLibrary:
+				ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
 
-				for (const auto& element : dir.SrcFileList())
+				for (const auto& element : module.SrcFileList())
 				{
 					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
-				for (const auto& element : dir.HeaderFileList())
+				for (const auto& element : module.HeaderFileList())
 				{
 					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
 
 				ofs << ")" << endl << endl;
 
-				AddFrameworks(ofs, projName, dir.FrameworkList());
+				AddFrameworks(ofs, moduleName, module.FrameworkList());
 
-				ofs << "install (TARGETS " << projName << " DESTINATION " << basePath << "/bin)" << endl;
+				ofs << "install (TARGETS " << moduleName << " DESTINATION " << basePath << "/lib)" << endl;
 				break;
 
-			case HEADER_ONLY:
-				ofs << "add_library (" << projName.c_str() << " INTERFACE)" << endl;
-				ofs << "target_sources (" << projName.c_str() << " INTERFACE " << endl;
+			case BuildType::SharedLibrary:
+				ofs << "add_library (" << moduleName.c_str() << " SHARED " << endl;
 
-				for (const auto& element : dir.HeaderFileList())
+				for (const auto& element : module.SrcFileList())
+				{
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+				}
+
+				for (const auto& element : module.HeaderFileList())
+				{
+					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+				}
+
+				ofs << ")" << endl << endl;
+
+				AddFrameworks(ofs, moduleName, module.FrameworkList());
+
+				ofs << "install (TARGETS " << moduleName << " DESTINATION " << basePath << "/bin)" << endl;
+				break;
+
+			case BuildType::HeaderOnly:
+				ofs << "add_library (" << moduleName.c_str() << " INTERFACE)" << endl;
+				ofs << "target_sources (" << moduleName.c_str() << " INTERFACE " << endl;
+
+				for (const auto& element : module.HeaderFileList())
 				{
 					ofs << " " << PathToName(element.GetPath().c_str()) << endl;
 				}
@@ -238,12 +237,12 @@ namespace CMake
         
 		ofs << endl << endl;
 
-		auto& dependencyList = dir.DependencyList();
-		auto& libList = dir.LibraryList();
+		auto& dependencyList = module.DependencyList();
+		auto& libList = module.LibraryList();
 
 		if (!dependencyList.empty() || !libList.empty())
 		{
-			ofs << "target_link_libraries (" << projName;
+			ofs << "target_link_libraries (" << moduleName;
 			for (const auto& dependency : dependencyList)
 			{
 				if (dependency.empty())
@@ -266,7 +265,7 @@ namespace CMake
 				if (dependency.empty())
 					continue;
 
-				ofs << "add_dependencies (" << projName.c_str() << " " << dependency << ")" << endl;
+				ofs << "add_dependencies (" << moduleName.c_str() << " " << dependency << ")" << endl;
 			}
 			ofs << endl;
 		}
@@ -280,10 +279,10 @@ namespace CMake
 		using namespace Util;
 		path = TrimPath(path);
 
-		if (StartsWithIgnoreCase(path, build.baseDir.path))
+		if (StartsWithIgnoreCase(path, build.baseModule.path))
 		{
 			string newPath = string("${CMAKE_SOURCE_DIR}");
-			newPath.append(path.substr(build.baseDir.path.length()));
+			newPath.append(path.substr(build.baseModule.path.length()));
 			return newPath;
 		}
 

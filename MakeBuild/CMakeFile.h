@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Build.h"
-#include "ProjectDir.h"
+#include "Module.h"
 #include <string>
 
 namespace CMake
@@ -12,10 +12,10 @@ namespace CMake
 	{
 	private:
 		const Builder::Build& build;
-		const Builder::ProjectDir& dir;
+		const Builder::Module& module;
 
 	public:
-		CMakeFile(const Builder::Build& build, const Builder::ProjectDir& targetDir);
+		CMakeFile(const Builder::Build& build, const Builder::Module& module);
 		~CMakeFile() = default;
 
 		void Make();

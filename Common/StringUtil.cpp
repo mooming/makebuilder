@@ -1,10 +1,4 @@
-//
-//  StringUtil.cpp
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 15..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
 #include "StringUtil.h"
 
@@ -16,6 +10,24 @@ using namespace std;
 
 namespace Util
 {
+	string Trim(const string& str)
+	{
+		auto start = str.begin();
+		auto end = str.end();
+
+		while (start != end && isspace(*start))
+		{
+			++start;
+		}
+		
+		do
+		{
+			--end;
+		} while (distance(start, end) > 0 && std::isspace(*end));
+
+		return string(start, end + 1);
+    }
+
 	string TrimPath(string path)
 	{
 		char tmp[PATH_MAX + 1];

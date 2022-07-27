@@ -1,13 +1,6 @@
-//
-//  OSAbstractLayer.h
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 14..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
-#ifndef OSAbstractLayer_h
-#define OSAbstractLayer_h
+#pragma once
 
 #include <string>
 #include <vector>
@@ -34,5 +27,3 @@ namespace OS
 	bool IsDirectory(const char* path);
 	std::vector<std::string> ListFilesInDirectory(const char* path);
 }
-
-#endif /* OSAbstractLayer_h */

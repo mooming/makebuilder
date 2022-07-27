@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ConfigFile.h"
-#include "ProjectDir.h"
+#include "Module.h"
 
 #include <string>
 #include <vector>
@@ -14,13 +14,13 @@ namespace Builder
 	class Build final
 	{
 	public:
-		using ProjDirs = std::vector<ProjectDir*>;
+		using Modules = std::vector<Module*>;
 		using Paths = std::vector<std::string>;
 
 	public:
 		const ConfigFile config;
-		ProjectDir baseDir;
-		ProjDirs projectDirs;
+		Module baseModule;
+		Modules modules;
 		Paths includeDirs;
 
 	public:
@@ -30,6 +30,6 @@ namespace Builder
 		void BuildCMakeFiles();
 
 	private:
-		bool TraverseDirTree(ProjectDir& dir, std::string header);
+		bool TraverseDirTree(Module& dir, std::string header);
 	};
 }

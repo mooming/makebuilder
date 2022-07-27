@@ -4,7 +4,6 @@
 
 #include "CMakeFile.h"
 #include "StringUtil.h"
-
 #include <iostream>
 #include <string>
 
@@ -15,35 +14,35 @@ namespace Builder
 {
 	namespace
 	{
-		void TravesAllChildren(ProjectDir& dir, Build::ProjDirs& projectDirs)
+		void GetAllChildrenRecursive(Module& module, Build::Modules& inoutModules)
 		{
-			projectDirs.push_back(&dir);
+			inoutModules.push_back(&module);
 
-			auto& subList = dir.ProjDirList();
+			auto& subList = module.SubModuleList();
 			for (auto& sub : subList)
 			{
-				TravesAllChildren(sub, projectDirs);
+				GetAllChildrenRecursive(sub, inoutModules);
 			}
 		};
 	}
 
 	Build::Build(const char* path)
-        : config(path)
-		, baseDir(path)
-        , projectDirs()
+        : config(path, ".project.config")
+		, baseModule(path)
+        , modules()
 	{
-		TraverseDirTree(baseDir, "");
-		projectDirs.shrink_to_fit();
+		TraverseDirTree(baseModule, "");
+		modules.shrink_to_fit();
 
 		cout << endl;
 		cout << "=== Project Directories Found ===" << endl;
 
-		baseDir.PrintSubDirs(" ");
+		baseModule.PrintSubModules(" ");
 
-		TravesAllChildren(baseDir, projectDirs);
+		GetAllChildrenRecursive(baseModule, modules);
 
 		int i = 0;
-		for (auto element : projectDirs)
+		for (auto element : modules)
 		{
 			assert(element != nullptr);
 
@@ -53,7 +52,7 @@ namespace Builder
 
 	void Build::BuildCMakeFiles()
 	{
-		for (auto element : projectDirs)
+		for (auto element : modules)
 		{
 			assert(element != nullptr);
 
@@ -64,29 +63,29 @@ namespace Builder
 		}
 	}
 
-	bool Build::TraverseDirTree(ProjectDir& projDir, string header)
+	bool Build::TraverseDirTree(Module& module, string header)
 	{
 		bool havingProjDir = false;
 
-		if (!projDir.SrcFileList().empty() || !projDir.HeaderFileList().empty())
+		if (!module.SrcFileList().empty() || !module.HeaderFileList().empty())
 		{
 			cout << endl;
-			cout << header << "### Directory = " << projDir.path << endl;
+			cout << header << "### Module = " << module.path << endl;
 
-			if (!projDir.SrcFileList().empty())
+			if (!module.SrcFileList().empty())
 			{
 				cout << header << "### Source Files" << endl;
-				for (const auto& element : projDir.SrcFileList())
+				for (const auto& element : module.SrcFileList())
 				{
 					cout << header << element << endl;
 				}
 			}
 
-			if (!projDir.HeaderFileList().empty())
+			if (!module.HeaderFileList().empty())
 			{
 				cout << endl;
 				cout << header << "### Header Files" << endl;
-				for (const auto& element : projDir.HeaderFileList())
+				for (const auto& element : module.HeaderFileList())
 				{
 					cout << header << element << endl;
 				}
@@ -95,34 +94,23 @@ namespace Builder
 			havingProjDir = true;
 		}
 
-		bool isBaseIncludeDir = false;
-		for (const auto& element : projDir.FileList())
-		{
-			if (Util::EqualsIgnoreCase(element.GetPath(), "ignore.txt"))
-			{
-				return false;
-			}
+		if (module.GetBuildType() == BuildType::Ignored)
+			return false;
 
-			if (Util::EqualsIgnoreCase(element.GetPath(), "include.txt"))
-			{
-				isBaseIncludeDir = true;
-			}
+		if (module.IsIncludePath())
+		{
+			includeDirs.push_back(module.path);
 		}
 
-		if (isBaseIncludeDir)
+		for (const auto& element : module.DirList())
 		{
-			includeDirs.push_back(projDir.path);
-		}
-
-		for (const auto& element : projDir.DirList())
-		{
-			ProjectDir childProjDir(element); 
+			Module childProjDir(element); 
 			string newHeader = header;
 			newHeader.append("  ");
 
 			if (TraverseDirTree(childProjDir, newHeader.append("  ")))
 			{		
-				auto& projList = projDir.ProjDirList();
+				auto& projList = module.SubModuleList();
 				projList.push_back(childProjDir);
 				
 				havingProjDir = true;

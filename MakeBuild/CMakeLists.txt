@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (MakeBuild)
+project (makebuild)
 
 set (CMAKE_CXX_STANDARD 17)
 
@@ -16,27 +16,27 @@ include_directories ( ${CMAKE_SOURCE_DIR}
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
-add_executable (MakeBuild
+add_executable (makebuild
  Build.cpp
  CMakeFile.cpp
  ConfigFile.cpp
  MakeBuild.cpp
- ProjectDir.cpp
+ Module.cpp
  Build.h
  CMakeFile.h
  ConfigFile.h
- ProjectDir.h
+ Module.h
 )
 
 if (APPLE)
 include_directories ( /System/Library/Frameworks )
 endif (APPLE)
 
-install (TARGETS MakeBuild DESTINATION ${CMAKE_SOURCE_DIR}/bin)
+install (TARGETS makebuild DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
-target_link_libraries (MakeBuild Common)
+target_link_libraries (makebuild Common)
 
-add_dependencies (MakeBuild Common)
+add_dependencies (makebuild Common)
 
 

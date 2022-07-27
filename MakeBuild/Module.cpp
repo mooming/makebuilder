@@ -1,6 +1,6 @@
 // Created by mooming.go@gmail.com 2016
 
-#include "ProjectDir.h"
+#include "Module.h"
 
 #include "StringUtil.h"
 #include <algorithm>
@@ -13,31 +13,80 @@ using namespace OS;
 
 namespace Builder
 {
-	string BuildTypeStr(BuildType type)
+	const string& BuildTypeToString(BuildType type)
 	{
-		switch(type)
+		static string strings[] = {
+			  "None"
+			, "Ignored"
+			, "HeaderOnly"
+			, "Executable"
+			, "StaticLibrary"
+			, "SharedLibrary"
+		};
+		
+		constexpr auto numStrings = sizeof(strings) / sizeof(strings[0]);
+		const int index = static_cast<uint8_t>(type);
+
+		if (index > numStrings || index < 0)
+			return strings[0];
+
+		return strings[index];
+	}
+
+	namespace
+	{
+		BuildType ParseBuildTypeStr(const std::string& str)
 		{
-			default:
-				return "None";
-			case IGNORE:
-				return "Ignored";
-			case HEADER_ONLY:
-				return "Header Only";
-			case EXECUTABLE:
-				return "Executable";
-			case STATIC_LIBRARY:
-				return "Static Library";
-			case SHARED_LIBRARY:
-				return "Shared Library";
+			constexpr uint8_t start = static_cast<uint8_t>(BuildType::None);
+			constexpr uint8_t end = static_cast<uint8_t>(BuildType::SharedLibrary);
+			for (uint8_t it = start; it <= end; ++it)
+			{
+				auto buildType = static_cast<BuildType>(it);
+				auto& buildTypeStr = BuildTypeToString(buildType);
+				if (Util::EqualsIgnoreCase(str, buildTypeStr))
+					return buildType;
+			}
+
+			return BuildType::None;
 		}
 	}
 
-	ProjectDir::ProjectDir(const Directory& dir)
+	Module::Module(const Directory& dir)
 		: Directory(dir)
-        , buildType(NONE)
+		, config(dir.path.c_str(), ".module.config")
+        , buildType(BuildType::Ignored)
+		, isIncludePath(false)
 	{
-        Files files;
+		if (!config.IsValid())
+		{
+			buildType = BuildType::Ignored;
+			return;
+		}
 
+		cout << "[Module] Open " << path << endl;
+		
+		auto name = config.GetValue("name", "");
+		if (!name.empty())
+		{
+			moduleName = name;
+			cout << "[Module] Name = " << name << endl;
+		}
+		else
+		{
+			moduleName = Util::PathToName(path);
+			cout << "[Module] Name set by path = " << name << endl;
+		}
+
+		{
+			auto buildTypeConfig = config.GetValue("buildType", "None");
+			buildType = ParseBuildTypeStr(buildTypeConfig);
+
+			cout << "[Module] build type of " << moduleName << " = " << buildTypeConfig << endl;
+		}
+
+		precompileDefinitions = config.GetValue("precompileDefinitions", "");
+
+        Files files;
 		for (const auto& file : FileList())
 		{
 			using namespace Util;
@@ -64,10 +113,24 @@ namespace Builder
 		sort(headerFiles.begin(), headerFiles.end());
 		sort(files.begin(), files.end());
 
-		SetUpBuildType(files);
+		for (auto& file : files)
+		{
+			if (Util::EqualsIgnoreCase(file.GetPath(), "include.txt"))
+			{
+				isIncludePath = true;
+				break;
+			}
+		}
+
+		if (buildType != BuildType::Ignored && SrcFileList().empty() && !HeaderFileList().empty())
+		{
+			buildType = BuildType::HeaderOnly;
+		}
+
+		BuildLists(files);
 	}
 
-	bool ProjectDir::HasSourceFileRecursive() const
+	bool Module::HasSourceFileRecursive() const
 	{
 		if (!srcFiles.empty() || !headerFiles.empty())
 			return true;
@@ -81,20 +144,19 @@ namespace Builder
 		return false;
 	}
 
-	void ProjectDir::PrintSubDirs(const std::string& header) const
+	void Module::PrintSubModules(const std::string& header) const
 	{
 		cout << "[DIR]" << header << path << endl;
 		for (auto& subDir : projDirs)
 		{
 			auto newHeader = header;
 			newHeader.append(" ");
-			subDir.PrintSubDirs(newHeader);
+			subDir.PrintSubModules(newHeader);
 		}
 	}
 
-	void ProjectDir::SetUpBuildType(const Files& files)
+	void Module::BuildLists(const Files& files)
 	{
-        definitions.empty();
         dependencies.empty();
         libraries.empty();
         frameworks.empty();
@@ -102,16 +164,6 @@ namespace Builder
 		for (const auto& element : files)
 		{
 			using namespace Util;
-
-            if (EqualsIgnoreCase(element.GetPath(), "definitions.txt"))
-            {
-                string filePath = path;
-                filePath.append("/");
-                filePath.append(element.GetPath());
-
-                LoadList(filePath.c_str(), definitions);
-                continue;
-            }
 
 			if (EqualsIgnoreCase(element.GetPath(), "dependencies.txt"))
 			{
@@ -142,40 +194,12 @@ namespace Builder
 				LoadList(filePath.c_str(), frameworks);
 				continue;
 			}
-
-			if (buildType == NONE)
-			{
-				if (EqualsIgnoreCase(element.GetPath(), "ignore.txt"))
-				{
-					buildType = IGNORE;
-				}
-
-				if (EqualsIgnoreCase(element.GetPath(), "executable.txt"))
-				{
-					buildType = EXECUTABLE;
-				}
-
-				if (EqualsIgnoreCase(element.GetPath(), "static_library.txt"))
-				{
-					buildType = STATIC_LIBRARY;
-				}
-
-				if (EqualsIgnoreCase(element.GetPath(), "shared_library.txt"))
-				{
-					buildType = SHARED_LIBRARY;
-				}
-			}
 		}
 
-		if (buildType != IGNORE && SrcFileList().empty() && !HeaderFileList().empty())
-		{
-			buildType = HEADER_ONLY;
-		}
-        
         Sort();
 	}
 
-	void ProjectDir::LoadList(const char* filePath, Strings& list)
+	void Module::LoadList(const char* filePath, Strings& list)
 	{
 		ifstream ifs(filePath);
 
@@ -203,7 +227,7 @@ namespace Builder
 		}
 	}
 
-	void ProjectDir::Sort()
+	void Module::Sort()
 	{
 		auto SortVector = [](auto& v)
 		{
@@ -213,6 +237,5 @@ namespace Builder
 		SortVector(dependencies);
 		SortVector(libraries);
 		SortVector(frameworks);
-		SortVector(definitions);
 	}
 }

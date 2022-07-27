@@ -14,6 +14,8 @@ namespace Builder
     public:
         using TString = std::string;
         using TValue = std::optional<TString>;
+
+        bool isValid;
         std::unordered_map<TString, TString> keymap;
 
     public:
@@ -23,6 +25,8 @@ namespace Builder
 
         TValue GetValue(const TString& key) const;
         TString GetValue(const TString& key, const TString& defaultValue) const;
+
+        inline auto IsValid() const { return isValid; }
 
     private:
         void Parse(const char* fileName);

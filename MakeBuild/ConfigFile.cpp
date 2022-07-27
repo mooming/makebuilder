@@ -2,19 +2,23 @@
 
 #include "ConfigFile.h"
 
+#include "Common/StringUtil.h"
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <unordered_map>
 
+
 namespace Builder
 {
     ConfigFile::ConfigFile(const char* path)
+        : isValid(false)
     {
         Parse(path);
     }
 
     ConfigFile::ConfigFile(const char* path, const char* fileName)
+        : isValid(false)
     {
         TString filePath(path);
 
@@ -49,15 +53,15 @@ namespace Builder
     void ConfigFile::Parse(const char* filePath)
     {
         using namespace std;
-        cout << "MakeBuildConfig: " << filePath << endl;
-
+       
 		ifstream ifs(filePath);
-
 		if (!ifs.is_open())
-		{
-			cout << "Failed to load the file, " << filePath << "." << endl;
-			abort();
-		}
+        {
+            cout << "[ConfigFile] Not Found: " << filePath << endl;
+            return;
+        }
+
+        cout << "[ConfigFile] Open " << filePath << endl;
 
         while (!ifs.eof())
 		{
@@ -75,8 +79,11 @@ namespace Builder
                 if (separator == string::npos)
                     return keyValue;
                 
-                keyValue.first = line.substr(0, separator);
-                keyValue.second = line.substr(separator + 1);
+                auto key = line.substr(0, separator);
+                auto value = line.substr(separator + 1);
+                keyValue.first = Util::Trim(key);
+                keyValue.second = Util::Trim(value);
+                
                 return keyValue;
             };
 
@@ -86,5 +93,7 @@ namespace Builder
             
             keymap[keyValue.first] = keyValue.second;
 		}
+
+        isValid = true;
     }
 }

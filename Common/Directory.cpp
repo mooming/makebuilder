@@ -1,10 +1,4 @@
-//
-//  Directory.cpp
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 15..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
 #include "Directory.h"
 

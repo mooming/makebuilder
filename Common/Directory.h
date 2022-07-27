@@ -1,18 +1,11 @@
-//
-//  Directory.h
-//  mbuild
-//
-//  Created by mooming on 2016. 8. 14..
-//
-//
+// Created by mooming.go@gmail.com 2016
 
-#ifndef Directory_h
-#define Directory_h
+#pragma once
 
+#include "File.h"
 #include <string>
 #include <vector>
 
-#include "File.h"
 
 namespace OS
 {
@@ -36,5 +29,3 @@ namespace OS
 
 	using Dirs = std::vector<Directory>;
 }
-
-#endif /* Directory_h */
