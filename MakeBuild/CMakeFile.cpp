@@ -78,21 +78,20 @@ namespace CMake
 		cout << "Creating: " << filePath.c_str() << "(" << BuildTypeStr(buildType) << ")" << endl;
 
 		ofstream ofs (filePath.c_str(), ofstream::out);
+		
+		auto requiredCMakeVersion = buildConfig.GetValue("requiredCMakeVersion", "3.12");
 		ofs << "cmake_minimum_required (VERSION "
-			<< buildConfig.GetRequiredCMakeVersion() << ")" << endl;
+			<< requiredCMakeVersion << ")" << endl;
 		ofs << "project (" << projName << ")" << endl;
 		ofs << endl;
 
-		ofs << "if(CMAKE_COMPILER_IS_GNUCXX)" << endl;
-		ofs << "	set(CMAKE_CXX_FLAGS \"${ CMAKE_CXX_FLAGS } -Wall -Werror\")" << endl;
-		ofs << "endif(CMAKE_COMPILER_IS_GNUCXX)" << endl;
-
-		ofs << "set (CMAKE_CXX_STANDARD " << buildConfig.GetCXXStandard() << ")" << endl;
+		auto cxxStandard = buildConfig.GetValue("cxxStandard", "17");
+		ofs << "set (CMAKE_CXX_STANDARD " << cxxStandard << ")" << endl;
 		ofs << endl;
 		ofs << "if (MSVC)" << endl;
 		
-		auto& compileOptions = buildConfig.GetCompileOptions();
-		auto& msvcCompileOptions = buildConfig.GetMSVCCompileOptions();
+		auto compileOptions = buildConfig.GetValue("compileOptions", "-Wall -Werror");
+		auto msvcCompileOptions = buildConfig.GetValue("msvcCompileOptions", "/W4 /WX");
 		
 		if (!msvcCompileOptions.empty())
 		{
@@ -113,15 +112,15 @@ namespace CMake
 		ofs << "endif (MSVC)" << endl;
 		ofs << endl;
 		
-		auto& precompileDefs = buildConfig.GetPrecompileDefinitions();
+		auto precompileDefs = buildConfig.GetValue("precompileDefinitions");
         auto& definesList = dir.DefinitionsList();
-        if (!precompileDefs.empty() || !definesList.empty())
+        if (precompileDefs.has_value() || !definesList.empty())
         {
             ofs << "add_compile_definitions (";
 
-			if (!precompileDefs.empty())
+			if (precompileDefs.has_value())
 			{
-				ofs << precompileDefs << " ";
+				ofs << *precompileDefs << " ";
 			}
 
             for (auto& def : definesList)

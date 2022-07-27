@@ -3,7 +3,6 @@
 #include "Build.h"
 
 #include "CMakeFile.h"
-#include "MakeBuildConfig.h"
 #include "StringUtil.h"
 
 #include <iostream>
