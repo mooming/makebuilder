@@ -1,9 +1,9 @@
 # makebuilder
 
 This program is developed to help build a c++ project on various platforms.<br>
-It helps to make a CMake file based on its directory structure.<br>
-It works with own .config and .txt files. They are project/module specifiers as descibed belows.<br>
-We're going to denote a directory as a module in the remained document. <br>
+It generates CMake files based on its directory structure.<br>
+It works with its own .config and .txt files. Details are provided below.<br>
+We'll denote a directory as a module in the remained document. <br>
 <hr>
 
 # Config Files
