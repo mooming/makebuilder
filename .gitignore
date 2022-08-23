@@ -15,3 +15,11 @@ MakeBuild/MakeBuild
 *.a
 *.lib
 *.cmake
+*.vcxproj
+*.sln
+*.vcxproj.filters
+*.vcxproj.user
+*.proj
+*.proj.filters
+*.dir
+x64

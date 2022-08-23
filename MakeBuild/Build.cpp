@@ -4,6 +4,7 @@
 
 #include "CMakeFile.h"
 #include "StringUtil.h"
+#include <cassert>
 #include <iostream>
 #include <string>
 

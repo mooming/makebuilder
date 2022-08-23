@@ -90,16 +90,16 @@ namespace Builder
 		for (const auto& file : FileList())
 		{
 			using namespace Util;
-			string  name(file.GetPath());
+			string filename(file.GetPath());
 
-			if (EndsWith(ToLowerCase(name), ".c")
-				|| EndsWith(ToLowerCase(name), ".cpp"))
+			if (EndsWith(ToLowerCase(filename), ".c")
+				|| EndsWith(ToLowerCase(filename), ".cpp"))
 			{
 				srcFiles.push_back(file);
 			}
-			else if (EndsWith(ToLowerCase(name), ".h")
-				|| EndsWith(ToLowerCase(name), ".hpp")
-				|| EndsWith(ToLowerCase(name), ".inl"))
+			else if (EndsWith(ToLowerCase(filename), ".h")
+				|| EndsWith(ToLowerCase(filename), ".hpp")
+				|| EndsWith(ToLowerCase(filename), ".inl"))
 			{
 				headerFiles.push_back(file);
 			}
@@ -157,9 +157,9 @@ namespace Builder
 
 	void Module::BuildLists(const Files& files)
 	{
-        dependencies.empty();
-        libraries.empty();
-        frameworks.empty();
+        dependencies.clear();
+        libraries.clear();
+        frameworks.clear();
         
 		for (const auto& element : files)
 		{
