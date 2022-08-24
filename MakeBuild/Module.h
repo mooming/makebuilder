@@ -30,7 +30,7 @@ namespace Builder
 		using Strings = std::vector<TString>;
 
 	private:
-		const ConfigFile config;
+		ConfigFile config;
 		TString moduleName;
 
 		OS::Files srcFiles;
@@ -48,6 +48,8 @@ namespace Builder
 		Module(const OS::Directory& dir);
 		virtual ~Module() = default;
 
+		inline bool operator < (const Module& rhs) const { return moduleName < rhs.moduleName; }
+	
 		bool HasSourceFileRecursive() const;
 		void PrintSubModules(const TString& header) const;
 

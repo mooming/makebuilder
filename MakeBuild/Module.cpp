@@ -128,6 +128,7 @@ namespace Builder
 		}
 
 		BuildLists(files);
+		Sort();
 	}
 
 	bool Module::HasSourceFileRecursive() const
@@ -195,8 +196,6 @@ namespace Builder
 				continue;
 			}
 		}
-
-        Sort();
 	}
 
 	void Module::LoadList(const char* filePath, Strings& list)

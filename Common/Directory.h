@@ -13,7 +13,7 @@ namespace OS
 	{
 		using Dirs = std::vector<Directory>;
 	public:
-		const std::string path;
+		std::string path;
 
 	private:
 		Files fileList;

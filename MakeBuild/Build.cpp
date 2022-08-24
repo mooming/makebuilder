@@ -117,6 +117,9 @@ namespace Builder
 				havingProjDir = true;
 			}
 		}
+		
+		auto& subModules = module.SubModuleList();
+		sort(subModules.begin(), subModules.end());
 
 		return havingProjDir;
 	};
