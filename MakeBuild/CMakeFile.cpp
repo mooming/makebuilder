@@ -90,7 +90,7 @@ namespace CMake
 		ofs << "if (MSVC)" << endl;
 		
 		auto compileOptions = buildConfig.GetValue("compileOptions", "-Wall -Werror");
-		auto msvcCompileOptions = buildConfig.GetValue("msvcCompileOptions", "/W4 /WX");
+		auto msvcCompileOptions = buildConfig.GetValue("msvcCompileOptions", "/W3 /WX");
 		
 		if (!msvcCompileOptions.empty())
 		{
