@@ -25,7 +25,7 @@ namespace Builder
 		};
 		
 		constexpr auto numStrings = sizeof(strings) / sizeof(strings[0]);
-		const int index = static_cast<uint8_t>(type);
+		const size_t index = static_cast<uint8_t>(type);
 
 		if (index > numStrings || index < 0)
 			return strings[0];
