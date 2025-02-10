@@ -38,20 +38,20 @@ namespace
                     os << "target_link_libraries (" << projName
                        << " ${OPENGL_glu_LIBRARY})" << endl;
                     os << "endif (OPENGL_GLU_FOUND)" << endl << endl;
-                }
-                else
-                {
-                    string libName = element;
-                    libName.append("_LIBRARY");
 
-                    os << "find_library(" << libName << " " << element << ")"
-                       << endl
-                       << endl;
-                    os << "if (" << libName << ")" << endl;
-                    os << "target_link_libraries (" << projName << " ${"
-                       << libName << "})" << endl;
-                    os << "endif (" << libName << ")" << endl << endl;
+                    continue;
                 }
+
+                string libName = element;
+                libName.append("_LIBRARY");
+
+                os << "find_library(" << libName << " " << element << ")"
+                   << endl
+                   << endl;
+                os << "if (" << libName << ")" << endl;
+                os << "target_link_libraries (" << projName << " ${"
+                   << libName << "})" << endl;
+                os << "endif (" << libName << ")" << endl << endl;
             }
         }
     }
@@ -258,21 +258,26 @@ namespace CMake
         if (!dependencyList.empty() || !libList.empty())
         {
             ofs << "target_link_libraries (" << moduleName;
-            for (const auto& dependency : dependencyList)
-            {
-                if (dependency.empty())
-                    continue;
 
-                ofs << " " << dependency;
+            if (buildType == BuildType::Executable)
+            {
+                for (const auto& dependency : dependencyList)
+                {
+                    if (dependency.empty())
+                        continue;
+
+                    ofs << " " << dependency;
+                }
+
+                for (const auto& library : libList)
+                {
+                    if (library.empty())
+                        continue;
+
+                    ofs << " " << library;
+                }
             }
 
-            for (const auto& library : libList)
-            {
-                if (library.empty())
-                    continue;
-
-                ofs << " " << library;
-            }
             ofs << ")" << endl << endl;
 
             for (const auto& dependency : dependencyList)

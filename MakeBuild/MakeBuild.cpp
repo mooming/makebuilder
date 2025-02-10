@@ -11,7 +11,7 @@ int main(int argc, const char* argv[])
 {
     if (argc < 2)
     {
-        cout << "MakeBuild 1.0" << endl;
+        cout << "MakeBuild 1.0.1" << endl;
         cout << "Directory based meta-build system" << endl;
         cout << "Helping write CMakeLists.txt" << endl << endl;
 
@@ -24,6 +24,7 @@ int main(int argc, const char* argv[])
              << endl;
         cout << endl;
         cout << "[ignore.txt] : This directory should be ignored." << endl;
+        cout << "[.module.config] : This directory is a module. This file should contains name, buildType, precompileDefinitions." << endl;
         cout << "[executable.txt] : This directory is a executable module."
              << endl;
         cout << "[static_library.txt] : This directory is a static library."
