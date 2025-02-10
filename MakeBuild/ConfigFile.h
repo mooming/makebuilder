@@ -6,7 +6,6 @@
 #include <string>
 #include <unordered_map>
 
-
 namespace Builder
 {
     class ConfigFile final
@@ -31,4 +30,4 @@ namespace Builder
     private:
         void Parse(const char* fileName);
     };
-}
+} // namespace Builder

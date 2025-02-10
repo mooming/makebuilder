@@ -6,26 +6,26 @@
 #include <string>
 #include <vector>
 
-
 namespace OS
 {
-	class Directory
-	{
-		using Dirs = std::vector<Directory>;
-	public:
-		std::string path;
+    class Directory
+    {
+        using Dirs = std::vector<Directory>;
 
-	private:
-		Files fileList;
-		Dirs dirList;
+    public:
+        std::string path;
 
-	public:
-		Directory(const char* path);
-		virtual ~Directory() = default;
+    private:
+        Files fileList;
+        Dirs dirList;
 
-		inline const Files& FileList() const { return fileList; }
-		inline const Dirs& DirList() const { return dirList; }
-	};
+    public:
+        Directory(const char* path);
+        virtual ~Directory() = default;
 
-	using Dirs = std::vector<Directory>;
-}
+        inline const Files& FileList() const { return fileList; }
+        inline const Dirs& DirList() const { return dirList; }
+    };
+
+    using Dirs = std::vector<Directory>;
+} // namespace OS
