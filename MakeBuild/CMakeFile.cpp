@@ -259,23 +259,20 @@ namespace CMake
         {
             ofs << "target_link_libraries (" << moduleName;
 
-            if (buildType == BuildType::Executable)
+            for (const auto& dependency : dependencyList)
             {
-                for (const auto& dependency : dependencyList)
-                {
-                    if (dependency.empty())
-                        continue;
+                if (dependency.empty())
+                    continue;
 
-                    ofs << " " << dependency;
-                }
+                ofs << " " << dependency;
+            }
 
-                for (const auto& library : libList)
-                {
-                    if (library.empty())
-                        continue;
+            for (const auto& library : libList)
+            {
+                if (library.empty())
+                    continue;
 
-                    ofs << " " << library;
-                }
+                ofs << " " << library;
             }
 
             ofs << ")" << endl << endl;
