@@ -23,24 +23,14 @@ int main(int argc, const char* argv[])
                 "characteristic of the module."
              << endl;
         cout << endl;
-        cout << "[ignore.txt] : This directory should be ignored." << endl;
-        cout << "[.module.config] : This directory is a module. This file should contains name, buildType, precompileDefinitions." << endl;
-        cout << "[executable.txt] : This directory is a executable module."
-             << endl;
-        cout << "[static_library.txt] : This directory is a static library."
-             << endl;
-        cout << "[shared_library.txt] : This directory is a dynamic library."
-             << endl;
-        cout << "[include.txt] : This directory should be set as an include "
-                "path of itself and children."
-             << endl;
-        cout << "[dependencies.txt] : Each line in this file defines a module "
-                "dependency."
-             << endl;
-        cout << "[libraries.txt] : Each line denotes a library file to be "
-                "linked."
-             << endl;
-        cout << "[definitions.txt] : compiler options" << endl;
+        cout << "[.module.config] : It denotes the directory is a module. This file should contains these." << endl;
+        cout << "name = \"Module Name\"" << endl;
+        cout << "buildType = \"buildType\"";
+        cout << " // Available Option: Ignored, HeaderOnly, Executable, StaticLibrary, SharedLibrary" << endl;
+        cout << "precompileDefinitions = DEFINITION0, DEFINITION1, ..." << endl << endl;
+        cout << "[include.txt] : This directory should be set as an include path of itself and children." << endl;
+        cout << "[dependencies.txt] : Each line in this file defines a module dependency." << endl;
+        cout << "[libraries.txt] : Each line denotes a library name" << endl;
         cout << endl;
 
         return 0;

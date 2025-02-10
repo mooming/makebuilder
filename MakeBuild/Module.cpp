@@ -33,6 +33,7 @@ namespace Builder
             constexpr uint8_t start = static_cast<uint8_t>(BuildType::None);
             constexpr uint8_t end =
                 static_cast<uint8_t>(BuildType::SharedLibrary);
+
             for (uint8_t it = start; it <= end; ++it)
             {
                 auto buildType = static_cast<BuildType>(it);
