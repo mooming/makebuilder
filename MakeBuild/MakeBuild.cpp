@@ -5,7 +5,6 @@
 #include "Build.h"
 #include "OSAbstractLayer.h"
 
-
 using namespace std;
 
 int main(int argc, const char* argv[])
@@ -17,18 +16,29 @@ int main(int argc, const char* argv[])
         cout << "Helping write CMakeLists.txt" << endl << endl;
 
         cout << "Usage: mbuild <projects root path>" << endl << endl;
-      
+
         cout << "== .txt Specifiers ==" << endl;
         cout << "Each directory is processed as a single module." << endl;
-        cout << "Place following .txt files in a directory. It describes a characteristic of the module." << endl;
+        cout << "Place following .txt files in a directory. It describes a "
+                "characteristic of the module."
+             << endl;
         cout << endl;
         cout << "[ignore.txt] : This directory should be ignored." << endl;
-        cout << "[executable.txt] : This directory is a executable module." << endl;
-        cout << "[static_library.txt] : This directory is a static library." << endl;
-        cout << "[shared_library.txt] : This directory is a dynamic library." << endl;
-        cout << "[include.txt] : This directory should be set as an include path of itself and children." << endl;
-        cout << "[dependencies.txt] : Each line in this file defines a module dependency." << endl;
-        cout << "[libraries.txt] : Each line denotes a library file to be linked." << endl;
+        cout << "[executable.txt] : This directory is a executable module."
+             << endl;
+        cout << "[static_library.txt] : This directory is a static library."
+             << endl;
+        cout << "[shared_library.txt] : This directory is a dynamic library."
+             << endl;
+        cout << "[include.txt] : This directory should be set as an include "
+                "path of itself and children."
+             << endl;
+        cout << "[dependencies.txt] : Each line in this file defines a module "
+                "dependency."
+             << endl;
+        cout << "[libraries.txt] : Each line denotes a library file to be "
+                "linked."
+             << endl;
         cout << "[definitions.txt] : compiler options" << endl;
         cout << endl;
 

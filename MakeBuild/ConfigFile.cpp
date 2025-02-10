@@ -8,7 +8,6 @@
 #include <iostream>
 #include <unordered_map>
 
-
 namespace Builder
 {
     ConfigFile::ConfigFile(const char* path)
@@ -28,7 +27,7 @@ namespace Builder
             filePath.append("/");
         }
         filePath.append(fileName);
-        
+
         Parse(filePath.c_str());
     }
 
@@ -37,25 +36,26 @@ namespace Builder
         auto found = keymap.find(key);
         if (found == keymap.end())
             return TValue();
-        
+
         return found->second;
     }
 
-    ConfigFile::TString ConfigFile::GetValue(const TString& key, const TString& defaultValue) const
+    ConfigFile::TString ConfigFile::GetValue(
+        const TString& key, const TString& defaultValue) const
     {
         auto found = keymap.find(key);
         if (found == keymap.end())
             return defaultValue;
-        
+
         return found->second;
     }
 
     void ConfigFile::Parse(const char* filePath)
     {
         using namespace std;
-       
-		ifstream ifs(filePath);
-		if (!ifs.is_open())
+
+        ifstream ifs(filePath);
+        if (!ifs.is_open())
         {
             cout << "[ConfigFile] Not Found: " << filePath << endl;
             return;
@@ -64,13 +64,12 @@ namespace Builder
         cout << "[ConfigFile] Open " << filePath << endl;
 
         while (!ifs.eof())
-		{
-			string line;
-			getline(ifs, line);
+        {
+            string line;
+            getline(ifs, line);
 
             using TKeyValue = pair<string, string>;
-            auto ParseLine = [&line]() -> TKeyValue
-            {
+            auto ParseLine = [&line]() -> TKeyValue {
                 TKeyValue keyValue;
                 if (line.empty())
                     return keyValue;
@@ -78,22 +77,22 @@ namespace Builder
                 auto separator = line.find('=');
                 if (separator == string::npos)
                     return keyValue;
-                
+
                 auto key = line.substr(0, separator);
                 auto value = line.substr(separator + 1);
                 keyValue.first = Util::Trim(key);
                 keyValue.second = Util::Trim(value);
-                
+
                 return keyValue;
             };
 
             auto keyValue = ParseLine();
             if (keyValue.first.empty() || keyValue.second.empty())
                 continue;
-            
+
             keymap[keyValue.first] = keyValue.second;
-		}
+        }
 
         isValid = true;
     }
-}
+} // namespace Builder

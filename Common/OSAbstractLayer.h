@@ -22,8 +22,8 @@
 
 namespace OS
 {
-	std::string GetFullPath(std::string path);
+    std::string GetFullPath(std::string path);
 
-	bool IsDirectory(const char* path);
-	std::vector<std::string> ListFilesInDirectory(const char* path);
-}
+    bool IsDirectory(const char* path);
+    std::vector<std::string> ListFilesInDirectory(const char* path);
+} // namespace OS

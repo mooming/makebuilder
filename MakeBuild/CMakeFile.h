@@ -8,17 +8,17 @@
 
 namespace CMake
 {
-	class CMakeFile final
-	{
-	private:
-		const Builder::Build& build;
-		const Builder::Module& module;
+    class CMakeFile final
+    {
+    private:
+        const Builder::Build& build;
+        const Builder::Module& module;
 
-	public:
-		CMakeFile(const Builder::Build& build, const Builder::Module& module);
-		~CMakeFile() = default;
+    public:
+        CMakeFile(const Builder::Build& build, const Builder::Module& module);
+        ~CMakeFile() = default;
 
-		void Make();
-		std::string TranslatePath(std::string path);
-	};
-}
+        void Make();
+        std::string TranslatePath(std::string path);
+    };
+} // namespace CMake
