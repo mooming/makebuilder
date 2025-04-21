@@ -44,7 +44,7 @@ namespace OS
             return *this;
         }
 
-        inline bool operator<(const File& rhs) const { return path < rhs.path; }
+        bool operator<(const File& rhs) const { return path < rhs.path; }
 
         friend std::ostream& operator<<(std::ostream& os, const File& file)
         {
@@ -53,7 +53,7 @@ namespace OS
             return os;
         }
 
-        inline auto& GetPath() const { return path; }
+        auto& GetPath() const { return path; }
     };
 
     using Files = std::vector<File>;

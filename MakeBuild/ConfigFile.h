@@ -25,7 +25,7 @@ namespace Builder
         TValue GetValue(const TString& key) const;
         TString GetValue(const TString& key, const TString& defaultValue) const;
 
-        inline auto IsValid() const { return isValid; }
+        auto IsValid() const { return isValid; }
 
     private:
         void Parse(const char* fileName);

@@ -69,7 +69,7 @@ namespace CMake
     void CMakeFile::Make()
     {
         const auto& buildConfig = build.config;
-        const BuildType buildType = module.GetBuildType();
+        const EBuildType buildType = module.GetBuildType();
 
         const char* basePath = "${CMAKE_SOURCE_DIR}";
         using namespace Util;
@@ -150,7 +150,7 @@ namespace CMake
 
         ofs << " )" << endl;
 
-        if (buildType != BuildType::HeaderOnly)
+        if (buildType != EBuildType::HeaderOnly)
         {
             ofs << "link_directories (" << basePath << "/lib)" << endl;
             ofs << endl;
@@ -169,7 +169,7 @@ namespace CMake
 
         switch (buildType)
         {
-        case BuildType::Executable:
+        case EBuildType::Executable:
             ofs << "add_executable (" << moduleName.c_str() << endl;
 
             for (const auto& element : module.SrcFileList())
@@ -190,7 +190,7 @@ namespace CMake
                 << basePath << "/bin)" << endl;
             break;
 
-        case BuildType::StaticLibrary:
+        case EBuildType::StaticLibrary:
             ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
 
             for (const auto& element : module.SrcFileList())
@@ -211,7 +211,7 @@ namespace CMake
                 << basePath << "/lib)" << endl;
             break;
 
-        case BuildType::SharedLibrary:
+        case EBuildType::SharedLibrary:
             ofs << "add_library (" << moduleName.c_str() << " SHARED " << endl;
 
             for (const auto& element : module.SrcFileList())
@@ -232,7 +232,7 @@ namespace CMake
                 << basePath << "/bin)" << endl;
             break;
 
-        case BuildType::HeaderOnly:
+        case EBuildType::HeaderOnly:
             ofs << "add_library (" << moduleName.c_str() << " INTERFACE)"
                 << endl;
             ofs << "target_sources (" << moduleName.c_str() << " INTERFACE "
