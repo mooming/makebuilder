@@ -23,8 +23,8 @@ namespace OS
         Directory(const char* path);
         virtual ~Directory() = default;
 
-        inline const Files& FileList() const { return fileList; }
-        inline const Dirs& DirList() const { return dirList; }
+        const Files& FileList() const { return fileList; }
+        const Dirs& DirList() const { return dirList; }
     };
 
     using Dirs = std::vector<Directory>;

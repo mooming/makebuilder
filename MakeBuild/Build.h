@@ -29,6 +29,6 @@ namespace Builder
         void BuildCMakeFiles();
 
     private:
-        bool TraverseDirTree(Module& dir, std::string header);
+        bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
     };
 } // namespace Builder

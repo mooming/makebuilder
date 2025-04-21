@@ -9,17 +9,19 @@
 
 namespace Builder
 {
-    enum class BuildType : uint8_t
+    enum class EBuildType : uint8_t
     {
         None = 0,
         Ignored,
         HeaderOnly,
         Executable,
         StaticLibrary,
-        SharedLibrary
+        SharedLibrary,
+        ExternalLibraries,
+        Max
     };
 
-    const std::string& BuildTypeToString(BuildType type);
+    const std::string& BuildTypeToString(EBuildType type);
 
     class Module : public OS::Directory
     {
@@ -34,20 +36,22 @@ namespace Builder
 
         OS::Files srcFiles;
         OS::Files headerFiles;
-        Modules projDirs;
+        Module* parentModule;
+        Modules submodules;
         Strings dependencies;
         Strings libraries;
         Strings frameworks;
         TString precompileDefinitions;
 
-        BuildType buildType;
+        EBuildType buildType;
         bool isIncludePath;
 
     public:
         Module(const OS::Directory& dir);
+        Module(Module* parent, const OS::Directory& dir);
         virtual ~Module() = default;
 
-        inline bool operator<(const Module& rhs) const
+        bool operator<(const Module& rhs) const
         {
             return moduleName < rhs.moduleName;
         }
@@ -55,23 +59,24 @@ namespace Builder
         bool HasSourceFileRecursive() const;
         void PrintSubModules(const TString& header) const;
 
-        inline auto& GetName() const { return moduleName; }
-        inline auto GetBuildType() const { return buildType; }
-        inline auto IsIncludePath() const { return isIncludePath; }
+        auto& GetName() const { return moduleName; }
+        auto GetBuildType() const { return buildType; }
+        auto IsIncludePath() const { return isIncludePath; }
 
-        inline auto& SrcFileList() const { return srcFiles; }
-        inline auto& HeaderFileList() const { return headerFiles; }
-        inline auto& SubModuleList() { return projDirs; }
-        inline auto& SubModuleList() const { return projDirs; }
-        inline auto& DependencyList() const { return dependencies; }
-        inline auto& LibraryList() const { return libraries; }
-        inline auto& FrameworkList() const { return frameworks; }
-        inline auto& GetPrecompileDefinitions() const
+        auto& SrcFileList() const { return srcFiles; }
+        auto& HeaderFileList() const { return headerFiles; }
+        auto& SubModuleList() { return submodules; }
+        auto& SubModuleList() const { return submodules; }
+        auto& DependencyList() const { return dependencies; }
+        auto& LibraryList() const { return libraries; }
+        auto& FrameworkList() const { return frameworks; }
+        auto& GetPrecompileDefinitions() const
         {
             return precompileDefinitions;
         }
 
     private:
+        void BuildCMakeModule();
         void BuildLists(const OS::Files& files);
         void LoadList(const char* filePath, Strings& list);
         void Sort();
