@@ -191,6 +191,7 @@ namespace CMake
             break;
 
         case EBuildType::StaticLibrary:
+			ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
             ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
 
             for (const auto& element : module.SrcFileList())
