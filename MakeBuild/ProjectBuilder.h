@@ -2,29 +2,29 @@
 
 #pragma once
 
-#include "ConfigFile.h"
+#include "BuildConfig.h"
 #include "Module.h"
 
 #include <string>
 #include <vector>
 
-namespace Builder
+namespace mb
 {
-    class Build final
+    class ProjectBuilder final
     {
     public:
         using Modules = std::vector<Module*>;
         using Paths = std::vector<std::string>;
 
     public:
-        const ConfigFile config;
+        const BuildConfig config;
         Module baseModule;
         Modules modules;
         Paths includeDirs;
 
     public:
-        Build(const char* path);
-        ~Build() = default;
+        explicit ProjectBuilder(const char* path);
+        ~ProjectBuilder() = default;
 
         void BuildCMakeFiles();
 

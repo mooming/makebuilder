@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "ConfigFile.h"
+#include "BuildConfig.h"
 #include "Directory.h"
 #include "File.h"
 #include <cstdint>
 
-namespace Builder
+namespace mb
 {
     enum class EBuildType : uint8_t
     {
@@ -23,6 +23,9 @@ namespace Builder
 
     const std::string& BuildTypeToString(EBuildType type);
 
+
+    // This class represent a build module which is also a directory
+    // under the project base directory.
     class Module : public OS::Directory
     {
     public:
@@ -31,7 +34,7 @@ namespace Builder
         using Strings = std::vector<TString>;
 
     private:
-        ConfigFile config;
+        BuildConfig config;
         TString moduleName;
 
         OS::Files srcFiles;
