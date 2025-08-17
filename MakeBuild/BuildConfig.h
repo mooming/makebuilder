@@ -6,9 +6,9 @@
 #include <string>
 #include <unordered_map>
 
-namespace Builder
+namespace mb
 {
-    class ConfigFile final
+    class BuildConfig final
     {
     public:
         using TString = std::string;
@@ -18,12 +18,12 @@ namespace Builder
         std::unordered_map<TString, TString> keymap;
 
     public:
-        ConfigFile(const char* path);
-        ConfigFile(const char* path, const char* fileName);
-        ~ConfigFile() = default;
+        explicit BuildConfig(const char* path);
+        BuildConfig(const char* path, const char* fileName);
+        ~BuildConfig() = default;
 
-        TValue GetValue(const TString& key) const;
-        TString GetValue(const TString& key, const TString& defaultValue) const;
+        [[nodiscard]] TValue GetValue(const TString& key) const;
+        [[nodiscard]] TString GetValue(const TString& key, const TString& defaultValue) const;
 
         auto IsValid() const { return isValid; }
 

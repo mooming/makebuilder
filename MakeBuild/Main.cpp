@@ -2,13 +2,14 @@
 
 #include <iostream>
 
-#include "Build.h"
+#include "ProjectBuilder.h"
 #include "OSAbstractLayer.h"
 
-using namespace std;
 
 int main(int argc, const char* argv[])
 {
+    using namespace std;
+
     if (argc < 2)
     {
         cout << "MakeBuild 1.0.1" << endl;
@@ -40,7 +41,7 @@ int main(int argc, const char* argv[])
         return 0;
     }
 
-    Builder::Build build(OS::GetFullPath(argv[1]).c_str());
+    mb::ProjectBuilder build(OS::GetFullPath(argv[1]).c_str());
     build.BuildCMakeFiles();
 
     cout << endl;

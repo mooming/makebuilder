@@ -10,17 +10,16 @@
 using namespace std;
 using namespace OS;
 
-namespace Builder
+namespace mb
 {
 const string& BuildTypeToString(EBuildType type)
 {
-    static string strings[] = {"None", "Ignored", "HeaderOnly", "Executable",
-        "StaticLibrary", "SharedLibrary", "ExternalLibraries", "Max"};
+    constexpr auto arraySize = static_cast<size_t>(EBuildType::Max);
+    static array<string, arraySize> strings{"None", "Ignored", "HeaderOnly", "Executable",
+        "StaticLibrary", "SharedLibrary", "ExternalLibraries"};
 
-    constexpr auto numStrings = sizeof(strings) / sizeof(strings[0]);
     const size_t index = static_cast<uint8_t>(type);
-
-    if (index > numStrings || index < 0)
+    if (index > arraySize || index < 0)
         return strings[0];
 
     return strings[index];
@@ -102,7 +101,7 @@ Module::Module(Module* parent, const OS::Directory& dir)
     for (const auto& file : FileList())
     {
         using namespace Util;
-        string filename(file.GetPath());
+        const auto& filename = file.GetPath();
 
         if (EndsWith(ToLowerCase(filename), ".c") ||
             EndsWith(ToLowerCase(filename), ".cpp"))
@@ -131,7 +130,7 @@ Module::Module(Module* parent, const OS::Directory& dir)
     }
     else
     {
-        for (auto& file : files)
+        for (const auto& file : files)
         {
             if (Util::EqualsIgnoreCase(file.GetPath(), "include.txt"))
             {
@@ -156,7 +155,7 @@ bool Module::HasSourceFileRecursive() const
     if (!srcFiles.empty() || !headerFiles.empty())
         return true;
 
-    for (auto& subDir : submodules)
+    for (const auto& subDir : submodules)
     {
         if (subDir.HasSourceFileRecursive())
             return true;
@@ -168,7 +167,7 @@ bool Module::HasSourceFileRecursive() const
 void Module::PrintSubModules(const std::string& header) const
 {
     cout << "[DIR]" << header << path << endl;
-    for (auto& subDir : submodules)
+    for (const auto& subDir : submodules)
     {
         auto newHeader = header;
         newHeader.append(" ");

@@ -53,7 +53,7 @@ namespace OS
             return os;
         }
 
-        auto& GetPath() const { return path; }
+        [[nodiscard]] auto& GetPath() const { return path; }
     };
 
     using Files = std::vector<File>;

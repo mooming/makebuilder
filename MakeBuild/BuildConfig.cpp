@@ -1,6 +1,6 @@
 // Created by mooming.go@gmail.com 2016
 
-#include "ConfigFile.h"
+#include "BuildConfig.h"
 
 #include "Common/StringUtil.h"
 #include <fstream>
@@ -8,15 +8,15 @@
 #include <iostream>
 #include <unordered_map>
 
-namespace Builder
+namespace mb
 {
-    ConfigFile::ConfigFile(const char* path)
+    BuildConfig::BuildConfig(const char* path)
         : isValid(false)
     {
         Parse(path);
     }
 
-    ConfigFile::ConfigFile(const char* path, const char* fileName)
+    BuildConfig::BuildConfig(const char* path, const char* fileName)
         : isValid(false)
     {
         TString filePath(path);
@@ -31,26 +31,26 @@ namespace Builder
         Parse(filePath.c_str());
     }
 
-    ConfigFile::TValue ConfigFile::GetValue(const TString& key) const
+    BuildConfig::TValue BuildConfig::GetValue(const TString& key) const
     {
         auto found = keymap.find(key);
         if (found == keymap.end())
-            return TValue();
+            return {};
 
-        return found->second;
+        return (*found).second;
     }
 
-    ConfigFile::TString ConfigFile::GetValue(
+    BuildConfig::TString BuildConfig::GetValue(
         const TString& key, const TString& defaultValue) const
     {
         auto found = keymap.find(key);
         if (found == keymap.end())
             return defaultValue;
 
-        return found->second;
+        return (*found).second;
     }
 
-    void ConfigFile::Parse(const char* filePath)
+    void BuildConfig::Parse(const char* filePath)
     {
         using namespace std;
 

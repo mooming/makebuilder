@@ -1,6 +1,6 @@
 // Created by mooming.go@gmail.com 2016
 
-#include "CMakeFile.h"
+#include "CMakeLists.h"
 
 #include "StringUtil.h"
 #include <fstream>
@@ -9,7 +9,7 @@
 #include <vector>
 
 using namespace std;
-using namespace Builder;
+using namespace mb;
 
 namespace
 {
@@ -57,16 +57,16 @@ namespace
     }
 } // namespace
 
-namespace CMake
+namespace mb
 {
 
-    CMakeFile::CMakeFile(const Build& build, const Module& module)
+    CMakeLists::CMakeLists(const ProjectBuilder& build, const Module& module)
         : build(build),
           module(module)
     {
     }
 
-    void CMakeFile::Make()
+    void CMakeLists::Make()
     {
         const auto& buildConfig = build.config;
         const EBuildType buildType = module.GetBuildType();
@@ -293,7 +293,7 @@ namespace CMake
         ofs.close();
     }
 
-    string CMakeFile::TranslatePath(string path)
+    string CMakeLists::TranslatePath(string path)
     {
         using namespace Util;
         path = TrimPath(path);

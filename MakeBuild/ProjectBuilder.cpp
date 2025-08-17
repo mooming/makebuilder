@@ -1,8 +1,8 @@
 // Created by mooming.go@gmail.com 2016
 
-#include "Build.h"
+#include "ProjectBuilder.h"
 
-#include "CMakeFile.h"
+#include "CMakeLists.h"
 #include "StringUtil.h"
 #include <algorithm>
 #include <cassert>
@@ -11,11 +11,11 @@
 
 using namespace std;
 
-namespace Builder
+namespace mb
 {
 namespace
 {
-void GetAllChildrenRecursive(Module& module, Build::Modules& inoutModules)
+void GetAllChildrenRecursive(Module& module, ProjectBuilder::Modules& inoutModules)
 {
     inoutModules.push_back(&module);
 
@@ -27,7 +27,7 @@ void GetAllChildrenRecursive(Module& module, Build::Modules& inoutModules)
 };
 } // namespace
 
-Build::Build(const char* path)
+ProjectBuilder::ProjectBuilder(const char* path)
     : config(path, ".project.config"),
       baseModule(path),
       modules()
@@ -51,13 +51,13 @@ Build::Build(const char* path)
     }
 }
 
-void Build::BuildCMakeFiles()
+void ProjectBuilder::BuildCMakeFiles()
 {
     for (auto module : modules)
     {
         assert(module != nullptr);
 
-        using namespace CMake;
+        using namespace mb;
         const auto moduleBuildType = module->GetBuildType();
         if (moduleBuildType == EBuildType::ExternalLibraries)
         {
@@ -66,13 +66,13 @@ void Build::BuildCMakeFiles()
             continue;
         }
 
-        CMakeFile cmf(*this, *module);
+        CMakeLists cmf(*this, *module);
         cmf.Make();
     }
 }
 
 // return true if the given module is valid, or it has a valid submodule.
-bool Build::TraverseDirectoryTree(
+bool ProjectBuilder::TraverseDirectoryTree(
     Module& module, const string& logHeader)
 {
     if (module.GetBuildType() == EBuildType::Ignored)

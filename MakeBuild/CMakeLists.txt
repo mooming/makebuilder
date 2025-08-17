@@ -17,14 +17,14 @@ link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
 add_executable (makebuild
- Build.cpp
- CMakeFile.cpp
- ConfigFile.cpp
- MakeBuild.cpp
+		ProjectBuilder.cpp
+		CMakeLists.cpp
+		BuildConfig.cpp
+        Main.cpp
  Module.cpp
- Build.h
- CMakeFile.h
- ConfigFile.h
+		ProjectBuilder.h
+		CMakeLists.h
+		BuildConfig.h
  Module.h
 )
 
