@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (MakeBuilder)
+project (Source)
 
 set (CMAKE_CXX_STANDARD 23)
 
@@ -16,8 +16,7 @@ include_directories ( ${CMAKE_SOURCE_DIR}
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
-add_subdirectory (Application)
-add_subdirectory (Source)
+add_subdirectory (Common)
 
 
 

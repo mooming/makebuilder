@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.12)
 project (Common)
 
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 23)
 
 if (MSVC)
 	add_compile_options (/W4 /WX)
@@ -11,7 +11,8 @@ endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- ${CMAKE_SOURCE_DIR}/Common
+ ${CMAKE_SOURCE_DIR}/Source
+ ${CMAKE_SOURCE_DIR}/Source/Common
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
