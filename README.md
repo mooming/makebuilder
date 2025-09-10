@@ -1,6 +1,6 @@
 # makebuilder
 
-This program is developed to help build a c++ project on various platforms.<br>
+This program is developed to help create a C++ project with CMake on various platforms.<br>
 It generates CMake files based on its directory structure.<br>
 It works with its own .config and .txt files. Details are provided below.<br>
 We'll denote a directory as a module in the remained document. <br>
