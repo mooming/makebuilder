@@ -3,7 +3,6 @@
 #include "ProjectBuilder.h"
 
 #include "CMakeLists.h"
-#include "StringUtil.h"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -11,11 +10,10 @@
 
 using namespace std;
 
-namespace mb
-{
 namespace
 {
-void GetAllChildrenRecursive(Module& module, ProjectBuilder::Modules& inoutModules)
+
+void GetAllChildrenRecursive(mb::Module& module, mb::ProjectBuilder::Modules& inoutModules)
 {
     inoutModules.push_back(&module);
 
@@ -25,7 +23,11 @@ void GetAllChildrenRecursive(Module& module, ProjectBuilder::Modules& inoutModul
         GetAllChildrenRecursive(sub, inoutModules);
     }
 };
+
 } // namespace
+
+namespace mb
+{
 
 ProjectBuilder::ProjectBuilder(const char* path)
     : config(path, ".project.config"),
@@ -59,10 +61,9 @@ void ProjectBuilder::BuildCMakeFiles()
 
         using namespace mb;
         const auto moduleBuildType = module->GetBuildType();
-        if (moduleBuildType == EBuildType::ExternalLibraries)
+        if (moduleBuildType == EBuildType::ExternalCMakePorject)
         {
-            cout << "[CMake] Skip creating CMakeLists.txt of Module = "
-                 << module->GetName().c_str() << endl;
+            cout << "[CMake] Skip creating CMakeLists.txt of Module = " << module->GetName().c_str() << endl;
             continue;
         }
 
@@ -78,18 +79,20 @@ bool ProjectBuilder::TraverseDirectoryTree(
     if (module.GetBuildType() == EBuildType::Ignored)
         return false;
 
+    if (module.GetBuildType() == EBuildType::ExternalCMakePorject)
+        return true;
+
     if (module.IsIncludePath())
     {
         includeDirs.push_back(module.path);
     }
 
+    bool isValidModule = false;
+
     if (module.GetBuildType() == EBuildType::ExternalLibraries)
     {
-        // External library path should be added to include paths.
-        return true;
+        isValidModule = true;
     }
-
-    bool isValidModule = false;
 
     if (!module.SrcFileList().empty() || !module.HeaderFileList().empty())
     {
@@ -119,9 +122,9 @@ bool ProjectBuilder::TraverseDirectoryTree(
     }
 
     // Iterate all children
-    for (const auto& element : module.DirList())
+    for (const auto& subDirectory : module.DirList())
     {
-        Module submodule(&module, element);
+        Module submodule(&module, subDirectory);
         string childLogHeader = logHeader;
         childLogHeader.append("  ");
 
@@ -137,6 +140,6 @@ bool ProjectBuilder::TraverseDirectoryTree(
     sort(subModules.begin(), subModules.end());
 
     return isValidModule;
-};
+}
 
 } // namespace Builder

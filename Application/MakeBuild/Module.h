@@ -5,7 +5,7 @@
 #include "BuildConfig.h"
 #include "Directory.h"
 #include "File.h"
-#include <cstdint>
+
 
 namespace mb
 {
@@ -18,6 +18,7 @@ namespace mb
         StaticLibrary,
         SharedLibrary,
         ExternalLibraries,
+        ExternalCMakePorject,
         Max
     };
 
@@ -39,7 +40,7 @@ namespace mb
 
         OS::Files srcFiles;
         OS::Files headerFiles;
-        Module* parentModule;
+        const Module* parentModule;
         Modules submodules;
         Strings dependencies;
         Strings libraries;
@@ -51,7 +52,7 @@ namespace mb
 
     public:
         Module(const OS::Directory& dir);
-        Module(Module* parent, const OS::Directory& dir);
+        Module(const Module* parent, const OS::Directory& dir);
         virtual ~Module() = default;
 
         bool operator<(const Module& rhs) const

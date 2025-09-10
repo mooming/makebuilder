@@ -59,13 +59,29 @@ Module::Module(const Directory& dir)
 {
 }
 
-Module::Module(Module* parent, const OS::Directory& dir)
+Module::Module(const Module* parent, const OS::Directory& dir)
     : Directory(dir),
       config(dir.path.c_str(), ".module.config"),
       parentModule(parent),
       buildType(EBuildType::Ignored),
       isIncludePath(false)
 {
+    if (parent != nullptr && parent->buildType == EBuildType::ExternalLibraries)
+    {
+        auto& files = FileList();
+        for (auto& file : files)
+        {
+            if (Util::EqualsIgnoreCase(file.GetPath(), "CMakeLists.txt"))
+            {
+                buildType = EBuildType::ExternalCMakePorject;
+                moduleName = path;
+                break;
+            }
+        }
+
+        return;
+    }
+
     if (!config.IsValid())
     {
         buildType = EBuildType::Ignored;

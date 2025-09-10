@@ -1,9 +1,21 @@
 # makebuilder
 
-This program is developed to help create a C++ project with CMake on various platforms.<br>
-It generates CMake files based on its directory structure.<br>
-It works with its own .config and .txt files. Details are provided below.<br>
+<p>
+We have a few options to create a build scrip for our C/C++ projects. Make utility helps us manage C/C++ projects.
+However, creating Makefile files is not a trivial job. It also requires some knowledge for the utility. CMake is
+also good multiplatform utility supporting most of platforms and toolchains. But, it's also non-trivial to create
+CMakeLists.txt for all the modules in a project.
+</p>
+
+<p>
+Most of my C/C++ projects are already well-organized with their directory structures. I had to recreate them for IDE
+or build utilities additionally. I've created this tool to get rid of that jobs by using directory structure. This
+tool will create a CMake project based on directory structure of projects with a few setting files; .config and .txt.
+</p>
+
+Details are provided below.<br>
 We'll denote a directory as a module in the remained document. <br>
+
 <hr>
 
 # Config Files
