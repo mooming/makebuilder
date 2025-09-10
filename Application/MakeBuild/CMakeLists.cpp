@@ -156,13 +156,16 @@ namespace mb
             ofs << endl;
         }
 
-        for (const auto& subDir : module.SubModuleList())
+        for (const auto& subModule : module.SubModuleList())
         {
-            if (!subDir.HasSourceFileRecursive())
+            auto subModuleBuildType = subModule.GetBuildType();
+            if (!subModule.HasSourceFileRecursive() && subModuleBuildType != EBuildType::ExternalLibraries
+                && subModuleBuildType != EBuildType::ExternalCMakePorject)
+            {
                 continue;
+            }
 
-            ofs << "add_subdirectory (" << PathToName(subDir.path.c_str())
-                << ")" << endl;
+            ofs << "add_subdirectory (" << PathToName(subModule.path.c_str()) << ")" << endl;
         }
 
         ofs << endl;
@@ -283,8 +286,7 @@ namespace mb
                 if (dependency.empty())
                     continue;
 
-                ofs << "add_dependencies (" << moduleName.c_str() << " "
-                    << dependency << ")" << endl;
+                ofs << "add_dependencies (" << moduleName.c_str() << " " << dependency << ")" << endl;
             }
             ofs << endl;
         }

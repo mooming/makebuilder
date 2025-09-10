@@ -4,31 +4,33 @@
 
 #include "BuildConfig.h"
 #include "Module.h"
-
 #include <string>
 #include <vector>
 
+
 namespace mb
 {
-    class ProjectBuilder final
-    {
-    public:
-        using Modules = std::vector<Module*>;
-        using Paths = std::vector<std::string>;
 
-    public:
-        const BuildConfig config;
-        Module baseModule;
-        Modules modules;
-        Paths includeDirs;
+// This class will create a CMake project with the given root path
+class ProjectBuilder final
+{
+public:
+    using Modules = std::vector<Module*>;
+    using Paths = std::vector<std::string>;
 
-    public:
-        explicit ProjectBuilder(const char* path);
-        ~ProjectBuilder() = default;
+public:
+    const BuildConfig config;
+    Module baseModule;
+    Modules modules;
+    Paths includeDirs;
 
-        void BuildCMakeFiles();
+public:
+    explicit ProjectBuilder(const char* rootPath);
+    ~ProjectBuilder() = default;
 
-    private:
-        bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
-    };
+    void BuildCMakeFiles();
+
+private:
+    bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
+};
 } // namespace Builder
