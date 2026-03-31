@@ -30,4 +30,4 @@ namespace mb
     private:
         void Parse(const char* fileName);
     };
-} // namespace Builder
+} // namespace mb

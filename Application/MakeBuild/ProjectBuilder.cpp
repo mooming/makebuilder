@@ -144,4 +144,4 @@ bool ProjectBuilder::TraverseDirectoryTree(
     return isValidModule;
 }
 
-} // namespace Builder
+} // namespace mb

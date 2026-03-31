@@ -17,7 +17,7 @@ include_directories ( ${CMAKE_SOURCE_DIR}
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
-add_library (Common STATIC 
+add_library (Common STATIC
  Directory.cpp
  OSAbstractLayer.cpp
  StringUtil.cpp
@@ -32,6 +32,3 @@ include_directories ( /System/Library/Frameworks )
 endif (APPLE)
 
 install (TARGETS Common DESTINATION ${CMAKE_SOURCE_DIR}/lib)
-
-
-
