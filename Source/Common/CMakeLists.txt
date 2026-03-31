@@ -18,13 +18,15 @@ link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
 add_library (Common STATIC
- Directory.cpp
- OSAbstractLayer.cpp
- StringUtil.cpp
- Directory.h
- File.h
- OSAbstractLayer.h
- StringUtil.h
+  ConfigParser.cpp
+  Directory.cpp
+  OSAbstractLayer.cpp
+  StringUtil.cpp
+  ConfigParser.h
+  Directory.h
+  File.h
+  OSAbstractLayer.h
+  StringUtil.h
 )
 
 if (APPLE)

@@ -2,32 +2,32 @@
 
 #pragma once
 
-#include <optional>
+#include "Common/ConfigParser.h"
+
 #include <string>
-#include <unordered_map>
 
 namespace mb
 {
-    class BuildConfig final
-    {
-    public:
-        using TString = std::string;
-        using TValue = std::optional<TString>;
+class BuildConfig final
+{
+public:
+    using TString = std::string;
+    using TValue = ConfigParser::TValue;
 
-        bool isValid;
-        std::unordered_map<TString, TString> keymap;
+private:
+    ConfigParser parser;
 
-    public:
-        explicit BuildConfig(const char* path);
-        BuildConfig(const char* path, const char* fileName);
-        ~BuildConfig() = default;
+public:
+    explicit BuildConfig(const char* path);
+    BuildConfig(const char* path, const char* fileName);
+    ~BuildConfig() = default;
 
-        [[nodiscard]] TValue GetValue(const TString& key) const;
-        [[nodiscard]] TString GetValue(const TString& key, const TString& defaultValue) const;
+    [[nodiscard]] TValue GetValue(const TString& key) const;
+    [[nodiscard]] TString GetValue(const TString& key, const TString& defaultValue) const;
 
-        auto IsValid() const { return isValid; }
+    auto IsValid() const { return parser.IsValid(); }
 
-    private:
-        void Parse(const char* fileName);
-    };
+private:
+    void Load(const char* path);
+};
 } // namespace mb
