@@ -203,7 +203,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
     sort(headerFiles.begin(), headerFiles.end());
     sort(files.begin(), files.end());
 
-    // FIX 2026-03-31: BUG - Source files must be saved to member variables
+    // BUG FIX 2026-03-31: Source files must be saved to member variables
     // Previously, files were categorized into local variables (lines 184-204),
     // but were never copied to this->srcFiles and this->headerFiles.
     // This caused GetSourceFiles() to return empty for modules with .module.config.
