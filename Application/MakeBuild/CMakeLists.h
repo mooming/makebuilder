@@ -8,18 +8,18 @@
 
 namespace mb
 {
-    // This class represents a CMakeLists.txt
-    class CMakeLists final
+    // Generates CMakeLists.txt file for a module
+    class CMakeGenerator final
     {
     private:
         const mb::ProjectBuilder& build;
         const mb::Module& module;
 
     public:
-        CMakeLists(const mb::ProjectBuilder& build, const mb::Module& module);
-        ~CMakeLists() = default;
+        CMakeGenerator(const mb::ProjectBuilder& build, const mb::Module& module);
+        ~CMakeGenerator() = default;
 
-        void Make();
+        void Generate();
         std::string TranslatePath(std::string path);
     };
-} // namespace CMake
+} // namespace mb

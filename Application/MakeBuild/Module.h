@@ -69,13 +69,13 @@ namespace mb
         auto GetBuildType() const { return buildType; }
         auto IsIncludePath() const { return isIncludePath; }
 
-        auto& SrcFileList() const { return srcFiles; }
-        auto& HeaderFileList() const { return headerFiles; }
-        auto& SubModuleList() { return submodules; }
-        auto& SubModuleList() const { return submodules; }
-        auto& DependencyList() const { return dependencies; }
-        auto& LibraryList() const { return libraries; }
-        auto& FrameworkList() const { return frameworks; }
+        auto& GetSourceFiles() const { return srcFiles; }
+        auto& GetHeaderFiles() const { return headerFiles; }
+        auto& GetSubModules() { return submodules; }
+        auto& GetSubModules() const { return submodules; }
+        auto& GetDependencies() const { return dependencies; }
+        auto& GetLibraries() const { return libraries; }
+        auto& GetFrameworks() const { return frameworks; }
         auto& GetPrecompileDefinitions() const
         {
             return precompileDefinitions;
