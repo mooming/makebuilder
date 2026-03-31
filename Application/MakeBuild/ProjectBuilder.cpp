@@ -17,7 +17,7 @@ void GetAllChildrenRecursive(mb::Module& module, mb::ProjectBuilder::Modules& in
 {
     inoutModules.push_back(&module);
 
-    auto& subList = module.SubModuleList();
+    auto& subList = module.GetSubModules();
     for (auto& sub : subList)
     {
         GetAllChildrenRecursive(sub, inoutModules);
@@ -53,7 +53,7 @@ ProjectBuilder::ProjectBuilder(const char* path)
     }
 }
 
-void ProjectBuilder::BuildCMakeFiles()
+void ProjectBuilder::GenerateCMakeFiles()
 {
     for (auto module : modules)
     {
@@ -67,8 +67,8 @@ void ProjectBuilder::BuildCMakeFiles()
             continue;
         }
 
-        CMakeLists cmf(*this, *module);
-        cmf.Make();
+        CMakeGenerator generator(*this, *module);
+        generator.Generate();
     }
 }
 
@@ -96,25 +96,25 @@ bool ProjectBuilder::TraverseDirectoryTree(
         isValidModule = true;
     }
 
-    if (!module.SrcFileList().empty() || !module.HeaderFileList().empty())
+    if (!module.GetSourceFiles().empty() || !module.GetHeaderFiles().empty())
     {
         cout << endl;
         cout << logHeader << "### Module = " << module.path << endl;
 
-        if (!module.SrcFileList().empty())
+        if (!module.GetSourceFiles().empty())
         {
             cout << logHeader << "### Source Files" << endl;
-            for (const auto& element : module.SrcFileList())
+            for (const auto& element : module.GetSourceFiles())
             {
                 cout << logHeader << element << endl;
             }
         }
 
-        if (!module.HeaderFileList().empty())
+        if (!module.GetHeaderFiles().empty())
         {
             cout << endl;
             cout << logHeader << "### Header Files" << endl;
-            for (const auto& element : module.HeaderFileList())
+            for (const auto& element : module.GetHeaderFiles())
             {
                 cout << logHeader << element << endl;
             }
@@ -132,13 +132,13 @@ bool ProjectBuilder::TraverseDirectoryTree(
 
         if (TraverseDirectoryTree(submodule, childLogHeader))
         {
-            auto& submoduleList = module.SubModuleList();
+            auto& submoduleList = module.GetSubModules();
             submoduleList.push_back(submodule);
             isValidModule = true;
         }
     }
 
-    auto& subModules = module.SubModuleList();
+    auto& subModules = module.GetSubModules();
     sort(subModules.begin(), subModules.end());
 
     return isValidModule;

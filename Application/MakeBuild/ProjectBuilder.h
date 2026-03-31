@@ -28,7 +28,7 @@ public:
     explicit ProjectBuilder(const char* rootPath);
     ~ProjectBuilder() = default;
 
-    void BuildCMakeFiles();
+    void GenerateCMakeFiles();
 
 private:
     bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
