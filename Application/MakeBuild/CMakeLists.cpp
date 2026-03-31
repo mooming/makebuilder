@@ -160,7 +160,7 @@ namespace mb
         {
             auto subModuleBuildType = subModule.GetBuildType();
             if (!subModule.HasSourceFileRecursive() && subModuleBuildType != EBuildType::ExternalLibraries
-                && subModuleBuildType != EBuildType::ExternalCMakePorject)
+                && subModuleBuildType != EBuildType::ExternalCMakeProject)
             {
                 continue;
             }
