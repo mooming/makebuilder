@@ -84,6 +84,7 @@ Located in each module directory. Defines module-specific settings.
 | `name` | Module identifier (defaults to directory name if not set) |
 | `buildType` | Module type (see below) |
 | `precompileDefinitions` | Module-specific definitions |
+| `optimizeLevel` | Optimization level override (0-3, e.g., "3" for -O3) |
 
 **Note:** Directories without `.module.config` are now automatically detected if they contain header files (auto-detected as `HeaderOnly`) or source files.
 

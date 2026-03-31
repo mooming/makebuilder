@@ -31,31 +31,42 @@ namespace
                     os << "if (OPENGL_FOUND)" << endl;
                     os << "include_directories (${OPENGL_INCLUDE_DIR})" << endl;
                     os << "target_link_libraries (" << projName
-                       << " ${OPENGL_gl_LIBRARY})" << endl;
-                    os << "endif (OPENGL_FOUND)" << endl << endl;
-
-                    os << "if (OPENGL_GLU_FOUND)" << endl;
-                    os << "target_link_libraries (" << projName
-                       << " ${OPENGL_glu_LIBRARY})" << endl;
-                    os << "endif (OPENGL_GLU_FOUND)" << endl << endl;
-
-                    continue;
+                       << " ${OPENGL_LIBRARIES})" << endl;
+                    os << "endif ()" << endl << endl;
                 }
+                else if (Util::EqualsIgnoreCase(element, "cocoa"))
+                {
+                    os << "find_package (Cocoa)" << endl << endl;
 
-                string libName = element;
-                libName.append("_LIBRARY");
+                    os << "if (COCOA_FOUND)" << endl;
+                    os << "include_directories (${COCOA_INCLUDE_DIR})" << endl;
+                    os << "target_link_libraries (" << projName
+                       << " ${COCOA_LIBRARIES})" << endl;
+                    os << "endif ()" << endl << endl;
+                }
+                else
+                {
+                    os << "find_package (" << element << ")" << endl << endl;
 
-                os << "find_library(" << libName << " " << element << ")"
-                   << endl
-                   << endl;
-                os << "if (" << libName << ")" << endl;
-                os << "target_link_libraries (" << projName << " ${"
-                   << libName << "})" << endl;
-                os << "endif (" << libName << ")" << endl << endl;
+                    os << "if (" << element << "_FOUND)" << endl;
+                    os << "target_link_libraries (" << projName << " "
+                       << element << ")" << endl;
+                    os << "endif ()" << endl << endl;
+                }
             }
         }
     }
-} // namespace
+
+    void AddOptimizeLevel(
+        ostream& os, const string& projName, const string& optimizeLevel)
+    {
+        if (optimizeLevel.empty())
+            return;
+
+        os << "target_compile_options (" << projName << " PRIVATE -O"
+           << optimizeLevel << ")" << endl;
+    }
+} // anonymous namespace
 
 namespace mb
 {
@@ -199,6 +210,7 @@ namespace mb
             ofs << ")" << endl << endl;
 
             AddFrameworks(ofs, moduleName, module.GetFrameworks());
+            AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
 
             ofs << "install (TARGETS " << moduleName << " DESTINATION "
                 << basePath << "/bin)" << endl;
@@ -221,6 +233,7 @@ namespace mb
             ofs << ")" << endl << endl;
 
             AddFrameworks(ofs, moduleName, module.GetFrameworks());
+            AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
 
             ofs << "install (TARGETS " << moduleName << " DESTINATION "
                 << basePath << "/lib)" << endl;
@@ -242,6 +255,7 @@ namespace mb
             ofs << ")" << endl << endl;
 
             AddFrameworks(ofs, moduleName, module.GetFrameworks());
+            AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
 
             ofs << "install (TARGETS " << moduleName << " DESTINATION "
                 << basePath << "/bin)" << endl;
