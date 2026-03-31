@@ -14,6 +14,13 @@
 - Allow users to define custom build type templates
 - Support for custom compiler flags per build type
 
+### 4. Multi-Configuration Build Support
+- Generate executables for debug, dev, and release configurations
+- debug: debug symbols, no optimization
+- dev: optimized with debug information (-O1 or -O2 with -g)
+- release: full optimization, no debug symbols
+- Use CMake multi-config generator support (--config flag)
+
 ## Medium Priority
 
 ### 4. Visual Project Viewer

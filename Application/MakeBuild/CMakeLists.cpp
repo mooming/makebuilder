@@ -91,6 +91,17 @@ namespace mb
         ofs << "project (" << moduleName << ")" << endl;
         ofs << endl;
 
+        ofs << "set (CMAKE_CONFIGURATION_TYPES \"Debug;Dev;Release\" CACHE STRING \"\" FORCE)"
+            << endl;
+        ofs << "if (NOT CMAKE_BUILD_TYPE)" << endl;
+        ofs << "    set (CMAKE_BUILD_TYPE \"Release\" CACHE STRING \"Build type\" FORCE)" << endl;
+        ofs << "endif ()" << endl;
+        ofs << endl;
+        ofs << "set (CMAKE_CXX_FLAGS_DEBUG \"${CMAKE_CXX_FLAGS_DEBUG} -g -O0\")" << endl;
+        ofs << "set (CMAKE_CXX_FLAGS_DEV \"${CMAKE_CXX_FLAGS_DEBUG} -O1\")" << endl;
+        ofs << "set (CMAKE_CXX_FLAGS_RELEASE \"${CMAKE_CXX_FLAGS_RELEASE} -O3\")" << endl;
+        ofs << endl;
+
         auto cxxStandard = buildConfig.GetValue("cxxStandard", "17");
         ofs << "set (CMAKE_CXX_STANDARD " << cxxStandard << ")" << endl;
         ofs << endl;
