@@ -3,6 +3,7 @@
 #include "ProjectBuilder.h"
 
 #include "CMakeLists.h"
+#include "../Common/StringUtil.h"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -143,6 +144,14 @@ bool ProjectBuilder::TraverseDirectoryTree(
     bool hasValidSubmodules = false;
     for (const auto& subDirectory : module.DirList())
     {
+        // Check if this subdirectory should be ignored based on module config
+        auto subDirName = Util::PathToName(subDirectory.path.c_str());
+        if (module.ShouldIgnoreSubdirectory(subDirName))
+        {
+            cout << logHeader << "[Ignore] " << subDirectory.path << " (ignored by parent config)" << endl;
+            continue;
+        }
+
         Module submodule(&module, subDirectory);
         string childLogHeader = logHeader;
         childLogHeader.append("  ");

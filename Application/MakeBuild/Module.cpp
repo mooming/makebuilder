@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace OS;
@@ -177,6 +178,23 @@ Module::Module(const Module* parent, const OS::Directory& dir)
 
     precompileDefinitions = config.GetValue("precompileDefinitions", "");
     optimizeLevel = config.GetValue("optimizeLevel", "");
+
+    {
+        auto ignoreDirs = config.GetValue("ignoreSubdirectories", "");
+        if (!ignoreDirs.empty())
+        {
+            std::istringstream ss(ignoreDirs);
+            std::string dir;
+            while (std::getline(ss, dir, ','))
+            {
+                if (!dir.empty())
+                {
+                    ignoreSubdirectories.push_back(dir);
+                    cout << "[Module] ignoreSubdirectory = " << dir << endl;
+                }
+            }
+        }
+    }
 
     if (!optimizeLevel.empty())
     {
@@ -360,5 +378,15 @@ void Module::Sort()
     SortVector(dependencies);
     SortVector(libraries);
     SortVector(frameworks);
+}
+
+bool Module::ShouldIgnoreSubdirectory(const TString& dirName) const
+{
+    for (const auto& ignored : ignoreSubdirectories)
+    {
+        if (dirName == ignored)
+            return true;
+    }
+    return false;
 }
 } // namespace mb

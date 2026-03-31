@@ -62,9 +62,8 @@ endif (APPLE)
 install (TARGETS makebuild DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
-target_link_libraries (makebuild Common Common)
+target_link_libraries (makebuild Common)
 
-add_dependencies (makebuild Common)
 add_dependencies (makebuild Common)
 
 

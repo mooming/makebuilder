@@ -49,6 +49,7 @@ namespace mb
         Strings frameworks;
         TString precompileDefinitions;
         TString optimizeLevel;
+        Strings ignoreSubdirectories;
 
         EBuildType buildType;
         bool isIncludePath;
@@ -82,6 +83,8 @@ namespace mb
             return precompileDefinitions;
         }
         auto& GetOptimizeLevel() const { return optimizeLevel; }
+        auto& GetIgnoreSubdirectories() const { return ignoreSubdirectories; }
+        bool ShouldIgnoreSubdirectory(const TString& dirName) const;
 
     private:
         void BuildLists(const OS::Files& files);
