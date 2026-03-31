@@ -176,6 +176,12 @@ Module::Module(const Module* parent, const OS::Directory& dir)
     }
 
     precompileDefinitions = config.GetValue("precompileDefinitions", "");
+    optimizeLevel = config.GetValue("optimizeLevel", "");
+
+    if (!optimizeLevel.empty())
+    {
+        cout << "[Module] optimizeLevel = " << optimizeLevel << endl;
+    }
 
     for (const auto& file : FileList())
     {
