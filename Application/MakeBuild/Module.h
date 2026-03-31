@@ -43,7 +43,6 @@ namespace mb
 
         OS::Files srcFiles;
         OS::Files headerFiles;
-        const Module* parentModule;
         Modules submodules;
         Strings dependencies;
         Strings libraries;
@@ -83,9 +82,8 @@ namespace mb
         }
 
     private:
-        void BuildCMakeModule();
         void BuildLists(const OS::Files& files);
         void LoadList(const char* filePath, Strings& list);
         void Sort();
     };
-} // namespace Builder
+} // namespace mb

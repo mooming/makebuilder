@@ -20,29 +20,11 @@ namespace OS
         {
         }
 
-        File(const File& src)
-            : path(src.path)
-        {
-        }
+        File(const File& src) = default;
+        File(File&& src) noexcept = default;
 
-        File(File&& src)
-            : path(std::move(src.path))
-        {
-        }
-
-        File& operator=(const File& src)
-        {
-            path = src.path;
-
-            return *this;
-        }
-
-        File& operator=(File&& src)
-        {
-            path = std::move(src.path);
-
-            return *this;
-        }
+        File& operator=(const File& src) = default;
+        File& operator=(File&& src) noexcept = default;
 
         bool operator<(const File& rhs) const { return path < rhs.path; }
 

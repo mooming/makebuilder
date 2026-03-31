@@ -33,4 +33,4 @@ public:
 private:
     bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
 };
-} // namespace Builder
+} // namespace mb
