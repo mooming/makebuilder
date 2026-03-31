@@ -79,6 +79,8 @@ bool ProjectBuilder::TraverseDirectoryTree(
     if (module.GetBuildType() == EBuildType::Ignored)
         return false;
 
+    // Fixed 2026-03-31: Previously had misleading indentation (extra 4 spaces).
+    // With -Werror -Wmisleading-indentation, this would fail to compile.
     if (module.GetBuildType() == EBuildType::ExternalCMakeProject)
         return true;
 
