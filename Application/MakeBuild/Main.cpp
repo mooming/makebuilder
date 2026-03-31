@@ -76,10 +76,26 @@ int main(int argc, const char* argv[])
             std::string testDir = argv[1];
             std::string mbuildPath = OS::GetFullPath(argv[0]).c_str();
 
+            // Try to find a built makebuild in build directory
             size_t pos = mbuildPath.rfind("/build/");
             if (pos != std::string::npos)
             {
-                mbuildPath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/Release/makebuild";
+                std::string releasePath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/Release/makebuild";
+                std::string debugPath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/Debug/makebuild";
+                std::string rootBuildPath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/makebuild";
+
+                if (OS::IsDirectory((releasePath + "/..").c_str()))
+                {
+                    mbuildPath = releasePath;
+                }
+                else if (OS::IsDirectory((debugPath + "/..").c_str()))
+                {
+                    mbuildPath = debugPath;
+                }
+                else if (OS::IsDirectory((rootBuildPath + "/..").c_str()))
+                {
+                    mbuildPath = rootBuildPath;
+                }
             }
 
             std::string baseDir = OS::GetFullPath(argv[1]).c_str();
