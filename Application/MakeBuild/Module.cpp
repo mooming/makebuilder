@@ -16,7 +16,7 @@ const string& BuildTypeToString(EBuildType type)
 {
     constexpr auto arraySize = static_cast<size_t>(EBuildType::Max);
     static array<string, arraySize> strings{"None", "Ignored", "HeaderOnly", "Executable",
-        "StaticLibrary", "SharedLibrary", "ExternalLibraries"};
+        "StaticLibrary", "SharedLibrary", "ExternalLibraries", "ExternalCMakeProject"};
 
     const size_t index = static_cast<uint8_t>(type);
     if (index > arraySize || index < 0)
@@ -73,7 +73,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
         {
             if (Util::EqualsIgnoreCase(file.GetPath(), "CMakeLists.txt"))
             {
-                buildType = EBuildType::ExternalCMakePorject;
+                buildType = EBuildType::ExternalCMakeProject;
                 moduleName = path;
                 break;
             }

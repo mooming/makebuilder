@@ -4,6 +4,7 @@
 
 #include "OSAbstractLayer.h"
 #include <algorithm>
+#include <cctype>
 
 using namespace std;
 
@@ -29,29 +30,22 @@ namespace Util
 
     string TrimPath(string path)
     {
-        char tmp[PATH_MAX + 1];
-        auto cStr = path.c_str();
-        for (size_t i = 0; i < path.length(); ++i)
+        const size_t len = path.length();
+        string result;
+        result.reserve(len);
+
+        for (size_t i = 0; i < len; ++i)
         {
-            if (cStr[i] == '\\')
-            {
-                tmp[i] = '/';
-            }
-            else
-            {
-                tmp[i] = cStr[i];
-            }
+            char ch = path[i];
+            result += (ch == '\\') ? '/' : ch;
         }
 
-        if (path.length() > 2 && tmp[path.length() - 2] != '.' &&
-            tmp[path.length() - 1] == '/')
+        if (len > 2 && result[len - 1] == '/' && result[len - 2] != '.')
         {
-            tmp[path.length() - 1] = '\0';
+            result.pop_back();
         }
 
-        tmp[path.length()] = '\0';
-
-        return string(tmp);
+        return result;
     }
 
     string ToLowerCase(string src)

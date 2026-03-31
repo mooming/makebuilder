@@ -1,0 +1,63 @@
+================================================================================
+REVIEW NOTE - Source/Common Directory
+================================================================================
+Date: 2026-03-31
+Reviewer: Agent Review
+
+SUMMARY:
+Shared library providing OS abstraction and utility functions. Contains cross-
+platform support for directory traversal, file operations, and string utilities.
+
+FILES REVIEWED:
+- CMakeLists.txt (37 lines)
+- .module.config (3 lines)
+- Directory.h (31 lines)
+- Directory.cpp (39 lines)
+- File.h (60 lines)
+- OSAbstractLayer.h (29 lines)
+- OSAbstractLayer.cpp (135 lines)
+- StringUtil.h (19 lines)
+- StringUtil.cpp (133 lines)
+- include.txt (marker file for include path)
+
+OBSERVATIONS:
+
+[POSITIVE]
+1. Excellent cross-platform abstraction in OSAbstractLayer
+2. Clean separation: Directory (container), File (representation), OS (operations)
+3. Proper use of namespace OS for OS operations, Util for utilities
+4. Good use of const correctness
+5. PATH_MAX handling across platforms
+6. Proper use of std::string in File class with move semantics
+7. Good use of friend function for ostream operator<<
+8. Proper nullptr check in realpath usage
+
+[ISSUES - CRITICAL]
+1. PATH_MAX may not be defined on some POSIX systems - should include <climits> or <limits.h>
+2. OSAbstractLayer.h defines PATH_MAX for Windows but uses it on POSIX (StringUtil.cpp:32)
+3. Potential buffer overflow in StringUtil::TrimPath if path length > PATH_MAX
+4. The File class manually implements copy/move operators - could use =default
+
+[ISSUES - MINOR]
+1. Trailing empty lines in CMakeLists.txt (lines 35-37)
+2. Inconsistent comment style: some use full line comments, others trailing
+3. TrimPath implementation assumes PATH_MAX is available on all platforms
+4. Missing <algorithm> include in some files (relies on transitive includes)
+
+[RECOMMENDATIONS]
+1. Fix PATH_MAX issue - use dynamic allocation or proper platform detection
+2. Consider using std::filesystem (C++17) if available instead of custom implementation
+3. Mark File class copy/move operations as =default
+4. Remove trailing empty lines from CMakeLists.txt
+5. Add <cctype> include for isspace() in StringUtil.cpp
+6. Consider using std::isspace with locale for proper Unicode handling
+7. The Trim function could use std::string_view for better performance
+8. Add unit tests for StringUtil functions
+
+[CROSS-PLATFORM NOTES]
+The OSAbstractLayer correctly handles:
+- Windows: GetFullPathNameA, GetFileAttributesA, FindFirstFileA
+- POSIX: realpath, opendir/readdir/closedir
+- Path separator normalization (backslash to forward slash)
+
+================================================================================

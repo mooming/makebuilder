@@ -1,0 +1,32 @@
+================================================================================
+REVIEW NOTE - Scripts Directory
+================================================================================
+Date: 2026-03-31
+Reviewer: Agent Review
+
+SUMMARY:
+Contains build/development scripts for the project.
+
+FILES REVIEWED:
+- RunFormatter.sh (3 lines)
+
+OBSERVATIONS:
+
+[POSITIVE]
+1. Simple, focused script for code formatting
+2. Uses clang-format -i for in-place formatting
+
+[ISSUES]
+1. Script assumes it's run from Scripts/ directory (relative paths ../)
+2. Hardcoded directory names (Common, MakeBuild)
+3. No error checking/validation
+4. Uses older POSIX shell (#!/bin/sh) - could use bash for better portability
+
+[RECOMMENDATIONS]
+1. Add error checking (set -e or check exit codes)
+2. Add --help option or usage information
+3. Consider using find with -maxdepth to avoid recursion issues
+4. Make paths absolute or relative to script location
+5. Add shebang #!/bin/bash for bash features
+6. Consider adding other useful scripts (build, clean, test if tests added)
+================================================================================

@@ -18,7 +18,7 @@ namespace mb
         StaticLibrary,
         SharedLibrary,
         ExternalLibraries,
-        ExternalCMakePorject,
+        ExternalCMakeProject,
         Max
     };
 
