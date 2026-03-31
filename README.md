@@ -16,7 +16,7 @@ MakeBuilder scans your project's directory structure and automatically generates
 
 2. **Run on your project:**
    ```bash
-   ./Application/MakeBuild/makebuild /path/to/your/project
+   ./build/Application/MakeBuild/makebuild /path/to/your/project
    ```
 
 3. **Build your project:**
@@ -24,6 +24,21 @@ MakeBuilder scans your project's directory structure and automatically generates
    cmake -B build -S .
    cmake --build build
    ```
+
+## New Features (v1.0.2)
+
+### Dependency Graph Output
+Generate a DOT-formatted dependency graph for visualization:
+```bash
+./build/Application/MakeBuild/makebuild --graph /path/to/project
+```
+Use Graphviz to convert to image:
+```bash
+dot -Tpng graph.dot -o graph.png
+```
+
+### Header-Only Auto-Detection
+Directories with header files (`.h`, `.hpp`, `.inl`) but no source files (`.c`, `.cpp`) are automatically detected as `HeaderOnly` modules - no `.module.config` required!
 
 ## Configuration Files
 
@@ -49,7 +64,7 @@ Located in each module directory. Defines module-specific settings.
 | `buildType` | Module type (see below) |
 | `precompileDefinitions` | Module-specific definitions |
 
-**Note:** Each module directory MUST have a `.module.config` file to be recognized as a module. Directories without this file are ignored.
+**Note:** Directories without `.module.config` are now automatically detected if they contain header files (auto-detected as `HeaderOnly`) or source files.
 
 ### Build Types
 
@@ -57,7 +72,7 @@ Located in each module directory. Defines module-specific settings.
 |------|-------------|
 | `None` | Not a module, but may contain valid submodules |
 | `Ignored` | Skip this directory |
-| `HeaderOnly` | Header files only (no compilation) |
+| `HeaderOnly` | Header files only (no compilation) - auto-detected if no .module.config |
 | `Executable` | Produces an executable |
 | `StaticLibrary` | Static library (.a/.lib) |
 | `SharedLibrary` | Shared library (.so/.dll) |
@@ -99,7 +114,7 @@ MakeBuilder automatically detects source and header files:
 - **Source files**: `.c`, `.cpp`
 - **Header files**: `.h`, `.hpp`, `.inl`
 
-If a module has only header files and no explicit buildType, it defaults to `HeaderOnly`.
+If a module has only header files and no `.module.config`, it is automatically classified as `HeaderOnly`.
 
 ## Requirements
 
