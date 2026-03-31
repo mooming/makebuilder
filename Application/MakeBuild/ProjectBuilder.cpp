@@ -96,7 +96,16 @@ bool ProjectBuilder::TraverseDirectoryTree(
         isValidModule = true;
     }
 
-    if (!module.GetSourceFiles().empty() || !module.GetHeaderFiles().empty())
+    // Always traverse children to find nested modules (including HeaderOnly)
+    // regardless of whether this module has source files
+
+    // FIX 2026-03-31: Support HeaderOnly modules in traversal
+    // Previously, modules were only considered valid if they had source or header files.
+    // Now we also consider HeaderOnly modules as valid, allowing them to be processed
+    // and have their submodules discovered correctly.
+    bool hasHeaderOrSource = !module.GetSourceFiles().empty() || !module.GetHeaderFiles().empty();
+    
+    if (hasHeaderOrSource || module.GetBuildType() == EBuildType::HeaderOnly)
     {
         cout << endl;
         cout << logHeader << "### Module = " << module.path << endl;
@@ -123,7 +132,15 @@ bool ProjectBuilder::TraverseDirectoryTree(
         isValidModule = true;
     }
 
-    // Iterate all children
+    // For HeaderOnly modules that may not have source files but are explicitly marked
+    if (module.GetBuildType() == EBuildType::HeaderOnly)
+    {
+        isValidModule = true;
+    }
+
+    // Always check for child modules - even if this module has no source files,
+    // it may contain valid submodules (e.g., HeaderOnly directories)
+    bool hasValidSubmodules = false;
     for (const auto& subDirectory : module.DirList())
     {
         Module submodule(&module, subDirectory);
@@ -134,8 +151,13 @@ bool ProjectBuilder::TraverseDirectoryTree(
         {
             auto& submoduleList = module.GetSubModules();
             submoduleList.push_back(submodule);
-            isValidModule = true;
+            hasValidSubmodules = true;
         }
+    }
+
+    if (hasValidSubmodules)
+    {
+        isValidModule = true;
     }
 
     auto& subModules = module.GetSubModules();

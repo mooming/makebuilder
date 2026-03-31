@@ -12,24 +12,34 @@ int main(int argc, const char* argv[])
 
     if (argc < 2)
     {
-        cout << "MakeBuild 1.0.2" << endl;
+        cout << "MakeBuild 1.0.3" << endl;
         cout << "Directory-based meta-build system" << endl;
         cout << "Automatically generates CMakeLists.txt files" << endl << endl;
 
-        cout << "Usage: mbuild <projects_root_path>" << endl << endl;
+        cout << "Usage: mbuild <projects_root_path> [options]" << endl << endl;
+
+        cout << "Options:" << endl;
+        cout << "  --graph <output.dot>  Generate DOT dependency graph" << endl << endl;
+
+        cout << "== New Features (v1.0.3) ==" << endl;
+        cout << "* Dependency Graph: Generate visual dependency graphs" << endl;
+        cout << "* Header-Only Auto-Detect: Directories with headers but no .module.config" << endl;
+        cout << "  are automatically detected as HeaderOnly modules" << endl << endl;
 
         cout << "== Project Configuration ==" << endl;
         cout << "Place .project.config in the project root directory." << endl << endl;
 
         cout << "  .project.config options:" << endl;
         cout << "    requiredCMakeVersion = <version>   (default: 3.12)" << endl;
-        cout << "    cxxStandard = <standard>            (default: 23)" << endl;
+        cout << "    cxxStandard = <standard>            (default: 17)" << endl;
         cout << "    compileOptions = <options>         (default: -Wall -Werror)" << endl;
-        cout << "    msvcCompileOptions = <options>     (default: /W4 /WX)" << endl;
+        cout << "    msvcCompileOptions = <options>     (default: /W3 /WX)" << endl;
         cout << "    precompileDefinitions = <defs>     (optional)" << endl << endl;
 
         cout << "== Module Configuration ==" << endl;
-        cout << "Place .module.config in each module directory." << endl << endl;
+        cout << "Place .module.config in each module directory." << endl;
+        cout << "NOTE: Directories without .module.config containing only header files" << endl;
+        cout << "      are automatically detected as HeaderOnly modules." << endl << endl;
 
         cout << "  .module.config options:" << endl;
         cout << "    name = \"ModuleName\"                (module identifier)" << endl;
@@ -39,7 +49,7 @@ int main(int argc, const char* argv[])
         cout << "  Build types:" << endl;
         cout << "    None           - Not a module, but may contain modules" << endl;
         cout << "    Ignored         - Skip this directory" << endl;
-        cout << "    HeaderOnly     - Header files only" << endl;
+        cout << "    HeaderOnly     - Header files only (auto-detected without .module.config)" << endl;
         cout << "    Executable      - Produces executable" << endl;
         cout << "    StaticLibrary   - Static library (.a/.lib)" << endl;
         cout << "    SharedLibrary   - Shared library (.so/.dll)" << endl;

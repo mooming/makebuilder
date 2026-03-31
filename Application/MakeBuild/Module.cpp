@@ -83,9 +83,74 @@ Module::Module(const Module* parent, const OS::Directory& dir)
         return;
     }
 
-    if (!config.IsValid())
+    // FIX 2026-03-31: Early file categorization to support HeaderOnly auto-detection
+    // Previously, files were categorized only after config was validated.
+    // Now we categorize files first so we can auto-detect HeaderOnly modules
+    // even when no .module.config exists.
+    OS::Files allFiles = FileList();
+    OS::Files srcFiles;
+    OS::Files headerFiles;
+    OS::Files otherFiles;
+
+    for (const auto& file : allFiles)
+    {
+        using namespace Util;
+        const auto& filename = file.GetPath();
+
+        if (EndsWith(ToLowerCase(filename), ".c") ||
+            EndsWith(ToLowerCase(filename), ".cpp"))
+        {
+            srcFiles.push_back(file);
+        }
+        else if (EndsWith(ToLowerCase(filename), ".h") ||
+            EndsWith(ToLowerCase(filename), ".hpp") ||
+            EndsWith(ToLowerCase(filename), ".inl"))
+        {
+            headerFiles.push_back(file);
+        }
+        else
+        {
+            otherFiles.push_back(file);
+        }
+    }
+
+    sort(srcFiles.begin(), srcFiles.end());
+    sort(headerFiles.begin(), headerFiles.end());
+    sort(otherFiles.begin(), otherFiles.end());
+
+    bool hasValidConfig = config.IsValid();
+    bool hasSourceFiles = !srcFiles.empty();
+    bool hasHeaderFiles = !headerFiles.empty();
+    Files files = std::move(otherFiles);
+
+    if (!hasValidConfig && !hasSourceFiles && !hasHeaderFiles)
     {
         buildType = EBuildType::Ignored;
+        return;
+    }
+
+    // FIX 2026-03-31: Auto-detect HeaderOnly modules without .module.config
+    // If no config file exists but directory has header files and no source files,
+    // automatically classify as HeaderOnly. This allows header-only libraries
+    // to work without explicit configuration.
+    if (!hasValidConfig)
+    {
+        buildType = EBuildType::None;
+        moduleName = Util::PathToName(path);
+        cout << "[Module] Auto-detected: " << path << endl;
+        cout << "[Module] Name = " << moduleName << " (from path)" << endl;
+
+        if (hasHeaderFiles && !hasSourceFiles)
+        {
+            buildType = EBuildType::HeaderOnly;
+            cout << "[Module] Auto-detected type: HeaderOnly (no source files)" << endl;
+        }
+
+        this->srcFiles = std::move(srcFiles);
+        this->headerFiles = std::move(headerFiles);
+
+        BuildLists(otherFiles);
+        Sort();
         return;
     }
 
@@ -114,7 +179,6 @@ Module::Module(const Module* parent, const OS::Directory& dir)
 
     precompileDefinitions = config.GetValue("precompileDefinitions", "");
 
-    Files files;
     for (const auto& file : FileList())
     {
         using namespace Util;
