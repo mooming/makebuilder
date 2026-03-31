@@ -48,6 +48,7 @@ namespace mb
         Strings libraries;
         Strings frameworks;
         TString precompileDefinitions;
+        TString optimizeLevel;
 
         EBuildType buildType;
         bool isIncludePath;
@@ -80,6 +81,7 @@ namespace mb
         {
             return precompileDefinitions;
         }
+        auto& GetOptimizeLevel() const { return optimizeLevel; }
 
     private:
         void BuildLists(const OS::Files& files);
