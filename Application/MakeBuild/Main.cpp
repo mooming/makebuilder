@@ -12,31 +12,44 @@ int main(int argc, const char* argv[])
 
     if (argc < 2)
     {
-        cout << "MakeBuild 1.0.1" << endl;
-        cout << "Directory based meta-build system" << endl;
-        cout << "Helping write CMakeLists.txt" << endl << endl;
-        cout << "Usage: mbuild <projects root path>" << endl << endl;
+        cout << "MakeBuild 1.0.2" << endl;
+        cout << "Directory-based meta-build system" << endl;
+        cout << "Automatically generates CMakeLists.txt files" << endl << endl;
 
-        cout << "== .txt Specifiers ==" << endl;
-        cout << "Each directory is processed as a single module." << endl;
-        cout << "Place following .txt files in a directory. It describes a characteristic of the module." << endl;
-        cout << "CMake projects will follow parent's build type." << endl;
-        cout << "[.module.config] : It denotes the directory is a module. This file should contains these." << endl;
-        cout << "name = \"Module Name\"" << endl;
-        cout << "buildType = \"buildType\"";
-        cout << " (Available Option: Ignored, HeaderOnly, Executable, StaticLibrary, SharedLibrary, ExternalLibs)" << endl;
-        cout << " [None] This directory is not a module but it can contain valid modules. " << endl;
-        cout << " [Ignored] This directory will be ignored." << endl;
-        cout << " [HeaderOnly] A module consists of header files only" << endl;
-        cout << " [Executable] A module which creates an executable" << endl;
-        cout << " [StaticLibrary] A static library module" << endl;
-        cout << " [SharedLibrary] A dynamic(or shared) library module" << endl;
-        cout << " [ExternalLibraries] This module contains external libraries. It'll be added to include paths." << endl;
-        cout << "precompileDefinitions = DEFINITION0, DEFINITION1, ..." << endl << endl;
-        cout << "[include.txt] : This directory should be set as an include path of itself and children." << endl;
-        cout << "[dependencies.txt] : Each line in this file defines a module dependency." << endl;
-        cout << "[libraries.txt] : Each line denotes a library name" << endl;
-        cout << endl;
+        cout << "Usage: mbuild <projects_root_path>" << endl << endl;
+
+        cout << "== Project Configuration ==" << endl;
+        cout << "Place .project.config in the project root directory." << endl << endl;
+
+        cout << "  .project.config options:" << endl;
+        cout << "    requiredCMakeVersion = <version>   (default: 3.12)" << endl;
+        cout << "    cxxStandard = <standard>            (default: 23)" << endl;
+        cout << "    compileOptions = <options>         (default: -Wall -Werror)" << endl;
+        cout << "    msvcCompileOptions = <options>     (default: /W4 /WX)" << endl;
+        cout << "    precompileDefinitions = <defs>     (optional)" << endl << endl;
+
+        cout << "== Module Configuration ==" << endl;
+        cout << "Place .module.config in each module directory." << endl << endl;
+
+        cout << "  .module.config options:" << endl;
+        cout << "    name = \"ModuleName\"                (module identifier)" << endl;
+        cout << "    buildType = <type>                 (see below)" << endl;
+        cout << "    precompileDefinitions = <defs>     (optional)" << endl << endl;
+
+        cout << "  Build types:" << endl;
+        cout << "    None           - Not a module, but may contain modules" << endl;
+        cout << "    Ignored         - Skip this directory" << endl;
+        cout << "    HeaderOnly     - Header files only" << endl;
+        cout << "    Executable      - Produces executable" << endl;
+        cout << "    StaticLibrary   - Static library (.a/.lib)" << endl;
+        cout << "    SharedLibrary   - Shared library (.so/.dll)" << endl;
+        cout << "    ExternalLibraries - External library directory" << endl << endl;
+
+        cout << "== Module Specifier Files ==" << endl;
+        cout << "  include.txt         - Add directory to include paths" << endl;
+        cout << "  dependencies.txt    - List module dependencies (one per line)" << endl;
+        cout << "  libraries.txt       - List required libraries (one per line)" << endl;
+        cout << "  frameworks.txt     - List required frameworks (macOS only)" << endl;
 
         return 0;
     }
@@ -45,7 +58,7 @@ int main(int argc, const char* argv[])
     build.GenerateCMakeFiles();
 
     cout << endl;
-    cout << "Have a nice day!" << endl;
+    cout << "Done! Run 'cmake -B build -S . && cmake --build build' to build." << endl;
     cout << endl;
 
     return 0;
