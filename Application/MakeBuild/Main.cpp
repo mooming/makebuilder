@@ -82,7 +82,7 @@ int main(int argc, const char* argv[])
             }
 
             std::string baseDir = OS::GetFullPath(argv[1]).c_str();
-            std::string testPath = baseDir + "/Test/testcases";
+            std::string testPath = baseDir + "/TestCases";
 
             cout << "[Test] Running tests from: " << testPath.c_str() << endl;
             cout << "[Test] Using mbuild: " << mbuildPath.c_str() << endl;

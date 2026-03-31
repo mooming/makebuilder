@@ -60,7 +60,7 @@ bool TestRunner::RunTests(const TString& testDir, const TString& mbuildPath, con
         results.push_back(result);
     }
 
-    TString resultsPath = testDir + "/TestResults.txt";
+    TString resultsPath = "TestResults.txt";
     WriteResults(resultsPath, results);
 
     int passed = 0;

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (03_header_only)
+project (TestProject)
 
 set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
 if (NOT CMAKE_BUILD_TYPE)
@@ -21,13 +21,10 @@ endif (MSVC)
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
  )
-add_subdirectory (build)
+link_directories (${CMAKE_SOURCE_DIR}/lib)
 
-add_library (03_header_only INTERFACE)
-target_sources (03_header_only INTERFACE 
- headerlib.h
- headerlib.h
-)
+add_subdirectory (src)
+
 
 
 

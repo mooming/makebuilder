@@ -154,12 +154,12 @@ MakeBuilder includes a built-in test runner that validates the build system func
 ```
 
 This command:
-1. Scans the `Test/testcases/` directory
+1. Scans the `TestCases/` directory
 2. For each test case:
    - Runs makebuild to generate CMakeLists.txt files
    - Configures the project with CMake using Ninja Multi-Config
    - Builds the project in Release mode
-3. Writes results to `Test/testcases/TestResults.txt`
+3. Writes results to `TestResults.txt` in the project root
 
 ### Test Cases
 

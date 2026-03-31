@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (TestProject)
+project (AppWithLib)
 
 set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
 if (NOT CMAKE_BUILD_TYPE)
@@ -23,9 +23,17 @@ include_directories ( ${CMAKE_SOURCE_DIR}
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
-add_subdirectory (src)
-add_subdirectory (build)
 
+add_executable (AppWithLib
+ main.cpp
+ main.cpp
+)
+
+if (APPLE)
+include_directories ( /System/Library/Frameworks )
+endif (APPLE)
+
+install (TARGETS AppWithLib DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
 
