@@ -328,8 +328,24 @@ void Module::LoadList(const char* filePath, Strings& list)
 
         if (!line.empty())
         {
-            cout << "Element: " << line << endl;
-            list.push_back(line);
+            // Check for duplicates before adding to the list.
+            // This prevents the same dependency from being added multiple times
+            // if the list file is accidentally loaded multiple times.
+            bool isDuplicate = false;
+            for (const auto& existing : list)
+            {
+                if (existing == line)
+                {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (!isDuplicate)
+            {
+                cout << "Element: " << line << endl;
+                list.push_back(line);
+            }
         }
 
         if (ifs.eof())
