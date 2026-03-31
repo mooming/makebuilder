@@ -1,0 +1,38 @@
+# Bug Report: Source Files Not Saved to Member Variables
+
+**Date:** 2026-03-31
+**Status:** In Progress
+
+## Description
+
+When a module has a `.module.config` file, the source files are categorized but NOT saved to the member variables `srcFiles` and `headerFiles`. This causes the module to appear empty in subsequent traversal, leading to incorrect behavior.
+
+## Steps to Reproduce
+
+1. Create a project with subdirectories containing source files
+2. Add `.module.config` to subdirectories
+3. Run makebuild
+4. Observe that submodules are not discovered correctly
+
+## Root Cause
+
+In `Module.cpp`, the `Module` constructor:
+1. Early categorizes files into local variables `srcFiles`, `headerFiles`, `otherFiles` (lines 90-115)
+2. Checks if config is valid (line 121)
+3. If config is valid, enters the block at line 159
+4. **BUG**: In this block, files are re-categorized using `FileList()` into local variables again (lines 184-204), but these are ALSO local variables
+5. The original `srcFiles` and `headerFiles` from lines 91-92 are NEVER copied to `this->srcFiles` and `this->headerFiles`
+
+## Expected Behavior
+
+- After constructor completes, `GetSourceFiles()` should return the module's source files
+- Currently returns empty when module has `.module.config`
+
+## Fix
+
+Add lines to save srcFiles and headerFiles to member variables after the re-categorization loop (around line 204):
+
+```cpp
+this->srcFiles = srcFiles;
+this->headerFiles = headerFiles;
+```
