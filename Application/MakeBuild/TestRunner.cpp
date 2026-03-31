@@ -1,7 +1,10 @@
+// Created by mooming.go@gmail.com 2016
 // TestRunner.cpp
 // Runs test cases and updates TestResults.txt
 
 #include "TestRunner.h"
+#include "OSAbstractLayer.h"
+#include "StringUtil.h"
 
 #include "OSAbstractLayer.h"
 #include "StringUtil.h"
