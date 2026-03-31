@@ -28,6 +28,10 @@ namespace Util
         return string(start, end + 1);
     }
 
+    // Converts backslashes to forward slashes and removes trailing slash.
+    // Previously used a fixed-size buffer (char tmp[PATH_MAX + 1]) which could
+    // overflow if the path length exceeded PATH_MAX. Fixed 2026-03-31 by using
+    // dynamic string operations to safely handle arbitrarily long paths.
     string TrimPath(string path)
     {
         const size_t len = path.length();

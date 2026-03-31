@@ -15,6 +15,8 @@ namespace mb
 const string& BuildTypeToString(EBuildType type)
 {
     constexpr auto arraySize = static_cast<size_t>(EBuildType::Max);
+    // Array must match EBuildType enum order exactly.
+    // Note: ExternalCMakeProject added at end (was missing before fix 2026-03-31).
     static array<string, arraySize> strings{"None", "Ignored", "HeaderOnly", "Executable",
         "StaticLibrary", "SharedLibrary", "ExternalLibraries", "ExternalCMakeProject"};
 

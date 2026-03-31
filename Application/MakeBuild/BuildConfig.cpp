@@ -63,6 +63,10 @@ namespace mb
 
         cout << "[ConfigFile] Open " << filePath << endl;
 
+        // Use getline() return value instead of ifs.eof() to detect end-of-file.
+        // The while(!ifs.eof()) pattern is an anti-pattern because eof() only
+        // returns true AFTER getline() fails to read, potentially processing
+        // the last line twice. Fixed 2026-03-31.
         string line;
         while (getline(ifs, line))
         {

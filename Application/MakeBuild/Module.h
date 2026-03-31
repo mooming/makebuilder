@@ -18,6 +18,9 @@ namespace mb
         StaticLibrary,
         SharedLibrary,
         ExternalLibraries,
+        // ExternalCMakeProject: Marks a directory containing an existing CMake project
+        // that should not have its CMakeLists.txt overwritten by this tool.
+        // Previously had a typo: "ExternalCMakePorject" (fixed 2026-03-31)
         ExternalCMakeProject,
         Max
     };
