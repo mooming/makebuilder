@@ -68,7 +68,9 @@ int main(int argc, const char* argv[])
     build.GenerateCMakeFiles();
 
     cout << endl;
-    cout << "Done! Run 'cmake -B build -S . && cmake --build build' to build." << endl;
+    cout << "Done! Run 'cmake -B build -G \"Ninja Multi-Config\" -S . && cmake --build build --config Debug' to build Debug." << endl;
+    cout << "       'cmake --build build --config Dev' for Dev (optimized with debug info)" << endl;
+    cout << "       'cmake --build build --config Release' for Release (full optimization)" << endl;
     cout << endl;
 
     return 0;
