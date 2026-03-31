@@ -61,7 +61,7 @@ void ProjectBuilder::BuildCMakeFiles()
 
         using namespace mb;
         const auto moduleBuildType = module->GetBuildType();
-        if (moduleBuildType == EBuildType::ExternalCMakePorject)
+        if (moduleBuildType == EBuildType::ExternalCMakeProject)
         {
             cout << "[CMake] Skip creating CMakeLists.txt of Module = " << module->GetName().c_str() << endl;
             continue;
@@ -79,7 +79,7 @@ bool ProjectBuilder::TraverseDirectoryTree(
     if (module.GetBuildType() == EBuildType::Ignored)
         return false;
 
-    if (module.GetBuildType() == EBuildType::ExternalCMakePorject)
+        if (module.GetBuildType() == EBuildType::ExternalCMakeProject)
         return true;
 
     if (module.IsIncludePath())

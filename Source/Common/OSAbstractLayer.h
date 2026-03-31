@@ -18,6 +18,10 @@
 
 #ifdef POSIX
 #include <dirent.h>
+#include <climits>
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 #endif // POSIX
 
 namespace OS

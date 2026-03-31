@@ -63,10 +63,9 @@ namespace mb
 
         cout << "[ConfigFile] Open " << filePath << endl;
 
-        while (!ifs.eof())
+        string line;
+        while (getline(ifs, line))
         {
-            string line;
-            getline(ifs, line);
 
             using TKeyValue = pair<string, string>;
             auto ParseLine = [&line]() -> TKeyValue {
