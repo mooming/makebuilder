@@ -181,6 +181,13 @@ namespace mb
         for (const auto& subModule : module.GetSubModules())
         {
             auto subModuleBuildType = subModule.GetBuildType();
+            // Include HeaderOnly modules as subdirectories (they have headers but no source files)
+            if (subModuleBuildType == EBuildType::HeaderOnly)
+            {
+                ofs << "add_subdirectory (" << PathToName(subModule.path.c_str()) << ")" << endl;
+                continue;
+            }
+
             if (!subModule.HasSourceFileRecursive() && subModuleBuildType != EBuildType::ExternalLibraries
                 && subModuleBuildType != EBuildType::ExternalCMakeProject)
             {
@@ -217,27 +224,46 @@ namespace mb
             break;
 
         case EBuildType::StaticLibrary:
-            ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
-            ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
+        {
+            bool hasSrcFiles = !module.GetSourceFiles().empty();
+            bool hasHeaderFiles = !module.GetHeaderFiles().empty();
 
-            for (const auto& element : module.GetSourceFiles())
+            // If no source files but has headers, create INTERFACE library (header-only)
+            if (!hasSrcFiles && hasHeaderFiles)
             {
-                ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+                ofs << "add_library (" << moduleName.c_str() << " INTERFACE)" << endl;
+                ofs << "target_sources (" << moduleName << " INTERFACE" << endl;
+                for (const auto& element : module.GetHeaderFiles())
+                {
+                    ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+                }
+                ofs << ")" << endl << endl;
             }
-
-            for (const auto& element : module.GetHeaderFiles())
+            else
             {
-                ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+                ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
+                ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
+
+                for (const auto& element : module.GetSourceFiles())
+                {
+                    ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+                }
+
+                for (const auto& element : module.GetHeaderFiles())
+                {
+                    ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+                }
+
+                ofs << ")" << endl << endl;
+
+                AddFrameworks(ofs, moduleName, module.GetFrameworks());
+                AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
+
+                ofs << "install (TARGETS " << moduleName << " DESTINATION "
+                    << basePath << "/lib)" << endl;
             }
-
-            ofs << ")" << endl << endl;
-
-            AddFrameworks(ofs, moduleName, module.GetFrameworks());
-            AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
-
-            ofs << "install (TARGETS " << moduleName << " DESTINATION "
-                << basePath << "/lib)" << endl;
             break;
+        }
 
         case EBuildType::SharedLibrary:
             ofs << "add_library (" << moduleName.c_str() << " SHARED " << endl;
