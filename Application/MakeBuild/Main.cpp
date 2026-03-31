@@ -13,17 +13,19 @@ int main(int argc, const char* argv[])
 {
     using namespace std;
 
+    constexpr const char* version = "1.0.3";
+
     if (argc < 2)
     {
-        cout << "MakeBuild 1.0.3" << endl;
+        cout << "MakeBuild v" << version << endl;
         cout << "Directory-based meta-build system" << endl;
         cout << "Automatically generates CMakeLists.txt files" << endl << endl;
 
         cout << "Usage: mbuild <projects_root_path> [options]" << endl << endl;
 
         cout << "Options:" << endl;
-        cout << "  --test-run          Run test cases from Test directory" << endl;
         cout << "  --graph <output.dot>  Generate DOT dependency graph" << endl << endl;
+        cout << "  --test-run          Run test cases from TestCases directory (DEBUG)" << endl;
 
         cout << "== New Features (v1.0.3) ==" << endl;
         cout << "* Dependency Graph: Generate visual dependency graphs" << endl;
@@ -64,7 +66,7 @@ int main(int argc, const char* argv[])
         cout << "  include.txt         - Add directory to include paths" << endl;
         cout << "  dependencies.txt    - List module dependencies (one per line)" << endl;
         cout << "  libraries.txt       - List required libraries (one per line)" << endl;
-        cout << "  frameworks.txt     - List required frameworks (macOS only)" << endl;
+        cout << "  frameworks.txt     - List required frameworks (macOS only)" << endl << endl;
 
         return 0;
     }
@@ -75,37 +77,12 @@ int main(int argc, const char* argv[])
         if (strcmp(argv[i], "--test-run") == 0)
         {
             std::string testDir = argv[1];
-            std::string mbuildPath = OS::GetFullPath(argv[0]).c_str();
-
-            // Try to find a built makebuild in build directory
-            size_t pos = mbuildPath.rfind("/build/");
-            if (pos != std::string::npos)
-            {
-                std::string releasePath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/Release/makebuild";
-                std::string debugPath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/Debug/makebuild";
-                std::string rootBuildPath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/makebuild";
-
-                if (OS::IsDirectory((releasePath + "/..").c_str()))
-                {
-                    mbuildPath = releasePath;
-                }
-                else if (OS::IsDirectory((debugPath + "/..").c_str()))
-                {
-                    mbuildPath = debugPath;
-                }
-                else if (OS::IsDirectory((rootBuildPath + "/..").c_str()))
-                {
-                    mbuildPath = rootBuildPath;
-                }
-            }
-
-            std::string baseDir = OS::GetFullPath(argv[1]).c_str();
+            std::string baseDir = OS::GetFullPath(argv[1]);
             std::string testPath = baseDir + "/TestCases";
 
             cout << "[Test] Running tests from: " << testPath.c_str() << endl;
-            cout << "[Test] Using mbuild: " << mbuildPath.c_str() << endl;
 
-            bool success = mb::TestRunner::RunTests(testPath, mbuildPath, "build");
+            bool success = mb::TestRunner::RunTests(testPath, "build");
 
             return success ? 0 : 1;
         }
