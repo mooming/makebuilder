@@ -76,20 +76,50 @@ void DependencyGraph::PrintToConsole() const
 
 void DependencyGraph::AddModuleNode(string& output, const Module& module) const
 {
-    auto label = GetModuleLabel(module);
+    const auto& name = module.GetName();
     auto style = GetNodeStyle(module.GetBuildType());
 
-    output += "  \"" + module.GetName() + "\" [label=\"" + label + "\", " + style
-              + "];\n";
+    string cleanName = name;
+    if (!cleanName.empty() && cleanName.front() == '"')
+        cleanName.erase(0, 1);
+    if (!cleanName.empty() && cleanName.back() == '"')
+        cleanName.pop_back();
+
+    output += "  \"";
+    output += cleanName;
+    output += "\" [label=\"";
+    output += cleanName;
+    output += "\\n(";
+    output += BuildTypeToString(module.GetBuildType());
+    output += ")\", ";
+    output += style;
+    output += "];\n";
 }
 
 void DependencyGraph::AddDependencyEdges(
     string& output, const Module& module) const
 {
     const auto& deps = module.GetDependencies();
+    const auto& fromName = module.GetName();
+    string cleanFrom = fromName;
+    if (!cleanFrom.empty() && cleanFrom.front() == '"')
+        cleanFrom.erase(0, 1);
+    if (!cleanFrom.empty() && cleanFrom.back() == '"')
+        cleanFrom.pop_back();
+
     for (const auto& dep : deps)
     {
-        output += "  \"" + module.GetName() + "\" -> \"" + dep + "\";\n";
+        string cleanDep = dep;
+        if (!cleanDep.empty() && cleanDep.front() == '"')
+            cleanDep.erase(0, 1);
+        if (!cleanDep.empty() && cleanDep.back() == '"')
+            cleanDep.pop_back();
+
+        output += "  \"";
+        output += cleanFrom;
+        output += "\" -> \"";
+        output += cleanDep;
+        output += "\";\n";
     }
 }
 

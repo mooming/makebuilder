@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "ProjectBuilder.h"
+#include "DependencyGraph.h"
 #include "OSAbstractLayer.h"
 #include "TestRunner.h"
 
@@ -90,6 +91,30 @@ int main(int argc, const char* argv[])
             bool success = mb::TestRunner::RunTests(testPath, mbuildPath, "build");
 
             return success ? 0 : 1;
+        }
+    }
+
+    // Check for --graph option
+    for (int i = 1; i < argc; ++i)
+    {
+        if (strcmp(argv[i], "--graph") == 0)
+        {
+            if (i + 1 >= argc)
+            {
+                cerr << "Error: --graph requires an output file path" << endl;
+                return 1;
+            }
+
+            const char* outputPath = argv[i + 1];
+
+            mb::ProjectBuilder build(OS::GetFullPath(argv[1]).c_str());
+            build.GenerateCMakeFiles();
+
+            mb::DependencyGraph graph(build);
+            graph.PrintToConsole();
+            graph.GenerateDotFile(outputPath);
+
+            return 0;
         }
     }
 
