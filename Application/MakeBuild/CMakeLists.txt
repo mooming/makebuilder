@@ -1,6 +1,15 @@
 cmake_minimum_required (VERSION 3.12)
 project (makebuild)
 
+set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
+if (NOT CMAKE_BUILD_TYPE)
+    set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+endif ()
+
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+set (CMAKE_CXX_FLAGS_DEV "${CMAKE_CXX_FLAGS_DEBUG} -O1")
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
 set (CMAKE_CXX_STANDARD 23)
 
 if (MSVC)
@@ -18,19 +27,32 @@ link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
 add_executable (makebuild
-  BuildConfig.cpp
-  CMakeLists.cpp
-  DependencyGraph.cpp
-  Main.cpp
-  Module.cpp
-  ProjectBuilder.cpp
-  TestRunner.cpp
-  BuildConfig.h
-  CMakeLists.h
-  DependencyGraph.h
-  Module.h
-  ProjectBuilder.h
-  TestRunner.h
+ BuildConfig.cpp
+ BuildConfig.cpp
+ CMakeLists.cpp
+ CMakeLists.cpp
+ DependencyGraph.cpp
+ DependencyGraph.cpp
+ Main.cpp
+ Main.cpp
+ Module.cpp
+ Module.cpp
+ ProjectBuilder.cpp
+ ProjectBuilder.cpp
+ TestRunner.cpp
+ TestRunner.cpp
+ BuildConfig.h
+ BuildConfig.h
+ CMakeLists.h
+ CMakeLists.h
+ DependencyGraph.h
+ DependencyGraph.h
+ Module.h
+ Module.h
+ ProjectBuilder.h
+ ProjectBuilder.h
+ TestRunner.h
+ TestRunner.h
 )
 
 if (APPLE)
@@ -40,6 +62,9 @@ endif (APPLE)
 install (TARGETS makebuild DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
-target_link_libraries (makebuild Common)
+target_link_libraries (makebuild Common Common)
 
 add_dependencies (makebuild Common)
+add_dependencies (makebuild Common)
+
+

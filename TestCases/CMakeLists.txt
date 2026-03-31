@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (SimpleApp)
+project (TestCases)
 
 set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
 if (NOT CMAKE_BUILD_TYPE)
@@ -25,17 +25,11 @@ include_directories ( ${CMAKE_SOURCE_DIR}
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
+add_subdirectory (03_header_only)
+add_subdirectory (04_multi_config)
+add_subdirectory (05_submodules)
+add_subdirectory (01_simple_executable)
 
-add_executable (SimpleApp
- main.cpp
- main.cpp
-)
-
-if (APPLE)
-include_directories ( /System/Library/Frameworks )
-endif (APPLE)
-
-install (TARGETS SimpleApp DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
 
