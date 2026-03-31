@@ -156,8 +156,8 @@ Module::Module(const Module* parent, const OS::Directory& dir)
             }
         }
 
-        if (buildType != EBuildType::Ignored && SrcFileList().empty() &&
-            !HeaderFileList().empty())
+        if (buildType != EBuildType::Ignored && GetSourceFiles().empty() &&
+            !GetHeaderFiles().empty())
         {
             buildType = EBuildType::HeaderOnly;
         }

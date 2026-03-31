@@ -60,13 +60,13 @@ namespace
 namespace mb
 {
 
-    CMakeLists::CMakeLists(const ProjectBuilder& build, const Module& module)
+    CMakeGenerator::CMakeGenerator(const ProjectBuilder& build, const Module& module)
         : build(build),
           module(module)
     {
     }
 
-    void CMakeLists::Make()
+    void CMakeGenerator::Generate()
     {
         const auto& buildConfig = build.config;
         const EBuildType buildType = module.GetBuildType();
@@ -156,7 +156,7 @@ namespace mb
             ofs << endl;
         }
 
-        for (const auto& subModule : module.SubModuleList())
+        for (const auto& subModule : module.GetSubModules())
         {
             auto subModuleBuildType = subModule.GetBuildType();
             if (!subModule.HasSourceFileRecursive() && subModuleBuildType != EBuildType::ExternalLibraries
@@ -175,41 +175,41 @@ namespace mb
         case EBuildType::Executable:
             ofs << "add_executable (" << moduleName.c_str() << endl;
 
-            for (const auto& element : module.SrcFileList())
+            for (const auto& element : module.GetSourceFiles())
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
-            for (const auto& element : module.HeaderFileList())
+            for (const auto& element : module.GetHeaderFiles())
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
             ofs << ")" << endl << endl;
 
-            AddFrameworks(ofs, moduleName, module.FrameworkList());
+            AddFrameworks(ofs, moduleName, module.GetFrameworks());
 
             ofs << "install (TARGETS " << moduleName << " DESTINATION "
                 << basePath << "/bin)" << endl;
             break;
 
         case EBuildType::StaticLibrary:
-			ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
+            ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
             ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
 
-            for (const auto& element : module.SrcFileList())
+            for (const auto& element : module.GetSourceFiles())
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
-            for (const auto& element : module.HeaderFileList())
+            for (const auto& element : module.GetHeaderFiles())
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
             ofs << ")" << endl << endl;
 
-            AddFrameworks(ofs, moduleName, module.FrameworkList());
+            AddFrameworks(ofs, moduleName, module.GetFrameworks());
 
             ofs << "install (TARGETS " << moduleName << " DESTINATION "
                 << basePath << "/lib)" << endl;
@@ -218,19 +218,19 @@ namespace mb
         case EBuildType::SharedLibrary:
             ofs << "add_library (" << moduleName.c_str() << " SHARED " << endl;
 
-            for (const auto& element : module.SrcFileList())
+            for (const auto& element : module.GetSourceFiles())
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
-            for (const auto& element : module.HeaderFileList())
+            for (const auto& element : module.GetHeaderFiles())
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
             ofs << ")" << endl << endl;
 
-            AddFrameworks(ofs, moduleName, module.FrameworkList());
+            AddFrameworks(ofs, moduleName, module.GetFrameworks());
 
             ofs << "install (TARGETS " << moduleName << " DESTINATION "
                 << basePath << "/bin)" << endl;
@@ -242,7 +242,7 @@ namespace mb
             ofs << "target_sources (" << moduleName.c_str() << " INTERFACE "
                 << endl;
 
-            for (const auto& element : module.HeaderFileList())
+            for (const auto& element : module.GetHeaderFiles())
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
@@ -256,8 +256,8 @@ namespace mb
 
         ofs << endl << endl;
 
-        auto& dependencyList = module.DependencyList();
-        auto& libList = module.LibraryList();
+        auto& dependencyList = module.GetDependencies();
+        auto& libList = module.GetLibraries();
 
         if (!dependencyList.empty() || !libList.empty())
         {
@@ -295,7 +295,7 @@ namespace mb
         ofs.close();
     }
 
-    string CMakeLists::TranslatePath(string path)
+    string CMakeGenerator::TranslatePath(string path)
     {
         using namespace Util;
         path = TrimPath(path);
@@ -310,4 +310,4 @@ namespace mb
         return path;
     }
 
-} // namespace CMake
+} // namespace mb

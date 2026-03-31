@@ -42,7 +42,7 @@ int main(int argc, const char* argv[])
     }
 
     mb::ProjectBuilder build(OS::GetFullPath(argv[1]).c_str());
-    build.BuildCMakeFiles();
+    build.GenerateCMakeFiles();
 
     cout << endl;
     cout << "Have a nice day!" << endl;
