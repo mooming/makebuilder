@@ -1,0 +1,12 @@
+digraph MakeBuilder {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  edge [arrowhead=vee];
+
+  "MakeBuilder" [label="MakeBuilder\n(None)", style=filled, fillcolor=white];
+  "Application" [label="Application\n(None)", style=filled, fillcolor=white];
+  "makebuild" [label="makebuild\n(Executable)", style=filled, fillcolor=lightgreen];
+  "Source" [label="Source\n(None)", style=filled, fillcolor=white];
+  "Common" [label="Common\n(StaticLibrary)", style=filled, fillcolor=lightblue];
+  "makebuild" -> "Common";
+}
