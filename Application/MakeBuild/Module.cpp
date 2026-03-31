@@ -64,11 +64,10 @@ Module::Module(const Directory& dir)
 Module::Module(const Module* parent, const OS::Directory& dir)
     : Directory(dir),
       config(dir.path.c_str(), ".module.config"),
-      parentModule(parent),
       buildType(EBuildType::Ignored),
       isIncludePath(false)
 {
-    if (parent != nullptr && parent->buildType == EBuildType::ExternalLibraries)
+    if (parent != nullptr && parent->GetBuildType() == EBuildType::ExternalLibraries)
     {
         auto& files = FileList();
         for (auto& file : files)
@@ -193,42 +192,6 @@ void Module::PrintSubModules(const std::string& header) const
     }
 }
 
-void Module::BuildCMakeModule()
-{
-    cout << "[Module] Open " << path << endl;
-
-    auto name = config.GetValue("name", "");
-    if (!name.empty())
-    {
-        moduleName = name;
-        cout << "[Module] Name = " << name << endl;
-    }
-    else
-    {
-        moduleName = Util::PathToName(path);
-        cout << "[Module] Name set by path = " << moduleName << endl;
-    }
-
-    // Default build type
-    buildType = EBuildType::None;
-
-    // Take parent's build type.
-    auto module = parentModule;
-    while (module != nullptr)
-    {
-        if (module->buildType == EBuildType::Ignored)
-        {
-            buildType = EBuildType::Ignored;
-            break;
-        }
-    }
-
-    if (buildType != EBuildType::Ignored && parentModule != nullptr)
-    {
-        buildType = parentModule->buildType;
-    }
-}
-
 void Module::BuildLists(const Files& files)
 {
     dependencies.clear();
@@ -307,4 +270,4 @@ void Module::Sort()
     SortVector(libraries);
     SortVector(frameworks);
 }
-} // namespace Builder
+} // namespace mb
