@@ -10,22 +10,43 @@ MakeBuilder scans your project's directory structure and automatically generates
 
 1. **Build MakeBuilder:**
    ```bash
-   cmake -B build -S .
-   cmake --build build
+   cmake -B build -G "Ninja Multi-Config" -S .
+   cmake --build build --config Release
    ```
 
 2. **Run on your project:**
    ```bash
-   ./build/Application/MakeBuild/makebuild /path/to/your/project
+   ./build/Application/MakeBuild/Release/makebuild /path/to/your/project
    ```
 
 3. **Build your project:**
    ```bash
-   cmake -B build -S .
-   cmake --build build
+   cmake -B build -G "Ninja Multi-Config" -S .
+   cmake --build build --config Release
    ```
 
-## New Features (v1.0.2)
+## New Features (v1.0.3)
+
+### Multi-Configuration Build Support
+Generate executables for Debug, Dev, and Release configurations:
+```bash
+# Configure with Ninja Multi-Config (cross-platform)
+cmake -B build -G "Ninja Multi-Config" -S .
+
+# Build each configuration
+cmake --build build --config Debug
+cmake --build build --config Dev
+cmake --build build --config Release
+```
+
+**Build Types:**
+| Config | Flags | Use Case |
+|--------|-------|----------|
+| Debug | `-g -O0` | Development with debug symbols |
+| Dev | `-g -O1` | Optimized but with debug info |
+| Release | `-O3` | Full optimization |
+
+**Note:** Requires Ninja (`brew install ninja`). Alternatively, use Xcode generator on macOS: `cmake -B build -G Xcode -S .`
 
 ### Dependency Graph Output
 Generate a DOT-formatted dependency graph for visualization:
