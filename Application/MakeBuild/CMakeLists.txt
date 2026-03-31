@@ -24,11 +24,13 @@ add_executable (makebuild
   Main.cpp
   Module.cpp
   ProjectBuilder.cpp
+  TestRunner.cpp
   BuildConfig.h
   CMakeLists.h
   DependencyGraph.h
   Module.h
   ProjectBuilder.h
+  TestRunner.h
 )
 
 if (APPLE)

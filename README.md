@@ -142,3 +142,53 @@ If a module has only header files and no `.module.config`, it is automatically c
 - CMake 3.12 or higher
 - C++ compatible compiler
 - Tested on macOS, Linux, and Windows
+
+## Testing
+
+MakeBuilder includes a built-in test runner that validates the build system functionality.
+
+### Running Tests
+
+```bash
+./build/Application/MakeBuild/Release/makebuild . --test-run
+```
+
+This command:
+1. Scans the `Test/testcases/` directory
+2. For each test case:
+   - Runs makebuild to generate CMakeLists.txt files
+   - Configures the project with CMake using Ninja Multi-Config
+   - Builds the project in Release mode
+3. Writes results to `Test/testcases/TestResults.txt`
+
+### Test Cases
+
+The test suite includes:
+
+| Test | Description |
+|------|-------------|
+| `01_simple_executable` | Basic executable build |
+| `02_static_library` | Static library build |
+| `03_header_only` | Header-only library auto-detection |
+| `04_multi_config` | Multi-configuration build (Debug/Dev/Release) |
+| `05_submodules` | Multiple submodules with dependencies |
+
+### Test Results
+
+Results are automatically written to `Test/testcases/TestResults.txt` after each test run:
+
+```
+Test Results - 2026-03-31 20:32:51
+================================
+
+Test: 01_simple_executable
+Status: PASSED
+Message: OK
+
+...
+
+================================
+Total: 5
+Passed: 4
+Failed: 1
+```

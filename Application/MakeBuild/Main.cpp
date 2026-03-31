@@ -1,9 +1,11 @@
 // Created by mooming.go@gmail.com 2016
 
 #include <iostream>
+#include <cstring>
 
 #include "ProjectBuilder.h"
 #include "OSAbstractLayer.h"
+#include "TestRunner.h"
 
 
 int main(int argc, const char* argv[])
@@ -19,6 +21,7 @@ int main(int argc, const char* argv[])
         cout << "Usage: mbuild <projects_root_path> [options]" << endl << endl;
 
         cout << "Options:" << endl;
+        cout << "  --test-run          Run test cases from Test directory" << endl;
         cout << "  --graph <output.dot>  Generate DOT dependency graph" << endl << endl;
 
         cout << "== New Features (v1.0.3) ==" << endl;
@@ -62,6 +65,32 @@ int main(int argc, const char* argv[])
         cout << "  frameworks.txt     - List required frameworks (macOS only)" << endl;
 
         return 0;
+    }
+
+    // Check for --test-run option
+    for (int i = 1; i < argc; ++i)
+    {
+        if (strcmp(argv[i], "--test-run") == 0)
+        {
+            std::string testDir = argv[1];
+            std::string mbuildPath = OS::GetFullPath(argv[0]).c_str();
+
+            size_t pos = mbuildPath.rfind("/build/");
+            if (pos != std::string::npos)
+            {
+                mbuildPath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/Release/makebuild";
+            }
+
+            std::string baseDir = OS::GetFullPath(argv[1]).c_str();
+            std::string testPath = baseDir + "/Test/testcases";
+
+            cout << "[Test] Running tests from: " << testPath.c_str() << endl;
+            cout << "[Test] Using mbuild: " << mbuildPath.c_str() << endl;
+
+            bool success = mb::TestRunner::RunTests(testPath, mbuildPath, "build");
+
+            return success ? 0 : 1;
+        }
     }
 
     mb::ProjectBuilder build(OS::GetFullPath(argv[1]).c_str());
