@@ -79,7 +79,7 @@ bool ProjectBuilder::TraverseDirectoryTree(
     if (module.GetBuildType() == EBuildType::Ignored)
         return false;
 
-        if (module.GetBuildType() == EBuildType::ExternalCMakeProject)
+    if (module.GetBuildType() == EBuildType::ExternalCMakeProject)
         return true;
 
     if (module.IsIncludePath())
