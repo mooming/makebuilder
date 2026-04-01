@@ -201,32 +201,6 @@ Module::Module(const Module* parent, const OS::Directory& dir)
         cout << "[Module] optimizeLevel = " << optimizeLevel << endl;
     }
 
-    for (const auto& file : FileList())
-    {
-        using namespace Util;
-        const auto& filename = file.GetPath();
-
-        if (EndsWith(ToLowerCase(filename), ".c") ||
-            EndsWith(ToLowerCase(filename), ".cpp"))
-        {
-            srcFiles.push_back(file);
-        }
-        else if (EndsWith(ToLowerCase(filename), ".h") ||
-            EndsWith(ToLowerCase(filename), ".hpp") ||
-            EndsWith(ToLowerCase(filename), ".inl"))
-        {
-            headerFiles.push_back(file);
-        }
-        else
-        {
-            files.push_back(file);
-        }
-    }
-
-    sort(srcFiles.begin(), srcFiles.end());
-    sort(headerFiles.begin(), headerFiles.end());
-    sort(files.begin(), files.end());
-
     // BUG FIX 2026-03-31: Source files must be saved to member variables
     // Previously, files were categorized into local variables (lines 184-204),
     // but were never copied to this->srcFiles and this->headerFiles.
