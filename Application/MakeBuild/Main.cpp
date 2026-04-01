@@ -21,13 +21,17 @@ int main(int argc, const char* argv[])
         cout << "Directory-based meta-build system" << endl;
         cout << "Automatically generates CMakeLists.txt files" << endl << endl;
 
-        cout << "Usage: mbuild <projects_root_path> [options]" << endl << endl;
+        cout << "Usage: mbuild <projects_root_path> <options>" << endl;
+        cout << "> mbuild <projects_root_path>" << endl;
+        cout << "> mbuild <projects_root_path> --graph <output file name>" << endl;
+        cout << "> mbuild <projects_root_path> --test-run" << endl;
+        cout << endl;
 
         cout << "Options:" << endl;
         cout << "  --graph <output.dot>  Generate DOT dependency graph" << endl << endl;
         cout << "  --test-run          Run test cases from TestCases directory (DEBUG)" << endl;
 
-        cout << "== New Features (v1.0.3) ==" << endl;
+        cout << "== New Features (v" << version << ") ==" << endl;
         cout << "* Dependency Graph: Generate visual dependency graphs" << endl;
         cout << "* Header-Only Auto-Detect: Directories with headers but no .module.config" << endl;
         cout << "  are automatically detected as HeaderOnly modules" << endl << endl;
@@ -66,7 +70,8 @@ int main(int argc, const char* argv[])
         cout << "  include.txt         - Add directory to include paths" << endl;
         cout << "  dependencies.txt    - List module dependencies (one per line)" << endl;
         cout << "  libraries.txt       - List required libraries (one per line)" << endl;
-        cout << "  frameworks.txt     - List required frameworks (macOS only)" << endl << endl;
+        cout << "  frameworks.txt     - List required frameworks (macOS only)" << endl;
+        cout << endl;
 
         return 0;
     }
