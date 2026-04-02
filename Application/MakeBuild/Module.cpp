@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 using namespace std;
 using namespace OS;
@@ -68,9 +67,15 @@ Module::Module(const Module* parent, const OS::Directory& dir)
       buildType(EBuildType::Ignored),
       isIncludePath(false)
 {
+    // FIX 2026-04-03: Handle modules that are children of ExternalLibraries
+    // When a module is inside an ExternalLibraries directory, we need to:
+    // 1. Check if it's an existing CMake project (has CMakeLists.txt)
+    // 2. If not, mark it as None (not Ignored) so it can still be used as a path container
+    // 3. Load includes.txt and libraries.txt from this directory
     if (parent != nullptr && parent->GetBuildType() == EBuildType::ExternalLibraries)
     {
         auto& files = FileList();
+        
         for (auto& file : files)
         {
             if (Util::EqualsIgnoreCase(file.GetPath(), "CMakeLists.txt"))
@@ -81,6 +86,21 @@ Module::Module(const Module* parent, const OS::Directory& dir)
             }
         }
 
+        // FIX 2026-04-03: Children of ExternalLibraries should be None, not Ignored
+        // Previously, modules without .module.config were left as Ignored,
+        // causing them to be skipped when generating add_subdirectory commands.
+        // Now we set them to None so they're recognized as valid path containers.
+        if (buildType == EBuildType::Ignored)
+        {
+            buildType = EBuildType::None;
+            moduleName = Util::PathToName(path);
+        }
+
+        // FIX 2026-04-03: Load includes.txt and libraries.txt for ExternalLibrary children
+        // This allows the parent ExternalLibraries module to collect include paths
+        // and external libraries from its child directories.
+        BuildLists(files);
+        Sort();
         return;
     }
 
@@ -179,27 +199,36 @@ Module::Module(const Module* parent, const OS::Directory& dir)
     precompileDefinitions = config.GetValue("precompileDefinitions", "");
     optimizeLevel = config.GetValue("optimizeLevel", "");
 
-    {
-        auto ignoreDirs = config.GetValue("ignoreSubdirectories", "");
-        if (!ignoreDirs.empty())
-        {
-            std::istringstream ss(ignoreDirs);
-            std::string dir;
-            while (std::getline(ss, dir, ','))
-            {
-                if (!dir.empty())
-                {
-                    ignoreSubdirectories.push_back(dir);
-                    cout << "[Module] ignoreSubdirectory = " << dir << endl;
-                }
-            }
-        }
-    }
-
     if (!optimizeLevel.empty())
     {
         cout << "[Module] optimizeLevel = " << optimizeLevel << endl;
     }
+
+    for (const auto& file : FileList())
+    {
+        using namespace Util;
+        const auto& filename = file.GetPath();
+
+        if (EndsWith(ToLowerCase(filename), ".c") ||
+            EndsWith(ToLowerCase(filename), ".cpp"))
+        {
+            srcFiles.push_back(file);
+        }
+        else if (EndsWith(ToLowerCase(filename), ".h") ||
+            EndsWith(ToLowerCase(filename), ".hpp") ||
+            EndsWith(ToLowerCase(filename), ".inl"))
+        {
+            headerFiles.push_back(file);
+        }
+        else
+        {
+            files.push_back(file);
+        }
+    }
+
+    sort(srcFiles.begin(), srcFiles.end());
+    sort(headerFiles.begin(), headerFiles.end());
+    sort(files.begin(), files.end());
 
     // BUG FIX 2026-03-31: Source files must be saved to member variables
     // Previously, files were categorized into local variables (lines 184-204),
@@ -264,12 +293,13 @@ void Module::BuildLists(const Files& files)
     dependencies.clear();
     libraries.clear();
     frameworks.clear();
+    includePaths.clear();
 
     for (const auto& element : files)
     {
         using namespace Util;
 
-        if (EqualsIgnoreCase(element.GetPath(), "dependencies.txt"))
+        if (EqualsIgnoreCase(element.GetPath(), "dependency.txt"))
         {
             string filePath = path;
             filePath.append("/");
@@ -279,7 +309,7 @@ void Module::BuildLists(const Files& files)
             continue;
         }
 
-        if (EqualsIgnoreCase(element.GetPath(), "libraries.txt"))
+        if (EqualsIgnoreCase(element.GetPath(), "library.txt"))
         {
             string filePath = path;
             filePath.append("/");
@@ -289,13 +319,27 @@ void Module::BuildLists(const Files& files)
             continue;
         }
 
-        if (EqualsIgnoreCase(element.GetPath(), "frameworks.txt"))
+        if (EqualsIgnoreCase(element.GetPath(), "framework.txt"))
         {
             string filePath = path;
             filePath.append("/");
             filePath.append(element.GetPath());
 
             LoadList(filePath.c_str(), frameworks);
+            continue;
+        }
+
+        // FIX 2026-04-03: Added support for includes.txt file parsing
+        // This allows ExternalLibraries modules to specify include paths
+        // via an includes.txt file in their directory. The paths are loaded
+        // into includePaths and can be collected by the parent module.
+        if (EqualsIgnoreCase(element.GetPath(), "includes.txt"))
+        {
+            string filePath = path;
+            filePath.append("/");
+            filePath.append(element.GetPath());
+
+            LoadList(filePath.c_str(), includePaths);
             continue;
         }
     }
@@ -352,15 +396,5 @@ void Module::Sort()
     SortVector(dependencies);
     SortVector(libraries);
     SortVector(frameworks);
-}
-
-bool Module::ShouldIgnoreSubdirectory(const TString& dirName) const
-{
-    for (const auto& ignored : ignoreSubdirectories)
-    {
-        if (dirName == ignored)
-            return true;
-    }
-    return false;
 }
 } // namespace mb

@@ -179,9 +179,9 @@ Use `OSAbstractLayer` for cross-platform operations:
 
 ### Module Specifier Files
 - `include.txt` - Directory is an include path
-- `dependencies.txt` - Module dependencies
-- `libraries.txt` - Required libraries
-- `frameworks.txt` - Required frameworks (macOS)
+- `dependency.txt` - Module dependencies
+- `library.txt` - Required libraries
+- `framework.txt` - Required frameworks (macOS)
 
 ## File Structure
 

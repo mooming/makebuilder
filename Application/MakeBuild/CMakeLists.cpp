@@ -178,18 +178,35 @@ namespace mb
             ofs << endl;
         }
 
+        // FIX 2026-04-03: Early return for ExternalLibraries type
+        // ExternalLibraries modules don't need add_subdirectory for their children
+        // because those are just path containers, not actual build targets.
+        // The include paths and libraries are already collected in the parent
+        // via ProjectBuilder and added to include_directories/target_link_libraries.
+        if (buildType == EBuildType::ExternalLibraries)
+        {
+            ofs << endl;
+            ofs.close();
+            return;
+        }
+
         for (const auto& subModule : module.GetSubModules())
         {
             auto subModuleBuildType = subModule.GetBuildType();
-            // Include HeaderOnly modules as subdirectories (they have headers but no source files)
+
+            // FIX 2026-04-03: Skip HeaderOnly modules in add_subdirectory
+            // HeaderOnly modules are interface libraries that don't need to be
+            // built separately - they're included via target_link_libraries.
             if (subModuleBuildType == EBuildType::HeaderOnly)
             {
-                ofs << "add_subdirectory (" << PathToName(subModule.path.c_str()) << ")" << endl;
                 continue;
             }
 
-            if (!subModule.HasSourceFileRecursive() && subModuleBuildType != EBuildType::ExternalLibraries
-                && subModuleBuildType != EBuildType::ExternalCMakeProject)
+            // FIX 2026-04-03: Skip None type submodules when parent is ExternalLibraries
+            // When an ExternalLibraries module has children with None build type
+            // (e.g., subdirectories without .module.config), we should skip them
+            // because they're just path containers, not actual build targets.
+            if (subModuleBuildType == EBuildType::None && buildType == EBuildType::ExternalLibraries)
             {
                 continue;
             }
@@ -224,46 +241,27 @@ namespace mb
             break;
 
         case EBuildType::StaticLibrary:
-        {
-            bool hasSrcFiles = !module.GetSourceFiles().empty();
-            bool hasHeaderFiles = !module.GetHeaderFiles().empty();
+            ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
+            ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
 
-            // If no source files but has headers, create INTERFACE library (header-only)
-            if (!hasSrcFiles && hasHeaderFiles)
+            for (const auto& element : module.GetSourceFiles())
             {
-                ofs << "add_library (" << moduleName.c_str() << " INTERFACE)" << endl;
-                ofs << "target_sources (" << moduleName << " INTERFACE" << endl;
-                for (const auto& element : module.GetHeaderFiles())
-                {
-                    ofs << " " << PathToName(element.GetPath().c_str()) << endl;
-                }
-                ofs << ")" << endl << endl;
+                ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
-            else
+
+            for (const auto& element : module.GetHeaderFiles())
             {
-                ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
-                ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
-
-                for (const auto& element : module.GetSourceFiles())
-                {
-                    ofs << " " << PathToName(element.GetPath().c_str()) << endl;
-                }
-
-                for (const auto& element : module.GetHeaderFiles())
-                {
-                    ofs << " " << PathToName(element.GetPath().c_str()) << endl;
-                }
-
-                ofs << ")" << endl << endl;
-
-                AddFrameworks(ofs, moduleName, module.GetFrameworks());
-                AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
-
-                ofs << "install (TARGETS " << moduleName << " DESTINATION "
-                    << basePath << "/lib)" << endl;
+                ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
+
+            ofs << ")" << endl << endl;
+
+            AddFrameworks(ofs, moduleName, module.GetFrameworks());
+            AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
+
+            ofs << "install (TARGETS " << moduleName << " DESTINATION "
+                << basePath << "/lib)" << endl;
             break;
-        }
 
         case EBuildType::SharedLibrary:
             ofs << "add_library (" << moduleName.c_str() << " SHARED " << endl;
@@ -309,10 +307,31 @@ namespace mb
 
         auto& dependencyList = module.GetDependencies();
         auto& libList = module.GetLibraries();
+        auto& externalLibs = build.externalLibraries;
 
-        if (!dependencyList.empty() || !libList.empty())
+        // FIX 2026-04-03: Skip target_link_libraries for None type modules
+        // Modules with None build type (e.g., ExternalLibraries children) are just
+        // path containers and shouldn't have target_link_libraries generated.
+        // This prevents CMake errors like "Cannot specify link libraries for target
+        // which is not built by this project."
+        if (buildType == EBuildType::None)
+        {
+            // Don't generate target_link_libraries for placeholder modules
+        }
+        else if (!externalLibs.empty() || !dependencyList.empty() || !libList.empty())
         {
             ofs << "target_link_libraries (" << moduleName;
+
+            // FIX 2026-04-03: Add external libraries first
+            // External libraries come from libraries.txt in ExternalLibraries children.
+            // These are linked to the parent ExternalLibraries module.
+            for (const auto& extLib : externalLibs)
+            {
+                if (extLib.empty())
+                    continue;
+
+                ofs << " " << extLib;
+            }
 
             for (const auto& dependency : dependencyList)
             {
@@ -322,12 +341,15 @@ namespace mb
                 ofs << " " << dependency;
             }
 
-            for (const auto& library : libList)
+            if (buildType != EBuildType::None)
             {
-                if (library.empty())
-                    continue;
+                for (const auto& library : libList)
+                {
+                    if (library.empty())
+                        continue;
 
-                ofs << " " << library;
+                    ofs << " " << library;
+                }
             }
 
             ofs << ")" << endl << endl;

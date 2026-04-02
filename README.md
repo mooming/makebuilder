@@ -108,9 +108,9 @@ Place these optional files in module directories:
 | File | Description |
 |------|-------------|
 | `include.txt` | Add directory to include paths |
-| `dependencies.txt` | Module dependencies (one per line) |
-| `libraries.txt` | Required libraries (one per line) |
-| `frameworks.txt` | Required frameworks (macOS only, e.g., OpenGL) |
+| `dependency.txt` | Module dependencies (one per line) |
+| `library.txt` | Required libraries (one per line) |
+| `framework.txt` | Required frameworks (macOS only, e.g., OpenGL) |
 
 ## Example Project Structure
 
