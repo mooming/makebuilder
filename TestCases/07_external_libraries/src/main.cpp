@@ -1,7 +1,8 @@
 #include <iostream>
+#include "test_sdk.h"
 
 int main()
 {
-    std::cout << "Graph test case" << std::endl;
+    TestSDK::SayHello();
     return 0;
 }

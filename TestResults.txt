@@ -1,4 +1,4 @@
-Test Results - 2026-03-31 23:37:36
+Test Results - 2026-03-31 21:51:38
 ================================
 
 Test: 01_simple_executable
@@ -21,11 +21,7 @@ Test: 05_submodules
 Status: PASSED
 Message: OK
 
-Test: 06_dependency_graph
-Status: PASSED
-Message: OK
-
 ================================
-Total: 6
-Passed: 6
+Total: 5
+Passed: 5
 Failed: 0

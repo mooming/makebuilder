@@ -49,7 +49,11 @@ namespace mb
         Strings frameworks;
         TString precompileDefinitions;
         TString optimizeLevel;
-        Strings ignoreSubdirectories;
+
+        // FIX 2026-04-03: Added includePaths to support includes.txt for ExternalLibraries
+        // When ExternalLibraries module has subdirectories with includes.txt files,
+        // those include paths need to be collected and added to the parent module.
+        Strings includePaths;
 
         EBuildType buildType;
         bool isIncludePath;
@@ -78,13 +82,15 @@ namespace mb
         auto& GetDependencies() const { return dependencies; }
         auto& GetLibraries() const { return libraries; }
         auto& GetFrameworks() const { return frameworks; }
+        
+        // FIX 2026-04-03: Added GetIncludePaths() to expose includePaths
+        // This allows ProjectBuilder to collect include paths from ExternalLibrary children.
+        auto& GetIncludePaths() const { return includePaths; }
         auto& GetPrecompileDefinitions() const
         {
             return precompileDefinitions;
         }
         auto& GetOptimizeLevel() const { return optimizeLevel; }
-        auto& GetIgnoreSubdirectories() const { return ignoreSubdirectories; }
-        bool ShouldIgnoreSubdirectory(const TString& dirName) const;
 
     private:
         void BuildLists(const OS::Files& files);

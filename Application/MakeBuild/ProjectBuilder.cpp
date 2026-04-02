@@ -3,7 +3,6 @@
 #include "ProjectBuilder.h"
 
 #include "CMakeLists.h"
-#include "../Common/StringUtil.h"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -144,14 +143,6 @@ bool ProjectBuilder::TraverseDirectoryTree(
     bool hasValidSubmodules = false;
     for (const auto& subDirectory : module.DirList())
     {
-        // Check if this subdirectory should be ignored based on module config
-        auto subDirName = Util::PathToName(subDirectory.path.c_str());
-        if (module.ShouldIgnoreSubdirectory(subDirName))
-        {
-            cout << logHeader << "[Ignore] " << subDirectory.path << " (ignored by parent config)" << endl;
-            continue;
-        }
-
         Module submodule(&module, subDirectory);
         string childLogHeader = logHeader;
         childLogHeader.append("  ");
@@ -161,6 +152,43 @@ bool ProjectBuilder::TraverseDirectoryTree(
             auto& submoduleList = module.GetSubModules();
             submoduleList.push_back(submodule);
             hasValidSubmodules = true;
+        }
+
+        // FIX 2026-04-03: Collect include paths and libraries from ExternalLibraries children
+        // When traversing an ExternalLibraries module, we need to collect:
+        // 1. Include paths from child directories (via includes.txt)
+        // 2. Library names from child directories (via libraries.txt)
+        // These are collected in the parent module's includeDirs and externalLibraries
+        // to be used when generating the ExternalLibraries CMakeLists.txt.
+        if (module.GetBuildType() == EBuildType::ExternalLibraries)
+        {
+            // Collect include paths from the child module
+            for (const auto& includePath : submodule.GetIncludePaths())
+            {
+                string baseDir = submodule.path;
+                string fullPath = baseDir + "/" + includePath;
+                
+                // Use realpath to resolve relative paths to absolute paths
+                // This ensures CMake include_directories works correctly.
+                char resolvedPath[1024];
+                if (realpath(fullPath.c_str(), resolvedPath) != nullptr)
+                {
+                    includeDirs.push_back(resolvedPath);
+                }
+                else
+                {
+                    includeDirs.push_back(fullPath);
+                }
+                
+                cout << logHeader << "[Include] Added: " << includeDirs.back() << endl;
+            }
+
+            // Collect external library names from the child module
+            for (const auto& lib : submodule.GetLibraries())
+            {
+                externalLibraries.push_back(lib);
+                cout << logHeader << "[Library] External lib: " << lib << endl;
+            }
         }
     }
 

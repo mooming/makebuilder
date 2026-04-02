@@ -13,25 +13,19 @@ int main(int argc, const char* argv[])
 {
     using namespace std;
 
-    constexpr const char* version = "1.0.3";
-
     if (argc < 2)
     {
-        cout << "MakeBuild v" << version << endl;
+        cout << "MakeBuild 1.0.3" << endl;
         cout << "Directory-based meta-build system" << endl;
         cout << "Automatically generates CMakeLists.txt files" << endl << endl;
 
-        cout << "Usage: mbuild <projects_root_path> <options>" << endl;
-        cout << "> mbuild <projects_root_path>" << endl;
-        cout << "> mbuild <projects_root_path> --graph <output file name>" << endl;
-        cout << "> mbuild <projects_root_path> --test-run" << endl;
-        cout << endl;
+        cout << "Usage: mbuild <projects_root_path> [options]" << endl << endl;
 
         cout << "Options:" << endl;
+        cout << "  --test-run          Run test cases from Test directory" << endl;
         cout << "  --graph <output.dot>  Generate DOT dependency graph" << endl << endl;
-        cout << "  --test-run          Run test cases from TestCases directory (DEBUG)" << endl;
 
-        cout << "== New Features (v" << version << ") ==" << endl;
+        cout << "== New Features (v1.0.3) ==" << endl;
         cout << "* Dependency Graph: Generate visual dependency graphs" << endl;
         cout << "* Header-Only Auto-Detect: Directories with headers but no .module.config" << endl;
         cout << "  are automatically detected as HeaderOnly modules" << endl << endl;
@@ -54,8 +48,7 @@ int main(int argc, const char* argv[])
         cout << "  .module.config options:" << endl;
         cout << "    name = \"ModuleName\"                (module identifier)" << endl;
         cout << "    buildType = <type>                 (see below)" << endl;
-        cout << "    precompileDefinitions = <defs>     (optional)" << endl;
-        cout << "    ignoreSubdirectories = <dirs>      (comma-separated dirs to skip)" << endl << endl;
+        cout << "    precompileDefinitions = <defs>     (optional)" << endl << endl;
 
         cout << "  Build types:" << endl;
         cout << "    None           - Not a module, but may contain modules" << endl;
@@ -68,10 +61,9 @@ int main(int argc, const char* argv[])
 
         cout << "== Module Specifier Files ==" << endl;
         cout << "  include.txt         - Add directory to include paths" << endl;
-        cout << "  dependencies.txt    - List module dependencies (one per line)" << endl;
-        cout << "  libraries.txt       - List required libraries (one per line)" << endl;
-        cout << "  frameworks.txt     - List required frameworks (macOS only)" << endl;
-        cout << endl;
+        cout << "  dependency.txt     - List module dependencies (one per line)" << endl;
+        cout << "  library.txt        - List required libraries (one per line)" << endl;
+        cout << "  framework.txt     - List required frameworks (macOS only)" << endl;
 
         return 0;
     }
@@ -82,12 +74,21 @@ int main(int argc, const char* argv[])
         if (strcmp(argv[i], "--test-run") == 0)
         {
             std::string testDir = argv[1];
-            std::string baseDir = OS::GetFullPath(argv[1]);
+            std::string mbuildPath = OS::GetFullPath(argv[0]).c_str();
+
+            size_t pos = mbuildPath.rfind("/build/");
+            if (pos != std::string::npos)
+            {
+                mbuildPath = mbuildPath.substr(0, pos) + "/build/Application/MakeBuild/Release/makebuild";
+            }
+
+            std::string baseDir = OS::GetFullPath(argv[1]).c_str();
             std::string testPath = baseDir + "/TestCases";
 
             cout << "[Test] Running tests from: " << testPath.c_str() << endl;
+            cout << "[Test] Using mbuild: " << mbuildPath.c_str() << endl;
 
-            bool success = mb::TestRunner::RunTests(testPath, "build");
+            bool success = mb::TestRunner::RunTests(testPath, mbuildPath, "build");
 
             return success ? 0 : 1;
         }
