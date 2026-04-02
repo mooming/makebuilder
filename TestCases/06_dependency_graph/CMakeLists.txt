@@ -20,13 +20,14 @@ endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
+ ${CMAKE_SOURCE_DIR}/07_external_libraries
+ ${CMAKE_SOURCE_DIR}/07_external_libraries/external
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 add_subdirectory (build)
 
 add_executable ("DependencyGraphTest"
- main.cpp
  main.cpp
 )
 

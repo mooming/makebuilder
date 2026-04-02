@@ -7,7 +7,6 @@
 #include "StringUtil.h"
 
 #include "OSAbstractLayer.h"
-#include "ProjectBuilder.h"
 #include "StringUtil.h"
 
 #include <algorithm>
@@ -23,7 +22,7 @@ using namespace std;
 namespace mb
 {
 
-bool TestRunner::RunTests(const TString& testDir, const TString& buildDir)
+bool TestRunner::RunTests(const TString& testDir, const TString& mbuildPath, const TString& buildDir)
 {
     cout << "[TestRunner] Running tests from: " << testDir.c_str() << endl;
 
@@ -49,7 +48,7 @@ bool TestRunner::RunTests(const TString& testDir, const TString& buildDir)
         TestResult result;
         result.testName = testName;
 
-        if (RunSingleTest(fullPath, buildDir, result))
+        if (RunSingleTest(fullPath, mbuildPath, buildDir, result))
         {
             result.passed = true;
             result.message = "OK";
@@ -86,14 +85,21 @@ bool TestRunner::RunTests(const TString& testDir, const TString& buildDir)
     return failed == 0;
 }
 
-bool TestRunner::RunSingleTest(const TString& testPath, const TString& buildDir, TestResult& result)
+bool TestRunner::RunSingleTest(const TString& testPath, const TString& mbuildPath, const TString& buildDir, TestResult& result)
 {
-    cout << "[TestRunner] Running : " << testPath.c_str() << endl;
-
-    mb::ProjectBuilder build(testPath.c_str());
-    build.GenerateCMakeFiles();
-
     string output;
+
+    // First run makebuild to generate CMakeLists.txt
+    TString mbuildCmd = "\"" + mbuildPath + "\" \"" + testPath + "\"";
+    cout << "[TestRunner] Running mbuild: " << mbuildCmd.c_str() << endl;
+
+    int mbuildResult = system(mbuildCmd.c_str());
+    if (mbuildResult != 0)
+    {
+        result.message = "makebuild failed with code " + to_string(mbuildResult);
+        return false;
+    }
+
     if (!ConfigureAndBuild(testPath, buildDir, output))
     {
         result.message = "Build failed: " + output;
