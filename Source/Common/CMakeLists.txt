@@ -29,22 +29,13 @@ link_directories (${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 add_library (Common STATIC 
  ConfigParser.cpp
- ConfigParser.cpp
- Directory.cpp
  Directory.cpp
  OSAbstractLayer.cpp
- OSAbstractLayer.cpp
- StringUtil.cpp
  StringUtil.cpp
  ConfigParser.h
- ConfigParser.h
- Directory.h
  Directory.h
  File.h
- File.h
  OSAbstractLayer.h
- OSAbstractLayer.h
- StringUtil.h
  StringUtil.h
 )
 

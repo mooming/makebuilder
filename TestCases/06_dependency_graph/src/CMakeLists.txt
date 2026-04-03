@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (MakeBuilder)
+project ("GraphApp")
 
 set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
 if (NOT CMAKE_BUILD_TYPE)
@@ -22,12 +22,26 @@ include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
  ${CMAKE_SOURCE_DIR}/Source
  ${CMAKE_SOURCE_DIR}/Source/Common
+ ${CMAKE_SOURCE_DIR}/TestCases/06_dependency_graph/src
+ ${CMAKE_SOURCE_DIR}/TestCases/07_external_libraries/TestSDK
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
-add_subdirectory (Application)
-add_subdirectory (Source)
+
+add_executable ("GraphApp"
+ main.cpp
+ main.cpp
+)
+
+if (APPLE)
+include_directories ( /System/Library/Frameworks )
+endif (APPLE)
+
+install (TARGETS "GraphApp" DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
+target_link_libraries ("GraphApp" GraphLib)
+
+add_dependencies ("GraphApp" GraphLib)
 
 

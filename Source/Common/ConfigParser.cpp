@@ -31,7 +31,6 @@ void ConfigParser::Load(const char* dirPath, const char* fileName)
 void ConfigParser::Clear()
 {
     keymap.clear();
-    loadOrder.clear();
     isValid = false;
 }
 
@@ -65,8 +64,7 @@ void ConfigParser::Parse(const char* filePath)
         return;
     }
 
-    cout << "[ConfigParser] Loaded: " << filePath << endl;
-    loadOrder.emplace_back(filePath);
+    cout << "[ConfigParser] Parse: " << filePath << endl;
 
     string line;
     while (getline(ifs, line))

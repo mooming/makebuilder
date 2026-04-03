@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace OS;
@@ -52,6 +53,32 @@ EBuildType ParseBuildTypeStr(const std::string& str)
 
     return buildType;
 }
+
+void ParseList(const char* filePath, Module::Strings& list)
+{
+    ifstream ifs(filePath);
+
+    if (!ifs.is_open())
+    {
+        cerr << "Failed to load list file, " << filePath << "." << endl;
+        abort();
+    }
+
+    while (!ifs.eof())
+    {
+        string line;
+        getline(ifs, line);
+        if (line.empty())
+            continue;
+
+        if (std::find(list.begin(), list.end(), line) != list.end())
+            continue;
+
+        cout << "Element: " << line << " from " << filePath << endl;
+        list.push_back(line);
+    }
+}
+
 } // namespace
 
 Module::Module(const Directory& dir)
@@ -65,16 +92,159 @@ Module::Module(const Module* parent, const OS::Directory& dir)
       buildType(EBuildType::Ignored),
       isIncludePath(false)
 {
-    // FIX 2026-03-31: Early file categorization to support HeaderOnly auto-detection
-    // Previously, files were categorized only after config was validated.
-    // Now we categorize files first so we can auto-detect HeaderOnly modules
-    // even when no .module.config exists.
-    OS::Files allFiles = FileList();
-    OS::Files srcFiles;
-    OS::Files headerFiles;
-    OS::Files otherFiles;
 
-    for (const auto& file : allFiles)
+    CollectFiles();
+
+    bool hasValidConfig = config.IsValid();
+    bool hasSourceFiles = !srcFiles.empty();
+    bool hasHeaderFiles = !headerFiles.empty();
+
+    auto name = config.GetValue("name", "");
+    if (!name.empty())
+    {
+        moduleName = name;
+    }
+    else
+    {
+        moduleName = Util::PathToName(path);
+    }
+
+    if (!hasValidConfig || (!hasSourceFiles && !hasHeaderFiles))
+    {
+        buildType = EBuildType::Ignored;
+        return;
+    }
+
+    {
+        auto buildTypeConfig = config.GetValue("buildType", "None");
+        buildType = ParseBuildTypeStr(buildTypeConfig);
+    }
+
+    precompileDefinitions = config.GetValue("precompileDefinitions", "");
+    optimizeLevel = config.GetValue("optimizeLevel", "");
+
+    {
+        TString value = config.GetValue("ignoreSubdirectories", "");
+        std::istringstream ss(value);
+
+        std::string token;
+        while (std::getline(ss, token, ' '))
+        {
+            ignoredSubdirectories.push_back(token);
+        }
+    }
+
+    if (buildType == EBuildType::ExternalLibrary)
+    {
+        isIncludePath = true;
+    }
+    else
+    {
+        for (const auto& file : otherFiles)
+        {
+            if (Util::EqualsIgnoreCase(file.GetPath(), "include.txt"))
+            {
+                isIncludePath = true;
+                break;
+            }
+        }
+    }
+
+    ParseBuildSpecifiers(otherFiles);
+    Sort();
+}
+
+bool Module::HasSourceFileRecursive() const
+{
+    if (!srcFiles.empty() || !headerFiles.empty())
+        return true;
+
+    for (const auto& subDir : submodules)
+    {
+        if (subDir.HasSourceFileRecursive())
+            return true;
+    }
+
+    return false;
+}
+
+void Module::PrintInfo(const std::string& header) const
+{
+    cout << endl;
+    cout << header << " [ModuleInfo][" << moduleName << "] START ###"<< endl;
+    cout << header << " [ModuleInfo][" << moduleName << "] Path = " << path << ", Build Type = "
+       << BuildTypeToString(buildType).c_str() << endl;
+
+    if (!precompileDefinitions.empty())
+    {
+        cout << header << " [ModuleInfo][" << moduleName << "] Precompile Definitions = " << precompileDefinitions << endl;
+    }
+
+    if (!optimizeLevel.empty())
+    {
+        cout << header << " [ModuleInfo][" << moduleName << "] optimizeLevel = " << optimizeLevel << endl;
+    }
+
+    for (auto& item : dependencies)
+    {
+        std::cout << header << " [ModuleInfo][" << moduleName << "] Dependency: " << item << std::endl;
+    }
+
+    for (auto& item : libraries)
+    {
+        std::cout << header << " [ModuleInfo][" << moduleName << "] Library: " << item << std::endl;
+    }
+
+    for (auto& item : frameworks)
+    {
+        std::cout << header << " [ModuleInfo][" << moduleName << "] Framework: " << item << std::endl;
+    }
+
+    for (auto& item : ignoredSubdirectories)
+    {
+        std::cout << header << " [ModuleInfo][" << moduleName << "] Ignored SubDir: " << item << std::endl;
+    }
+
+    if (!headerFiles.empty())
+    {
+        for (const auto& element : headerFiles)
+        {
+            cout << header << " [ModuleInfo][" << moduleName << "] " << element << endl;
+        }
+    }
+
+    if (!srcFiles.empty())
+    {
+        for (const auto& element : srcFiles)
+        {
+            cout << header << " [ModuleInfo][" << moduleName << "] " << element << endl;
+        }
+    }
+
+    cout << header << " [ModuleInfo][" << moduleName << "] END ###" << endl;
+}
+
+void Module::PrintSubModules(const std::string& header) const
+{
+    cout << "[DIR]" << header << path << endl;
+    for (const auto& subDir : submodules)
+    {
+        auto newHeader = header;
+        newHeader.append(" ");
+        subDir.PrintSubModules(newHeader);
+    }
+}
+
+void Module::CollectFiles()
+{
+    // Clear file containers
+    srcFiles.clear();
+    headerFiles.clear();
+    otherFiles.clear();
+
+    // Classify files
+    auto files = FileList();
+    for (const auto& file : files)
     {
         using namespace Util;
         const auto& filename = file.GetPath();
@@ -96,160 +266,13 @@ Module::Module(const Module* parent, const OS::Directory& dir)
         }
     }
 
+    // Sort all the file containers
     sort(srcFiles.begin(), srcFiles.end());
     sort(headerFiles.begin(), headerFiles.end());
     sort(otherFiles.begin(), otherFiles.end());
-
-    bool hasValidConfig = config.IsValid();
-    bool hasSourceFiles = !srcFiles.empty();
-    bool hasHeaderFiles = !headerFiles.empty();
-    Files files = std::move(otherFiles);
-
-    if (!hasValidConfig && !hasSourceFiles && !hasHeaderFiles)
-    {
-        buildType = EBuildType::Ignored;
-        return;
-    }
-
-    // FIX 2026-03-31: Auto-detect HeaderOnly modules without .module.config
-    // If no config file exists but directory has header files and no source files,
-    // automatically classify as HeaderOnly. This allows header-only libraries
-    // to work without explicit configuration.
-    if (!hasValidConfig)
-    {
-        buildType = EBuildType::None;
-        moduleName = Util::PathToName(path);
-
-        if (hasHeaderFiles && !hasSourceFiles)
-        {
-            buildType = EBuildType::HeaderOnly;
-            cout << "[Module] Auto-detected type: HeaderOnly (no source files)" << endl;
-        }
-
-        this->srcFiles = std::move(srcFiles);
-        this->headerFiles = std::move(headerFiles);
-
-        BuildLists(otherFiles);
-        Sort();
-        return;
-    }
-
-    cout << "[Module] Open " << path << endl;
-
-    auto name = config.GetValue("name", "");
-    if (!name.empty())
-    {
-        moduleName = name;
-        cout << "[Module] Name = " << name << endl;
-    }
-    else
-    {
-        moduleName = Util::PathToName(path);
-        cout << "[Module] Name set by path = " << moduleName << endl;
-    }
-
-    {
-        auto buildTypeConfig = config.GetValue("buildType", "None");
-        buildType = ParseBuildTypeStr(buildTypeConfig);
-
-        cout << "[Module] build type of [" << moduleName
-             << "] = " << BuildTypeToString(buildType).c_str() << " ("
-             << buildTypeConfig << ')' << endl;
-    }
-
-    precompileDefinitions = config.GetValue("precompileDefinitions", "");
-    optimizeLevel = config.GetValue("optimizeLevel", "");
-
-    if (!optimizeLevel.empty())
-    {
-        cout << "[Module] optimizeLevel = " << optimizeLevel << endl;
-    }
-
-    for (const auto& file : FileList())
-    {
-        using namespace Util;
-        const auto& filename = file.GetPath();
-
-        if (EndsWith(ToLowerCase(filename), ".c") ||
-            EndsWith(ToLowerCase(filename), ".cpp"))
-        {
-            srcFiles.push_back(file);
-        }
-        else if (EndsWith(ToLowerCase(filename), ".h") ||
-            EndsWith(ToLowerCase(filename), ".hpp") ||
-            EndsWith(ToLowerCase(filename), ".inl"))
-        {
-            headerFiles.push_back(file);
-        }
-        else
-        {
-            files.push_back(file);
-        }
-    }
-
-    sort(srcFiles.begin(), srcFiles.end());
-    sort(headerFiles.begin(), headerFiles.end());
-    sort(files.begin(), files.end());
-
-    // BUG FIX 2026-03-31: Source files must be saved to member variables
-    // Previously, files were categorized into local variables (lines 184-204),
-    // but were never copied to this->srcFiles and this->headerFiles.
-    // This caused GetSourceFiles() to return empty for modules with .module.config.
-    this->srcFiles = srcFiles;
-    this->headerFiles = headerFiles;
-
-    if (buildType == EBuildType::ExternalLibrary)
-    {
-        isIncludePath = true;
-    }
-    else
-    {
-        for (const auto& file : files)
-        {
-            if (Util::EqualsIgnoreCase(file.GetPath(), "include.txt"))
-            {
-                isIncludePath = true;
-                break;
-            }
-        }
-
-        if (buildType != EBuildType::Ignored && GetSourceFiles().empty() &&
-            !GetHeaderFiles().empty())
-        {
-            buildType = EBuildType::HeaderOnly;
-        }
-    }
-
-    BuildLists(files);
-    Sort();
 }
 
-bool Module::HasSourceFileRecursive() const
-{
-    if (!srcFiles.empty() || !headerFiles.empty())
-        return true;
-
-    for (const auto& subDir : submodules)
-    {
-        if (subDir.HasSourceFileRecursive())
-            return true;
-    }
-
-    return false;
-}
-
-void Module::PrintSubModules(const std::string& header) const
-{
-    cout << "[DIR]" << header << path << endl;
-    for (const auto& subDir : submodules)
-    {
-        auto newHeader = header;
-        newHeader.append(" ");
-        subDir.PrintSubModules(newHeader);
-    }
-}
-
-void Module::BuildLists(const Files& files)
+void Module::ParseBuildSpecifiers(const Files& files)
 {
     dependencies.clear();
     libraries.clear();
@@ -260,13 +283,15 @@ void Module::BuildLists(const Files& files)
     {
         using namespace Util;
 
+        //std::cout << "[Module][" << moduleName << "] Check: " << element.GetPath() << std::endl;
+
         if (EqualsIgnoreCase(element.GetPath(), "dependency.txt"))
         {
             string filePath = path;
             filePath.append("/");
             filePath.append(element.GetPath());
 
-            LoadList(filePath.c_str(), dependencies);
+            ParseList(filePath.c_str(), dependencies);
             continue;
         }
 
@@ -276,7 +301,7 @@ void Module::BuildLists(const Files& files)
             filePath.append("/");
             filePath.append(element.GetPath());
 
-            LoadList(filePath.c_str(), libraries);
+            ParseList(filePath.c_str(), libraries);
             continue;
         }
 
@@ -286,76 +311,32 @@ void Module::BuildLists(const Files& files)
             filePath.append("/");
             filePath.append(element.GetPath());
 
-            LoadList(filePath.c_str(), frameworks);
+            ParseList(filePath.c_str(), frameworks);
             continue;
         }
 
-        // FIX 2026-04-03: Added support for includes.txt file parsing
-        // This allows ExternalLibrary modules to specify include paths
-        // via an includes.txt file in their directory. The paths are loaded
-        // into includePaths and can be collected by the parent module.
-        if (EqualsIgnoreCase(element.GetPath(), "includes.txt"))
+        if (EqualsIgnoreCase(element.GetPath(), "include.txt"))
         {
             string filePath = path;
             filePath.append("/");
             filePath.append(element.GetPath());
 
-            LoadList(filePath.c_str(), includePaths);
+            ParseList(filePath.c_str(), includePaths);
             continue;
         }
     }
 }
 
-void Module::LoadList(const char* filePath, Strings& list)
-{
-    ifstream ifs(filePath);
-
-    if (!ifs.is_open())
-    {
-        cout << "Failed to load list file, " << filePath << "." << endl;
-        abort();
-    }
-
-    cout << "List from " << filePath << endl;
-
-    while (true)
-    {
-        string line;
-        getline(ifs, line);
-
-        if (!line.empty())
-        {
-            // Check for duplicates before adding to the list.
-            // This prevents the same dependency from being added multiple times
-            // if the list file is accidentally loaded multiple times.
-            bool isDuplicate = false;
-            for (const auto& existing : list)
-            {
-                if (existing == line)
-                {
-                    isDuplicate = true;
-                    break;
-                }
-            }
-
-            if (!isDuplicate)
-            {
-                cout << "Element: " << line << endl;
-                list.push_back(line);
-            }
-        }
-
-        if (ifs.eof())
-            break;
-    }
-}
-
 void Module::Sort()
 {
+    //std::cout << "[Module][" << moduleName << "] SORT ###" << std::endl;
+
     auto SortVector = [](auto& v) { sort(v.begin(), v.end()); };
 
     SortVector(dependencies);
     SortVector(libraries);
     SortVector(frameworks);
+    SortVector(ignoredSubdirectories);
 }
+
 } // namespace mb

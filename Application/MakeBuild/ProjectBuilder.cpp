@@ -31,10 +31,9 @@ namespace mb
 
 ProjectBuilder::ProjectBuilder(const char* path)
     : config(path, ".project.config"),
-      baseModule(path),
-      modules()
+      baseModule(path)
 {
-    TraverseDirectoryTree(baseModule, "");
+    TraverseDirectoryTree(baseModule, "=");
     modules.shrink_to_fit();
 
     cout << endl;
@@ -68,6 +67,8 @@ void ProjectBuilder::GenerateCMakeFiles()
 bool ProjectBuilder::TraverseDirectoryTree(
     Module& module, const string& logHeader)
 {
+    module.PrintInfo(logHeader);
+
     if (module.GetBuildType() == EBuildType::Ignored)
         return false;
 
@@ -77,72 +78,45 @@ bool ProjectBuilder::TraverseDirectoryTree(
     }
 
     bool isValidModule = false;
-
     if (module.GetBuildType() == EBuildType::ExternalLibrary)
     {
         isValidModule = true;
     }
 
-    // Always traverse children to find nested modules (including HeaderOnly)
-    // regardless of whether this module has source files
-
-    // FIX 2026-03-31: Support HeaderOnly modules in traversal
-    // Previously, modules were only considered valid if they had source or header files.
-    // Now we also consider HeaderOnly modules as valid, allowing them to be processed
-    // and have their submodules discovered correctly.
     bool hasHeaderOrSource = !module.GetSourceFiles().empty() || !module.GetHeaderFiles().empty();
-    
     if (hasHeaderOrSource || module.GetBuildType() == EBuildType::HeaderOnly)
     {
-        cout << endl;
-        cout << logHeader << "### Module = " << module.path << endl;
-
-        if (!module.GetSourceFiles().empty())
-        {
-            cout << logHeader << "### Source Files" << endl;
-            for (const auto& element : module.GetSourceFiles())
-            {
-                cout << logHeader << element << endl;
-            }
-        }
-
-        if (!module.GetHeaderFiles().empty())
-        {
-            cout << endl;
-            cout << logHeader << "### Header Files" << endl;
-            for (const auto& element : module.GetHeaderFiles())
-            {
-                cout << logHeader << element << endl;
-            }
-        }
-
         isValidModule = true;
     }
 
-    // For HeaderOnly modules that may not have source files but are explicitly marked
-    if (module.GetBuildType() == EBuildType::HeaderOnly)
-    {
-        isValidModule = true;
-    }
-
-    // Always check for child modules - even if this module has no source files,
-    // it may contain valid submodules (e.g., HeaderOnly directories)
-    bool hasValidSubmodules = false;
+    auto& submodules = module.GetSubModules();
     for (const auto& subDirectory : module.DirList())
     {
+        cout << endl;
+        cout << "[" << module.GetName() << "] Visit " << subDirectory.path << endl;
+
         Module submodule(&module, subDirectory);
+        auto& ignoredSubDirs = module.GetIgnoredSubdirectories();
+        auto subModuleName = submodule.GetName();
+
+        if (submodule.GetBuildType() == EBuildType::Ignored
+            || std::find(ignoredSubDirs.begin(), ignoredSubDirs.end(), subModuleName) != ignoredSubDirs.end())
+        {
+            cout << "[" << module.GetName() << "] SKIP: " << subModuleName << endl;
+            continue;
+        }
+
         string childLogHeader = logHeader;
-        childLogHeader.append("  ");
+        childLogHeader.append("=");
 
         if (TraverseDirectoryTree(submodule, childLogHeader))
         {
-            auto& submoduleList = module.GetSubModules();
-            submoduleList.push_back(submodule);
-            hasValidSubmodules = true;
+            submodules.push_back(submodule);
         }
     }
 
-    if (hasValidSubmodules)
+    // A module is valid if it has submodules.
+    if (!submodules.empty())
     {
         isValidModule = true;
     }

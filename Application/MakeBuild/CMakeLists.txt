@@ -28,30 +28,17 @@ link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 add_executable (makebuild
  BuildConfig.cpp
- BuildConfig.cpp
- CMakeLists.cpp
  CMakeLists.cpp
  DependencyGraph.cpp
- DependencyGraph.cpp
- Main.cpp
  Main.cpp
  Module.cpp
- Module.cpp
- ProjectBuilder.cpp
  ProjectBuilder.cpp
  TestRunner.cpp
- TestRunner.cpp
- BuildConfig.h
  BuildConfig.h
  CMakeLists.h
- CMakeLists.h
- DependencyGraph.h
  DependencyGraph.h
  Module.h
- Module.h
  ProjectBuilder.h
- ProjectBuilder.h
- TestRunner.h
  TestRunner.h
 )
 
@@ -62,9 +49,8 @@ endif (APPLE)
 install (TARGETS makebuild DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 
-target_link_libraries (makebuild Common Common)
+target_link_libraries (makebuild Common)
 
-add_dependencies (makebuild Common)
 add_dependencies (makebuild Common)
 
 

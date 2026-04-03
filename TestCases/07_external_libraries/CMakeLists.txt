@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (TestExternalLibs)
+project (07_external_libraries)
 
 set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
 if (NOT CMAKE_BUILD_TYPE)
@@ -20,17 +20,13 @@ endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/external
- ${CMAKE_SOURCE_DIR}/external/TestSDK/include
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
+add_subdirectory (src)
 add_subdirectory (external)
 
-
-
-target_link_libraries (TestExternalLibs mylib)
 
 
 
