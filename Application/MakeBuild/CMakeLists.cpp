@@ -170,6 +170,11 @@ namespace mb
             ofs << " " << TranslatePath(element) << endl;
         }
 
+        for (const auto& incPath : module.GetIncludePaths())
+        {
+            ofs << " " << TranslatePath(module.path + "/" + incPath) << endl;
+        }
+
         ofs << " )" << endl;
 
         if (buildType != EBuildType::HeaderOnly)
@@ -178,35 +183,14 @@ namespace mb
             ofs << endl;
         }
 
-        // FIX 2026-04-03: Early return for ExternalLibraries type
-        // ExternalLibraries modules don't need add_subdirectory for their children
-        // because those are just path containers, not actual build targets.
-        // The include paths and libraries are already collected in the parent
-        // via ProjectBuilder and added to include_directories/target_link_libraries.
-        if (buildType == EBuildType::ExternalLibraries)
-        {
-            ofs << endl;
-            ofs.close();
-            return;
-        }
-
         for (const auto& subModule : module.GetSubModules())
         {
             auto subModuleBuildType = subModule.GetBuildType();
 
-            // FIX 2026-04-03: Skip HeaderOnly modules in add_subdirectory
+            // Skip HeaderOnly modules in add_subdirectory
             // HeaderOnly modules are interface libraries that don't need to be
             // built separately - they're included via target_link_libraries.
             if (subModuleBuildType == EBuildType::HeaderOnly)
-            {
-                continue;
-            }
-
-            // FIX 2026-04-03: Skip None type submodules when parent is ExternalLibraries
-            // When an ExternalLibraries module has children with None build type
-            // (e.g., subdirectories without .module.config), we should skip them
-            // because they're just path containers, not actual build targets.
-            if (subModuleBuildType == EBuildType::None && buildType == EBuildType::ExternalLibraries)
             {
                 continue;
             }
@@ -299,6 +283,20 @@ namespace mb
             ofs << ")" << endl;
             break;
 
+        case EBuildType::ExternalLibrary:
+            ofs << "add_library (" << moduleName.c_str() << " INTERFACE)"
+                << endl;
+            ofs << "target_include_directories (" << moduleName.c_str()
+                << " INTERFACE" << endl;
+
+            for (const auto& incPath : module.GetIncludePaths())
+            {
+                ofs << " " << TranslatePath(module.path + "/" + incPath) << endl;
+            }
+
+            ofs << ")" << endl;
+            break;
+
         default:
             break;
         };
@@ -310,7 +308,7 @@ namespace mb
         auto& externalLibs = build.externalLibraries;
 
         // FIX 2026-04-03: Skip target_link_libraries for None type modules
-        // Modules with None build type (e.g., ExternalLibraries children) are just
+        // Modules with None build type are just
         // path containers and shouldn't have target_link_libraries generated.
         // This prevents CMake errors like "Cannot specify link libraries for target
         // which is not built by this project."
@@ -320,11 +318,14 @@ namespace mb
         }
         else if (!externalLibs.empty() || !dependencyList.empty() || !libList.empty())
         {
+            bool isInterface = (buildType == EBuildType::HeaderOnly || buildType == EBuildType::ExternalLibrary);
             ofs << "target_link_libraries (" << moduleName;
+            if (isInterface)
+            {
+                ofs << " INTERFACE";
+            }
 
-            // FIX 2026-04-03: Add external libraries first
-            // External libraries come from libraries.txt in ExternalLibraries children.
-            // These are linked to the parent ExternalLibraries module.
+            // External libraries from library.txt in this module
             for (const auto& extLib : externalLibs)
             {
                 if (extLib.empty())

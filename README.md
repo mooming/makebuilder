@@ -98,7 +98,7 @@ Located in each module directory. Defines module-specific settings.
 | `Executable` | Produces an executable |
 | `StaticLibrary` | Static library (.a/.lib) |
 | `SharedLibrary` | Shared library (.so/.dll) |
-| `ExternalLibraries` | External library directory |
+| `ExternalLibrary` | External library directory |
 | `ExternalCMakeProject` | Contains existing CMakeLists.txt (auto-detected) |
 
 ### Module Specifier Files
