@@ -57,7 +57,7 @@ int main(int argc, const char* argv[])
         cout << "    Executable      - Produces executable" << endl;
         cout << "    StaticLibrary   - Static library (.a/.lib)" << endl;
         cout << "    SharedLibrary   - Shared library (.so/.dll)" << endl;
-        cout << "    ExternalLibraries - External library directory" << endl << endl;
+        cout << "    ExternalLibrary   - External library directory" << endl << endl;
 
         cout << "== Module Specifier Files ==" << endl;
         cout << "  include.txt         - Add directory to include paths" << endl;

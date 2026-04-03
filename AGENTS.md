@@ -174,7 +174,7 @@ Use `OSAbstractLayer` for cross-platform operations:
 - `Executable` - Produces executable
 - `StaticLibrary` - Static library (.a/.lib)
 - `SharedLibrary` - Shared library (.so/.dll)
-- `ExternalLibraries` - External library directory
+- `ExternalLibrary` - External library directory
 - `ExternalCMakeProject` - External CMake project
 
 ### Module Specifier Files

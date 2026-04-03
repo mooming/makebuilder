@@ -15,10 +15,8 @@ namespace mb
 const string& BuildTypeToString(EBuildType type)
 {
     constexpr auto arraySize = static_cast<size_t>(EBuildType::Max);
-    // Array must match EBuildType enum order exactly.
-    // Note: ExternalCMakeProject added at end (was missing before fix 2026-03-31).
     static array<string, arraySize> strings{"None", "Ignored", "HeaderOnly", "Executable",
-        "StaticLibrary", "SharedLibrary", "ExternalLibraries", "ExternalCMakeProject"};
+        "StaticLibrary", "SharedLibrary", "ExternalLibrary"};
 
     const size_t index = static_cast<uint8_t>(type);
     if (index > arraySize || index < 0)
@@ -67,43 +65,6 @@ Module::Module(const Module* parent, const OS::Directory& dir)
       buildType(EBuildType::Ignored),
       isIncludePath(false)
 {
-    // FIX 2026-04-03: Handle modules that are children of ExternalLibraries
-    // When a module is inside an ExternalLibraries directory, we need to:
-    // 1. Check if it's an existing CMake project (has CMakeLists.txt)
-    // 2. If not, mark it as None (not Ignored) so it can still be used as a path container
-    // 3. Load includes.txt and libraries.txt from this directory
-    if (parent != nullptr && parent->GetBuildType() == EBuildType::ExternalLibraries)
-    {
-        auto& files = FileList();
-        
-        for (auto& file : files)
-        {
-            if (Util::EqualsIgnoreCase(file.GetPath(), "CMakeLists.txt"))
-            {
-                buildType = EBuildType::ExternalCMakeProject;
-                moduleName = path;
-                break;
-            }
-        }
-
-        // FIX 2026-04-03: Children of ExternalLibraries should be None, not Ignored
-        // Previously, modules without .module.config were left as Ignored,
-        // causing them to be skipped when generating add_subdirectory commands.
-        // Now we set them to None so they're recognized as valid path containers.
-        if (buildType == EBuildType::Ignored)
-        {
-            buildType = EBuildType::None;
-            moduleName = Util::PathToName(path);
-        }
-
-        // FIX 2026-04-03: Load includes.txt and libraries.txt for ExternalLibrary children
-        // This allows the parent ExternalLibraries module to collect include paths
-        // and external libraries from its child directories.
-        BuildLists(files);
-        Sort();
-        return;
-    }
-
     // FIX 2026-03-31: Early file categorization to support HeaderOnly auto-detection
     // Previously, files were categorized only after config was validated.
     // Now we categorize files first so we can auto-detect HeaderOnly modules
@@ -237,7 +198,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
     this->srcFiles = srcFiles;
     this->headerFiles = headerFiles;
 
-    if (buildType == EBuildType::ExternalLibraries)
+    if (buildType == EBuildType::ExternalLibrary)
     {
         isIncludePath = true;
     }
@@ -330,7 +291,7 @@ void Module::BuildLists(const Files& files)
         }
 
         // FIX 2026-04-03: Added support for includes.txt file parsing
-        // This allows ExternalLibraries modules to specify include paths
+        // This allows ExternalLibrary modules to specify include paths
         // via an includes.txt file in their directory. The paths are loaded
         // into includePaths and can be collected by the parent module.
         if (EqualsIgnoreCase(element.GetPath(), "includes.txt"))
