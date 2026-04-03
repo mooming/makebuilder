@@ -59,14 +59,6 @@ void ProjectBuilder::GenerateCMakeFiles()
     {
         assert(module != nullptr);
 
-        using namespace mb;
-        const auto moduleBuildType = module->GetBuildType();
-        if (moduleBuildType == EBuildType::ExternalCMakeProject)
-        {
-            cout << "[CMake] Skip creating CMakeLists.txt of Module = " << module->GetName().c_str() << endl;
-            continue;
-        }
-
         CMakeGenerator generator(*this, *module);
         generator.Generate();
     }
@@ -79,11 +71,6 @@ bool ProjectBuilder::TraverseDirectoryTree(
     if (module.GetBuildType() == EBuildType::Ignored)
         return false;
 
-    // Fixed 2026-03-31: Previously had misleading indentation (extra 4 spaces).
-    // With -Werror -Wmisleading-indentation, this would fail to compile.
-    if (module.GetBuildType() == EBuildType::ExternalCMakeProject)
-        return true;
-
     if (module.IsIncludePath())
     {
         includeDirs.push_back(module.path);
@@ -91,7 +78,7 @@ bool ProjectBuilder::TraverseDirectoryTree(
 
     bool isValidModule = false;
 
-    if (module.GetBuildType() == EBuildType::ExternalLibraries)
+    if (module.GetBuildType() == EBuildType::ExternalLibrary)
     {
         isValidModule = true;
     }
@@ -152,43 +139,6 @@ bool ProjectBuilder::TraverseDirectoryTree(
             auto& submoduleList = module.GetSubModules();
             submoduleList.push_back(submodule);
             hasValidSubmodules = true;
-        }
-
-        // FIX 2026-04-03: Collect include paths and libraries from ExternalLibraries children
-        // When traversing an ExternalLibraries module, we need to collect:
-        // 1. Include paths from child directories (via includes.txt)
-        // 2. Library names from child directories (via libraries.txt)
-        // These are collected in the parent module's includeDirs and externalLibraries
-        // to be used when generating the ExternalLibraries CMakeLists.txt.
-        if (module.GetBuildType() == EBuildType::ExternalLibraries)
-        {
-            // Collect include paths from the child module
-            for (const auto& includePath : submodule.GetIncludePaths())
-            {
-                string baseDir = submodule.path;
-                string fullPath = baseDir + "/" + includePath;
-                
-                // Use realpath to resolve relative paths to absolute paths
-                // This ensures CMake include_directories works correctly.
-                char resolvedPath[1024];
-                if (realpath(fullPath.c_str(), resolvedPath) != nullptr)
-                {
-                    includeDirs.push_back(resolvedPath);
-                }
-                else
-                {
-                    includeDirs.push_back(fullPath);
-                }
-                
-                cout << logHeader << "[Include] Added: " << includeDirs.back() << endl;
-            }
-
-            // Collect external library names from the child module
-            for (const auto& lib : submodule.GetLibraries())
-            {
-                externalLibraries.push_back(lib);
-                cout << logHeader << "[Library] External lib: " << lib << endl;
-            }
         }
     }
 

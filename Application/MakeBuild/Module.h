@@ -17,11 +17,7 @@ namespace mb
         Executable,
         StaticLibrary,
         SharedLibrary,
-        ExternalLibraries,
-        // ExternalCMakeProject: Marks a directory containing an existing CMake project
-        // that should not have its CMakeLists.txt overwritten by this tool.
-        // Previously had a typo: "ExternalCMakePorject" (fixed 2026-03-31)
-        ExternalCMakeProject,
+        ExternalLibrary,
         Max
     };
 
@@ -50,9 +46,8 @@ namespace mb
         TString precompileDefinitions;
         TString optimizeLevel;
 
-        // FIX 2026-04-03: Added includePaths to support includes.txt for ExternalLibraries
-        // When ExternalLibraries module has subdirectories with includes.txt files,
-        // those include paths need to be collected and added to the parent module.
+        // FIX 2026-04-03: Added includePaths to support includes.txt for ExternalLibrary
+        // When ExternalLibrary module has includes.txt, those paths are collected
         Strings includePaths;
 
         EBuildType buildType;

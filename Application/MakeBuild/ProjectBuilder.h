@@ -24,10 +24,7 @@ public:
     Modules modules;
     Paths includeDirs;
     
-    // FIX 2026-04-03: Added externalLibraries to collect libraries from ExternalLibraries children
-    // When traversing an ExternalLibraries module, we collect library names from
-    // libraries.txt files in subdirectories. These are then used to generate
-    // target_link_libraries() in the parent ExternalLibraries CMakeLists.txt.
+    // externalLibraries collected from library.txt files in modules
     Module::Strings externalLibraries;
 
 public:

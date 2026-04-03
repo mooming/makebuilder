@@ -145,7 +145,7 @@ string DependencyGraph::GetNodeStyle(EBuildType buildType) const
         return "style=filled, fillcolor=lightskyblue";
     case EBuildType::HeaderOnly:
         return "style=filled, fillcolor=lightyellow";
-    case EBuildType::ExternalLibraries:
+    case EBuildType::ExternalLibrary:
         return "style=filled, fillcolor=lightgray";
     default:
         return "style=filled, fillcolor=white";
