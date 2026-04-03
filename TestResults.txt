@@ -9,10 +9,6 @@ Test: 02_static_library
 Status: PASSED
 Message: OK
 
-Test: 03_header_only
-Status: PASSED
-Message: OK
-
 Test: 04_multi_config
 Status: PASSED
 Message: OK
@@ -22,6 +18,6 @@ Status: PASSED
 Message: OK
 
 ================================
-Total: 5
-Passed: 5
+Total: 4
+Passed: 4
 Failed: 0

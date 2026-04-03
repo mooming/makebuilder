@@ -58,9 +58,6 @@ Use Graphviz to convert to image:
 dot -Tpng graph.dot -o graph.png
 ```
 
-### Header-Only Auto-Detection
-Directories with header files (`.h`, `.hpp`, `.inl`) but no source files (`.c`, `.cpp`) are automatically detected as `HeaderOnly` modules - no `.module.config` required!
-
 ## Configuration Files
 
 ### .project.config (Project Root)
@@ -79,14 +76,15 @@ Located in the project root directory. Defines global project settings.
 
 Located in each module directory. Defines module-specific settings.
 
-| Option | Description |
-|--------|-------------|
+| Option | Description                                               |
+|--------|-----------------------------------------------------------|
 | `name` | Module identifier (defaults to directory name if not set) |
-| `buildType` | Module type (see below) |
-| `precompileDefinitions` | Module-specific definitions |
-| `optimizeLevel` | Optimization level override (0-3, e.g., "3" for -O3) |
+| `buildType` | Module type (see below)                                   |
+| `precompileDefinitions` | Module-specific definitions                               |
+| `optimizeLevel` | Optimization level override (0-3, e.g., "3" for -O3)      |
+| `ignoreSubdirectories` | Skip submodules                                    |
 
-**Note:** Directories without `.module.config` are now automatically detected if they contain header files (auto-detected as `HeaderOnly`) or source files.
+**Note:** Directories without `.module.config` are automatically detected if they contain source files.
 
 ### Build Types
 
@@ -94,7 +92,7 @@ Located in each module directory. Defines module-specific settings.
 |------|-------------|
 | `None` | Not a module, but may contain valid submodules |
 | `Ignored` | Skip this directory |
-| `HeaderOnly` | Header files only (no compilation) - auto-detected if no .module.config |
+| `HeaderOnly` | Header files only (no compilation) |
 | `Executable` | Produces an executable |
 | `StaticLibrary` | Static library (.a/.lib) |
 | `SharedLibrary` | Shared library (.so/.dll) |
@@ -132,11 +130,8 @@ myproject/
 ## File Detection
 
 MakeBuilder automatically detects source and header files:
-
-- **Source files**: `.c`, `.cpp`
-- **Header files**: `.h`, `.hpp`, `.inl`
-
-If a module has only header files and no `.module.config`, it is automatically classified as `HeaderOnly`.
+- Source files: `.c`, `.cpp`
+- Header files: `.h`, `.hpp`, `.inl`
 
 ## Requirements
 
@@ -170,7 +165,6 @@ The test suite includes:
 |------|-------------|
 | `01_simple_executable` | Basic executable build |
 | `02_static_library` | Static library build |
-| `03_header_only` | Header-only library auto-detection |
 | `04_multi_config` | Multi-configuration build (Debug/Dev/Release) |
 | `05_submodules` | Multiple submodules with dependencies |
 
@@ -189,7 +183,7 @@ Message: OK
 ...
 
 ================================
-Total: 5
+Total: 4
 Passed: 4
-Failed: 1
+Failed: 0
 ```

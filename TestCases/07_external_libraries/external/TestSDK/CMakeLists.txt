@@ -20,17 +20,12 @@ endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/external
- ${CMAKE_SOURCE_DIR}/external/TestSDK/include
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
-add_subdirectory (include)
+add_subdirectory (src)
 
-
-
-target_link_libraries (TestSDK mylib)
 
 
 

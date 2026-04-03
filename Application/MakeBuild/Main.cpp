@@ -26,9 +26,7 @@ int main(int argc, const char* argv[])
         cout << "  --graph <output.dot>  Generate DOT dependency graph" << endl << endl;
 
         cout << "== New Features (v1.0.3) ==" << endl;
-        cout << "* Dependency Graph: Generate visual dependency graphs" << endl;
-        cout << "* Header-Only Auto-Detect: Directories with headers but no .module.config" << endl;
-        cout << "  are automatically detected as HeaderOnly modules" << endl << endl;
+        cout << "* Dependency Graph: Generate visual dependency graphs" << endl << endl;
 
         cout << "== Project Configuration ==" << endl;
         cout << "Place .project.config in the project root directory." << endl << endl;
@@ -41,9 +39,7 @@ int main(int argc, const char* argv[])
         cout << "    precompileDefinitions = <defs>     (optional)" << endl << endl;
 
         cout << "== Module Configuration ==" << endl;
-        cout << "Place .module.config in each module directory." << endl;
-        cout << "NOTE: Directories without .module.config containing only header files" << endl;
-        cout << "      are automatically detected as HeaderOnly modules." << endl << endl;
+        cout << "Place .module.config in each module directory." << endl << endl;
 
         cout << "  .module.config options:" << endl;
         cout << "    name = \"ModuleName\"                (module identifier)" << endl;
@@ -53,7 +49,7 @@ int main(int argc, const char* argv[])
         cout << "  Build types:" << endl;
         cout << "    None           - Not a module, but may contain modules" << endl;
         cout << "    Ignored         - Skip this directory" << endl;
-        cout << "    HeaderOnly     - Header files only (auto-detected without .module.config)" << endl;
+        cout << "    HeaderOnly     - Header files only (no compilation)" << endl;
         cout << "    Executable      - Produces executable" << endl;
         cout << "    StaticLibrary   - Static library (.a/.lib)" << endl;
         cout << "    SharedLibrary   - Shared library (.so/.dll)" << endl;
@@ -122,9 +118,13 @@ int main(int argc, const char* argv[])
     build.GenerateCMakeFiles();
 
     cout << endl;
-    cout << "Done! Run 'cmake -B build -G \"Ninja Multi-Config\" -S . && cmake --build build --config Debug' to build Debug." << endl;
-    cout << "       'cmake --build build --config Dev' for Dev (optimized with debug info)" << endl;
-    cout << "       'cmake --build build --config Release' for Release (full optimization)" << endl;
+    cout << "Done!" << endl << endl;
+
+    cout << "Build Commands:" << endl;
+    cout << "> cmake --fresh -B build -G \"Ninja Multi-Config\" -S ." << endl;
+    cout << "> cmake --build build --config Debug" << endl;
+    cout << "> cmake --build build --config Dev" << endl;
+    cout << "> cmake --build build --config Release" << endl;
     cout << endl;
 
     return 0;

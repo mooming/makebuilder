@@ -20,9 +20,8 @@ public:
     using TKeyMap = std::unordered_map<TString, TString>;
 
 private:
-    TKeyMap keymap;
     bool isValid;
-    std::vector<TString> loadOrder;
+    TKeyMap keymap;
 
 public:
     ConfigParser() : isValid(false) {}

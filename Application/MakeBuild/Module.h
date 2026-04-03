@@ -39,57 +39,55 @@ namespace mb
 
         OS::Files srcFiles;
         OS::Files headerFiles;
+        OS::Files otherFiles;
+
         Modules submodules;
         Strings dependencies;
+        Strings includePaths;
         Strings libraries;
         Strings frameworks;
+
         TString precompileDefinitions;
         TString optimizeLevel;
-
-        // FIX 2026-04-03: Added includePaths to support includes.txt for ExternalLibrary
-        // When ExternalLibrary module has includes.txt, those paths are collected
-        Strings includePaths;
+        Strings ignoredSubdirectories;
 
         EBuildType buildType;
         bool isIncludePath;
 
     public:
-        Module(const OS::Directory& dir);
+        explicit Module(const OS::Directory& dir);
         Module(const Module* parent, const OS::Directory& dir);
-        virtual ~Module() = default;
+        ~Module() override = default;
 
         bool operator<(const Module& rhs) const
         {
             return moduleName < rhs.moduleName;
         }
 
-        bool HasSourceFileRecursive() const;
+        [[nodiscard]] bool HasSourceFileRecursive() const;
+
+        void PrintInfo(const std::string& header) const;
         void PrintSubModules(const TString& header) const;
 
-        auto& GetName() const { return moduleName; }
-        auto GetBuildType() const { return buildType; }
-        auto IsIncludePath() const { return isIncludePath; }
+        [[nodiscard]] auto& GetName() const { return moduleName; }
+        [[nodiscard]] auto GetBuildType() const { return buildType; }
+        [[nodiscard]] auto IsIncludePath() const { return isIncludePath; }
 
-        auto& GetSourceFiles() const { return srcFiles; }
-        auto& GetHeaderFiles() const { return headerFiles; }
-        auto& GetSubModules() { return submodules; }
-        auto& GetSubModules() const { return submodules; }
-        auto& GetDependencies() const { return dependencies; }
-        auto& GetLibraries() const { return libraries; }
-        auto& GetFrameworks() const { return frameworks; }
-        
-        // FIX 2026-04-03: Added GetIncludePaths() to expose includePaths
-        // This allows ProjectBuilder to collect include paths from ExternalLibrary children.
-        auto& GetIncludePaths() const { return includePaths; }
-        auto& GetPrecompileDefinitions() const
-        {
-            return precompileDefinitions;
-        }
-        auto& GetOptimizeLevel() const { return optimizeLevel; }
+        [[nodiscard]] auto& GetSourceFiles() const { return srcFiles; }
+        [[nodiscard]] auto& GetHeaderFiles() const { return headerFiles; }
+        [[nodiscard]] auto& GetSubModules() { return submodules; }
+        [[nodiscard]] auto& GetSubModules() const { return submodules; }
+        [[nodiscard]] auto& GetDependencies() const { return dependencies; }
+        [[nodiscard]] auto& GetLibraries() const { return libraries; }
+        [[nodiscard]] auto& GetFrameworks() const { return frameworks; }
+        [[nodiscard]] auto& GetIncludePaths() const { return includePaths; }
+        [[nodiscard]] auto& GetPrecompileDefinitions() const { return precompileDefinitions; }
+        [[nodiscard]] auto& GetOptimizeLevel() const { return optimizeLevel; }
+        [[nodiscard]] auto& GetIgnoredSubdirectories() const { return ignoredSubdirectories; }
 
     private:
-        void BuildLists(const OS::Files& files);
-        void LoadList(const char* filePath, Strings& list);
+        void CollectFiles();
+        void ParseBuildSpecifiers(const OS::Files& files);
         void Sort();
     };
 } // namespace mb

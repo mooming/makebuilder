@@ -18,16 +18,11 @@ private:
     ConfigParser parser;
 
 public:
-    explicit BuildConfig(const char* path);
     BuildConfig(const char* path, const char* fileName);
     ~BuildConfig() = default;
 
     [[nodiscard]] TValue GetValue(const TString& key) const;
     [[nodiscard]] TString GetValue(const TString& key, const TString& defaultValue) const;
-
-    auto IsValid() const { return parser.IsValid(); }
-
-private:
-    void Load(const char* path);
+    [[nodiscard]] auto IsValid() const { return parser.IsValid(); }
 };
 } // namespace mb
