@@ -25,7 +25,6 @@ include_directories ( ${CMAKE_SOURCE_DIR}
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
-add_subdirectory (03_header_only)
 add_subdirectory (07_external_libraries)
 add_subdirectory (04_multi_config)
 add_subdirectory (05_submodules)
