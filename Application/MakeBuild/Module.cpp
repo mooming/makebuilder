@@ -109,7 +109,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
         moduleName = Util::PathToName(path);
     }
 
-    if (!hasValidConfig || (!hasSourceFiles && !hasHeaderFiles))
+    if (!hasValidConfig && !hasSourceFiles && !hasHeaderFiles)
     {
         buildType = EBuildType::Ignored;
         return;

@@ -124,6 +124,8 @@ bool ProjectBuilder::TraverseDirectoryTree(
     auto& subModules = module.GetSubModules();
     sort(subModules.begin(), subModules.end());
 
+    cout << "[" << module.GetName() << "] Valid: " << isValidModule << endl;
+
     return isValidModule;
 }
 

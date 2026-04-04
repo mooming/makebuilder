@@ -4,7 +4,6 @@
 #include <cstring>
 
 #include "ProjectBuilder.h"
-#include "DependencyGraph.h"
 #include "OSAbstractLayer.h"
 #include "TestRunner.h"
 
@@ -15,18 +14,14 @@ int main(int argc, const char* argv[])
 
     if (argc < 2)
     {
-        cout << "MakeBuild 1.0.3" << endl;
+        cout << "MakeBuild 1.0" << endl;
         cout << "Directory-based meta-build system" << endl;
         cout << "Automatically generates CMakeLists.txt files" << endl << endl;
 
         cout << "Usage: mbuild <projects_root_path> [options]" << endl << endl;
 
         cout << "Options:" << endl;
-        cout << "  --test-run          Run test cases from Test directory" << endl;
-        cout << "  --graph <output.dot>  Generate DOT dependency graph" << endl << endl;
-
-        cout << "== New Features (v1.0.3) ==" << endl;
-        cout << "* Dependency Graph: Generate visual dependency graphs" << endl << endl;
+        cout << "  --test-run          Run test cases from Test directory" << endl << endl;
 
         cout << "== Project Configuration ==" << endl;
         cout << "Place .project.config in the project root directory." << endl << endl;
@@ -87,30 +82,6 @@ int main(int argc, const char* argv[])
             bool success = mb::TestRunner::RunTests(testPath, mbuildPath, "build");
 
             return success ? 0 : 1;
-        }
-    }
-
-    // Check for --graph option
-    for (int i = 1; i < argc; ++i)
-    {
-        if (strcmp(argv[i], "--graph") == 0)
-        {
-            if (i + 1 >= argc)
-            {
-                cerr << "Error: --graph requires an output file path" << endl;
-                return 1;
-            }
-
-            const char* outputPath = argv[i + 1];
-
-            mb::ProjectBuilder build(OS::GetFullPath(argv[1]).c_str());
-            build.GenerateCMakeFiles();
-
-            mb::DependencyGraph graph(build);
-            graph.PrintToConsole();
-            graph.GenerateDotFile(outputPath);
-
-            return 0;
         }
     }
 
