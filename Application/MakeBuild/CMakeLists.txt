@@ -29,14 +29,12 @@ link_directories (${CMAKE_SOURCE_DIR}/lib)
 add_executable (makebuild
  BuildConfig.cpp
  CMakeLists.cpp
- DependencyGraph.cpp
  Main.cpp
  Module.cpp
  ProjectBuilder.cpp
  TestRunner.cpp
  BuildConfig.h
  CMakeLists.h
- DependencyGraph.h
  Module.h
  ProjectBuilder.h
  TestRunner.h
