@@ -36,10 +36,12 @@ int main(int argc, const char* argv[])
         cout << "== Module Configuration ==" << endl;
         cout << "Place .module.config in each module directory." << endl << endl;
 
-        cout << "  .module.config options:" << endl;
-        cout << "    name = \"ModuleName\"                (module identifier)" << endl;
-        cout << "    buildType = <type>                 (see below)" << endl;
-        cout << "    precompileDefinitions = <defs>     (optional)" << endl << endl;
+    cout << "  .module.config options:" << endl;
+    cout << "    name = \"ModuleName\"                (module identifier)" << endl;
+    cout << "    buildType = <type>                 (see below)" << endl;
+    cout << "    precompileDefinitions = <defs>     (optional)" << endl;
+    cout << "    optimizeLevel = <level>            (0-3, optional)" << endl;
+    cout << "    ignoreSubdirectories = <dirs>      (space-separated list of subdirs to skip)" << endl << endl;
 
         cout << "  Build types:" << endl;
         cout << "    None           - Not a module, but may contain modules" << endl;
