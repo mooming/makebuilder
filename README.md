@@ -121,15 +121,19 @@ cmake --build build --config Release
 Run built-in test cases:
 
 ```bash
-makebuild . --test-run
+./build/Application/MakeBuild/Debug/makebuild . --test-run
+./build/Application/MakeBuild/Dev/makebuild . --test-run
+./build/Application/MakeBuild/Release/makebuild . --test-run
 ```
 
+Note: Test cases can specify pre-execution commands in a `pretest_commands.txt` file located within the test directory. Each line in this file is executed as a system command before running `makebuild`.
+
 Test cases are located in `TestCases/`:
+...
 - `01_simple_executable` - Basic executable build
 - `02_static_library` - Static library build
-- `04_multi_config` - Multi-configuration build
-- `05_submodules` - Multiple submodules with dependencies
-- `07_external_libraries` - External library integration
+- `03_external_library` - External library integration (uses `pretest_commands.txt`)
+- `04_objective_c` - Objective-C support
 
 ## Requirements
 
