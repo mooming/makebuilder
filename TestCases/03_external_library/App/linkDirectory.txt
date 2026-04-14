@@ -1,0 +1,4 @@
+../External/TestSDK/lib/Debug
+../External/TestSDK/lib/Dev
+../External/TestSDK/lib/Release
+
