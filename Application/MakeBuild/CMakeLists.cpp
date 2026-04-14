@@ -85,7 +85,7 @@ namespace mb
         const char* basePath = "${CMAKE_SOURCE_DIR}";
         using namespace Util;
 
-        string filePath(module.path);
+        string filePath(module.GetPath());
         string moduleName = module.GetName();
 
         filePath.append("/CMakeLists.txt");
@@ -190,7 +190,7 @@ namespace mb
 
         for (const auto& incPath : module.GetIncludePaths())
         {
-            ofs << " " << TranslatePath(module.path + "/" + incPath) << endl;
+            ofs << " " << TranslatePath(module.GetPath() + "/" + incPath) << endl;
         }
 
         ofs << " )" << endl;
@@ -213,7 +213,7 @@ namespace mb
                 continue;
             }
 
-            ofs << "add_subdirectory (" << PathToName(subModule.path.c_str()) << ")" << endl;
+            ofs << "add_subdirectory (" << PathToName(subModule.GetPath().c_str()) << ")" << endl;
         }
 
         ofs << endl;
@@ -315,7 +315,7 @@ namespace mb
 
             for (const auto& incPath : module.GetIncludePaths())
             {
-                ofs << " " << TranslatePath(module.path + "/" + incPath) << endl;
+                ofs << " " << TranslatePath(module.GetPath() + "/" + incPath) << endl;
             }
 
             ofs << ")" << endl;
@@ -373,7 +373,7 @@ namespace mb
                     if (library.empty())
                         continue;
 
-                    ofs << " " << library;
+                    ofs << " " << module.GetPath() << '/' << library;
                 }
             }
 
@@ -398,10 +398,10 @@ namespace mb
         using namespace Util;
         path = TrimPath(path);
 
-        if (StartsWithIgnoreCase(path, build.baseModule.path))
+        if (StartsWithIgnoreCase(path, build.baseModule.GetPath()))
         {
             string newPath = string("${CMAKE_SOURCE_DIR}");
-            newPath.append(path.substr(build.baseModule.path.length()));
+            newPath.append(path.substr(build.baseModule.GetPath().length()));
             return newPath;
         }
 

@@ -88,7 +88,7 @@ Module::Module(const Directory& dir)
 
 Module::Module(const Module* parent, const OS::Directory& dir)
     : Directory(dir),
-      config(dir.path.c_str(), ".module.config"),
+      config(dir.GetPath().c_str(), ".module.config"),
       buildType(EBuildType::Ignored),
       isIncludePath(false)
 {
@@ -106,7 +106,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
     }
     else
     {
-        moduleName = Util::PathToName(path);
+        moduleName = Util::PathToName(GetPath());
     }
 
     if (!hasValidConfig && !hasSourceFiles && !hasHeaderFiles)
@@ -130,7 +130,8 @@ Module::Module(const Module* parent, const OS::Directory& dir)
         std::string token;
         while (std::getline(ss, token, ' '))
         {
-            ignoredSubdirectories.push_back(token);
+            auto path = Util::TrimPath(GetPath() + '/' + token);
+            ignoredSubdirectories.push_back(path);
         }
     }
 
@@ -172,7 +173,7 @@ void Module::PrintInfo(const std::string& header) const
 {
     cout << endl;
     cout << header << " [ModuleInfo][" << moduleName << "] START ###" << endl;
-    cout << header << " [ModuleInfo][" << moduleName << "] Path = " << path
+    cout << header << " [ModuleInfo][" << moduleName << "] Path = " << GetPath()
          << ", Build Type = " << BuildTypeToString(buildType).c_str() << endl;
 
     if (!precompileDefinitions.empty())
@@ -235,7 +236,7 @@ void Module::PrintInfo(const std::string& header) const
 
 void Module::PrintSubModules(const std::string& header) const // NOLINT(*-no-recursion)
 {
-    cout << "[DIR]" << header << path << endl;
+    cout << "[DIR]" << header << GetPath() << endl;
     for (const auto& subDir : submodules)
     {
         auto newHeader = header;
@@ -300,7 +301,7 @@ void Module::ParseBuildSpecifiers(const Files& files)
 
         if (EqualsIgnoreCase(element.GetPath(), "dependency.txt"))
         {
-            string filePath = path;
+            string filePath = GetPath();
             filePath.append("/");
             filePath.append(element.GetPath());
 
@@ -310,7 +311,7 @@ void Module::ParseBuildSpecifiers(const Files& files)
 
         if (EqualsIgnoreCase(element.GetPath(), "library.txt"))
         {
-            string filePath = path;
+            string filePath = GetPath();
             filePath.append("/");
             filePath.append(element.GetPath());
 
@@ -320,7 +321,7 @@ void Module::ParseBuildSpecifiers(const Files& files)
 
         if (EqualsIgnoreCase(element.GetPath(), "framework.txt"))
         {
-            string filePath = path;
+            string filePath = GetPath();
             filePath.append("/");
             filePath.append(element.GetPath());
 
@@ -330,7 +331,7 @@ void Module::ParseBuildSpecifiers(const Files& files)
 
         if (EqualsIgnoreCase(element.GetPath(), "include.txt"))
         {
-            string filePath = path;
+            string filePath = GetPath();
             filePath.append("/");
             filePath.append(element.GetPath());
 

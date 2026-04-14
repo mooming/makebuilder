@@ -48,7 +48,7 @@ ProjectBuilder::ProjectBuilder(const char* path)
     {
         assert(element != nullptr);
 
-        cout << i++ << " : " << element->path << endl;
+        cout << i++ << " : " << element->GetPath() << endl;
     }
 }
 
@@ -74,7 +74,7 @@ bool ProjectBuilder::TraverseDirectoryTree(
 
     if (module.IsIncludePath())
     {
-        includeDirs.push_back(module.path);
+        includeDirs.push_back(module.GetPath());
     }
 
     bool isValidModule = false;
@@ -95,16 +95,15 @@ bool ProjectBuilder::TraverseDirectoryTree(
     for (const auto& subDirectory : module.DirList())
     {
         cout << endl;
-        cout << "[" << module.GetName() << "] Visit " << subDirectory.path << endl;
+        cout << "[" << module.GetName() << "] Visit " << subDirectory.GetPath() << endl;
 
         Module submodule(&module, subDirectory);
         auto& ignoredSubDirs = module.GetIgnoredSubdirectories();
-        auto subModuleName = submodule.GetName();
-
-        if (submodule.GetBuildType() == EBuildType::Ignored
-            || std::find(ignoredSubDirs.begin(), ignoredSubDirs.end(), subModuleName) != ignoredSubDirs.end())
+        auto subModulePath = submodule.GetPath();
+        const bool isIgnoredSubDir = std::find(ignoredSubDirs.begin(), ignoredSubDirs.end(), subModulePath) != ignoredSubDirs.end();
+        if (submodule.GetBuildType() == EBuildType::Ignored || isIgnoredSubDir)
         {
-            cout << "[" << module.GetName() << "] SKIP: " << subModuleName << endl;
+            cout << "[" << module.GetName() << "] SKIP: " << subModulePath << endl;
             continue;
         }
 

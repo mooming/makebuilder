@@ -12,10 +12,8 @@ namespace OS
     {
         using Dirs = std::vector<Directory>;
 
-    public:
-        std::string path;
-
     private:
+        std::string path;
         Files fileList;
         Dirs dirList;
 
@@ -25,6 +23,7 @@ namespace OS
 
         const Files& FileList() const { return fileList; }
         const Dirs& DirList() const { return dirList; }
+        const std::string& GetPath() const { return path; }
     };
 
     using Dirs = std::vector<Directory>;
