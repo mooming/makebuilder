@@ -1,0 +1,3 @@
+makebuild TestCases/03_external_library/External/TestSDK
+cmake -B TestCases/03_external_library/External/TestSDK/build -G "Ninja Multi-Config" -S TestCases/03_external_library/External/TestSDK
+cmake --build TestCases/03_external_library/External/TestSDK/build --config Release

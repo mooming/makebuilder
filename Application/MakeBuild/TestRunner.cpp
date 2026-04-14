@@ -93,6 +93,26 @@ bool TestRunner::RunSingleTest(const TString& testPath, const TString& mbuildPat
     TString mbuildCmd = "\"" + mbuildPath + "\" \"" + testPath + "\"";
     cout << "[TestRunner] Running mbuild: " << mbuildCmd.c_str() << endl;
 
+    // Execute Pretest Commands
+    {
+        TString preBuildFile = testPath + "/pretest_commands.txt";
+        ifstream ifs(preBuildFile.c_str());
+        if (ifs.is_open())
+        {
+            cout << "[TestRunner] Running commands from pretest_commands.txt" << endl;
+
+            string line;
+            while (getline(ifs, line))
+            {
+                if (line.empty())
+                    continue;
+
+                cout << "[TestRunner] PreTestCMD: Execute) " << line.c_str() << endl;
+                system(line.c_str());
+            }
+        }
+    }
+
     int mbuildResult = system(mbuildCmd.c_str());
     if (mbuildResult != 0)
     {
