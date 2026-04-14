@@ -46,6 +46,7 @@ namespace mb
         Strings dependencies;
         Strings includePaths;
         Strings libraries;
+        Strings linkDirectories;
         Strings frameworks;
 
         TString precompileDefinitions;
@@ -81,6 +82,7 @@ namespace mb
         [[nodiscard]] auto& GetSubModules() const { return submodules; }
         [[nodiscard]] auto& GetDependencies() const { return dependencies; }
         [[nodiscard]] auto& GetLibraries() const { return libraries; }
+        [[nodiscard]] auto& GetLinkDirectories() const { return linkDirectories; }
         [[nodiscard]] auto& GetFrameworks() const { return frameworks; }
         [[nodiscard]] auto& GetIncludePaths() const { return includePaths; }
         [[nodiscard]] auto& GetPrecompileDefinitions() const { return precompileDefinitions; }

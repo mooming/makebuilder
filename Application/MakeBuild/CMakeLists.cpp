@@ -195,9 +195,16 @@ namespace mb
 
         ofs << " )" << endl;
 
-        if (buildType != EBuildType::HeaderOnly)
+        if (buildType == EBuildType::Executable)
         {
-            ofs << "link_directories (" << basePath << "/lib)" << endl;
+            ofs << "link_directories (" << basePath << "/lib" << endl;
+            auto& linkDirectories = module.GetLinkDirectories();
+            for (auto& linkDirectory : linkDirectories)
+            {
+                ofs << "    " << TrimPath(module.GetPath() + '/' + linkDirectory)  << endl;
+            }
+
+            ofs << ")" << endl;
             ofs << endl;
         }
 
@@ -373,7 +380,7 @@ namespace mb
                     if (library.empty())
                         continue;
 
-                    ofs << " " << module.GetPath() << '/' << library;
+                    ofs << " " << library;
                 }
             }
 

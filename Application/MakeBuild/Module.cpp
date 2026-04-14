@@ -197,6 +197,11 @@ void Module::PrintInfo(const std::string& header) const
         std::cout << header << " [ModuleInfo][" << moduleName << "] Library: " << item << std::endl;
     }
 
+    for (auto& item : linkDirectories)
+    {
+        std::cout << header << " [ModuleInfo][" << moduleName << "] Link Path: " << item << std::endl;
+    }
+
     for (auto& item : frameworks)
     {
         std::cout << header << " [ModuleInfo][" << moduleName << "] Framework: " << item << std::endl;
@@ -290,6 +295,7 @@ void Module::ParseBuildSpecifiers(const Files& files)
 {
     dependencies.clear();
     libraries.clear();
+    linkDirectories.clear();
     frameworks.clear();
     includePaths.clear();
 
@@ -316,6 +322,17 @@ void Module::ParseBuildSpecifiers(const Files& files)
             filePath.append(element.GetPath());
 
             ParseList(filePath.c_str(), libraries);
+            continue;
+        }
+
+        if (EqualsIgnoreCase(element.GetPath(), "linkDirectory.txt"))
+        {
+            string filePath = GetPath();
+            filePath.append("/");
+            filePath.append(element.GetPath());
+
+            ParseList(filePath.c_str(), linkDirectories);
+
             continue;
         }
 
@@ -349,6 +366,7 @@ void Module::Sort()
 
     SortVector(dependencies);
     SortVector(libraries);
+    SortVector(linkDirectories);
     SortVector(frameworks);
     SortVector(ignoredSubdirectories);
 }

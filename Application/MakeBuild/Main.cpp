@@ -53,10 +53,11 @@ int main(int argc, const char* argv[])
         cout << "    ExternalLibrary   - External library directory" << endl << endl;
 
         cout << "== Module Specifier Files ==" << endl;
-        cout << "  include.txt         - Add directory to include paths" << endl;
+        cout << "  include.txt        -  Add directory and its contents to include paths. Paths are relative to the file's directory." << endl;
         cout << "  dependency.txt     - List module dependencies (one per line)" << endl;
         cout << "  library.txt        - List required libraries (one per line)" << endl;
-        cout << "  framework.txt     - List required frameworks (macOS only)" << endl;
+        cout << "  linkDirectory.txt  - List linker directories (one per line). Paths are relative to the file's directory." << endl;
+        cout << "  framework.txt      - List required frameworks (macOS only)" << endl;
 
         return 0;
     }
