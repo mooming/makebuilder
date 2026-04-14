@@ -83,7 +83,9 @@ bool ProjectBuilder::TraverseDirectoryTree(
         isValidModule = true;
     }
 
-    bool hasHeaderOrSource = !module.GetSourceFiles().empty() || !module.GetHeaderFiles().empty();
+    bool hasHeaderOrSource = !module.GetSourceFiles().empty() || !module.GetObjectiveCSourceFiles().empty()
+        || !module.GetHeaderFiles().empty();
+
     if (hasHeaderOrSource || module.GetBuildType() == EBuildType::HeaderOnly)
     {
         isValidModule = true;

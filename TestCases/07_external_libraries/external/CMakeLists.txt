@@ -12,6 +12,13 @@ set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 set (CMAKE_CXX_STANDARD 17)
 
+if (APPLE)
+    set(PLATFORM_SOURCES
+    )
+else()
+    set(PLATFORM_SOURCES "")
+endif()
+
 if (MSVC)
 	add_compile_options (/W3 /WX)
 else (MSVC)
@@ -21,13 +28,14 @@ endif (MSVC)
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
  ${CMAKE_SOURCE_DIR}/external
+ ${CMAKE_SOURCE_DIR}/external/TestSDK/include
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
-add_subdirectory (TestSDK)
 
 add_library (external INTERFACE)
 target_include_directories (external INTERFACE
+ ${CMAKE_SOURCE_DIR}/external/TestSDK/include
 )
 
 

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (TestProject)
+project (ObjCLib)
 
 set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
 if (NOT CMAKE_BUILD_TYPE)
@@ -14,6 +14,7 @@ set (CMAKE_CXX_STANDARD 17)
 
 if (APPLE)
     set(PLATFORM_SOURCES
+        lib.m
     )
 else()
     set(PLATFORM_SOURCES "")
@@ -31,6 +32,16 @@ include_directories ( ${CMAKE_SOURCE_DIR}
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+add_library (ObjCLib STATIC 
+${PLATFORM_SOURCES}
+)
+
+if (APPLE)
+include_directories ( /System/Library/Frameworks )
+endif (APPLE)
+
+install (TARGETS ObjCLib DESTINATION ${CMAKE_SOURCE_DIR}/lib)
 
 
 

@@ -12,6 +12,13 @@ set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 set (CMAKE_CXX_STANDARD 17)
 
+if (APPLE)
+    set(PLATFORM_SOURCES
+    )
+else()
+    set(PLATFORM_SOURCES "")
+endif()
+
 if (MSVC)
 	add_compile_options (/W3 /WX)
 else (MSVC)

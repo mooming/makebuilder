@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (TestProject)
+project (OCApp)
 
 set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE)
 if (NOT CMAKE_BUILD_TYPE)
@@ -31,6 +31,28 @@ include_directories ( ${CMAKE_SOURCE_DIR}
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
+add_executable (OCApp
+ main.cpp
+${PLATFORM_SOURCES}
+)
 
+if (APPLE)
+include_directories ( /System/Library/Frameworks )
+endif (APPLE)
+
+find_package (Cocoa)
+
+if (COCOA_FOUND)
+include_directories (${COCOA_INCLUDE_DIR})
+target_link_libraries (OCApp ${COCOA_LIBRARIES})
+endif ()
+
+install (TARGETS OCApp DESTINATION ${CMAKE_SOURCE_DIR}/bin)
+
+
+target_link_libraries (OCApp ObjCLib ObjCPPLib)
+
+add_dependencies (OCApp ObjCLib)
+add_dependencies (OCApp ObjCPPLib)
 
 

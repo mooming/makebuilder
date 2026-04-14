@@ -38,6 +38,7 @@ namespace mb
         TString moduleName;
 
         OS::Files srcFiles;
+        OS::Files objectiveCSrcFiles;
         OS::Files headerFiles;
         OS::Files otherFiles;
 
@@ -74,6 +75,7 @@ namespace mb
         [[nodiscard]] auto IsIncludePath() const { return isIncludePath; }
 
         [[nodiscard]] auto& GetSourceFiles() const { return srcFiles; }
+        [[nodiscard]] auto& GetObjectiveCSourceFiles() const { return objectiveCSrcFiles; }
         [[nodiscard]] auto& GetHeaderFiles() const { return headerFiles; }
         [[nodiscard]] auto& GetSubModules() { return submodules; }
         [[nodiscard]] auto& GetSubModules() const { return submodules; }

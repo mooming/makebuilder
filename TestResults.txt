@@ -1,4 +1,4 @@
-Test Results - 2026-03-31 21:51:38
+Test Results - 2026-04-14 15:54:11
 ================================
 
 Test: 01_simple_executable
@@ -17,7 +17,15 @@ Test: 05_submodules
 Status: PASSED
 Message: OK
 
+Test: 07_external_libraries
+Status: FAILED
+Message: Build failed: cmake build failed with code 256
+
+Test: 08_objective_c
+Status: FAILED
+Message: Build failed: cmake build failed with code 256
+
 ================================
-Total: 4
+Total: 6
 Passed: 4
-Failed: 0
+Failed: 2

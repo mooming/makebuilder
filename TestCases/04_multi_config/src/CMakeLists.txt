@@ -10,25 +10,30 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 set (CMAKE_CXX_FLAGS_DEV "${CMAKE_CXX_FLAGS_DEBUG} -O1")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
-set (CMAKE_CXX_STANDARD 23)
+set (CMAKE_CXX_STANDARD 17)
+
+if (APPLE)
+    set(PLATFORM_SOURCES
+    )
+else()
+    set(PLATFORM_SOURCES "")
+endif()
 
 if (MSVC)
-	add_compile_options (/W4 /WX)
+	add_compile_options (/W3 /WX)
 else (MSVC)
 	add_compile_options (-Wall -Werror)
 endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- ${CMAKE_SOURCE_DIR}/Source
- ${CMAKE_SOURCE_DIR}/Source/Common
  )
 link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 
 add_executable (MultiConfigApp
  main.cpp
- main.cpp
+${PLATFORM_SOURCES}
 )
 
 if (APPLE)

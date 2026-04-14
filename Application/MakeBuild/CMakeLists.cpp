@@ -116,6 +116,24 @@ namespace mb
         auto cxxStandard = buildConfig.GetValue("cxxStandard", "17");
         ofs << "set (CMAKE_CXX_STANDARD " << cxxStandard << ")" << endl;
         ofs << endl;
+
+        ofs << "if (APPLE)" << endl;
+        ofs << "    set(PLATFORM_SOURCES" << endl;
+
+        {
+            auto& objCsrcFiles = module.GetObjectiveCSourceFiles();
+            for (auto& objCsrcFile : objCsrcFiles)
+            {
+                ofs << "        " << objCsrcFile << endl;
+            }
+        }
+
+        ofs << "    )" << endl;
+        ofs << "else()" << endl;
+        ofs << "    set(PLATFORM_SOURCES \"\")" << endl;
+        ofs << "endif()" << endl;
+
+        ofs << endl;
         ofs << "if (MSVC)" << endl;
 
         auto compileOptions =
@@ -215,6 +233,8 @@ namespace mb
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
+            ofs << "${PLATFORM_SOURCES}" << endl;
+
             ofs << ")" << endl << endl;
 
             AddFrameworks(ofs, moduleName, module.GetFrameworks());
@@ -238,6 +258,8 @@ namespace mb
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
 
+            ofs << "${PLATFORM_SOURCES}" << endl;
+
             ofs << ")" << endl << endl;
 
             AddFrameworks(ofs, moduleName, module.GetFrameworks());
@@ -259,6 +281,8 @@ namespace mb
             {
                 ofs << " " << PathToName(element.GetPath().c_str()) << endl;
             }
+
+            ofs << "${PLATFORM_SOURCES}" << endl;
 
             ofs << ")" << endl << endl;
 

@@ -16,8 +16,8 @@ namespace mb
 const string& BuildTypeToString(EBuildType type)
 {
     constexpr auto arraySize = static_cast<size_t>(EBuildType::Max);
-    static array<string, arraySize> strings{"None", "Ignored", "HeaderOnly", "Executable",
-        "StaticLibrary", "SharedLibrary", "ExternalLibrary"};
+    static array<string, arraySize> strings{
+        "None", "Ignored", "HeaderOnly", "Executable", "StaticLibrary", "SharedLibrary", "ExternalLibrary"};
 
     const size_t index = static_cast<uint8_t>(type);
     if (index > arraySize || index < 0)
@@ -96,7 +96,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
     CollectFiles();
 
     bool hasValidConfig = config.IsValid();
-    bool hasSourceFiles = !srcFiles.empty();
+    bool hasSourceFiles = !srcFiles.empty() || !objectiveCSrcFiles.empty();
     bool hasHeaderFiles = !headerFiles.empty();
 
     auto name = config.GetValue("name", "");
@@ -156,7 +156,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
 
 bool Module::HasSourceFileRecursive() const
 {
-    if (!srcFiles.empty() || !headerFiles.empty())
+    if (!srcFiles.empty() || !objectiveCSrcFiles.empty() || !headerFiles.empty())
         return true;
 
     for (const auto& subDir : submodules)
@@ -171,13 +171,14 @@ bool Module::HasSourceFileRecursive() const
 void Module::PrintInfo(const std::string& header) const
 {
     cout << endl;
-    cout << header << " [ModuleInfo][" << moduleName << "] START ###"<< endl;
-    cout << header << " [ModuleInfo][" << moduleName << "] Path = " << path << ", Build Type = "
-       << BuildTypeToString(buildType).c_str() << endl;
+    cout << header << " [ModuleInfo][" << moduleName << "] START ###" << endl;
+    cout << header << " [ModuleInfo][" << moduleName << "] Path = " << path
+         << ", Build Type = " << BuildTypeToString(buildType).c_str() << endl;
 
     if (!precompileDefinitions.empty())
     {
-        cout << header << " [ModuleInfo][" << moduleName << "] Precompile Definitions = " << precompileDefinitions << endl;
+        cout << header << " [ModuleInfo][" << moduleName << "] Precompile Definitions = " << precompileDefinitions
+             << endl;
     }
 
     if (!optimizeLevel.empty())
@@ -221,10 +222,18 @@ void Module::PrintInfo(const std::string& header) const
         }
     }
 
+    if (!objectiveCSrcFiles.empty())
+    {
+        for (const auto& element : objectiveCSrcFiles)
+        {
+            cout << header << " [ModuleInfo][" << moduleName << "] " << element << endl;
+        }
+    }
+
     cout << header << " [ModuleInfo][" << moduleName << "] END ###" << endl;
 }
 
-void Module::PrintSubModules(const std::string& header) const
+void Module::PrintSubModules(const std::string& header) const // NOLINT(*-no-recursion)
 {
     cout << "[DIR]" << header << path << endl;
     for (const auto& subDir : submodules)
@@ -239,6 +248,7 @@ void Module::CollectFiles()
 {
     // Clear file containers
     srcFiles.clear();
+    objectiveCSrcFiles.clear();
     headerFiles.clear();
     otherFiles.clear();
 
@@ -249,13 +259,15 @@ void Module::CollectFiles()
         using namespace Util;
         const auto& filename = file.GetPath();
 
-        if (EndsWith(ToLowerCase(filename), ".c") ||
-            EndsWith(ToLowerCase(filename), ".cpp"))
+        if (EndsWith(ToLowerCase(filename), ".c") || EndsWith(ToLowerCase(filename), ".cpp"))
         {
             srcFiles.push_back(file);
         }
-        else if (EndsWith(ToLowerCase(filename), ".h") ||
-            EndsWith(ToLowerCase(filename), ".hpp") ||
+        if (EndsWith(ToLowerCase(filename), ".m") || EndsWith(ToLowerCase(filename), ".mm"))
+        {
+            objectiveCSrcFiles.push_back(file);
+        }
+        else if (EndsWith(ToLowerCase(filename), ".h") || EndsWith(ToLowerCase(filename), ".hpp") ||
             EndsWith(ToLowerCase(filename), ".inl"))
         {
             headerFiles.push_back(file);
@@ -268,6 +280,7 @@ void Module::CollectFiles()
 
     // Sort all the file containers
     sort(srcFiles.begin(), srcFiles.end());
+    sort(objectiveCSrcFiles.begin(), objectiveCSrcFiles.end());
     sort(headerFiles.begin(), headerFiles.end());
     sort(otherFiles.begin(), otherFiles.end());
 }

@@ -12,6 +12,13 @@ set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 set (CMAKE_CXX_STANDARD 17)
 
+if (APPLE)
+    set(PLATFORM_SOURCES
+    )
+else()
+    set(PLATFORM_SOURCES "")
+endif()
+
 if (MSVC)
 	add_compile_options (/W3 /WX)
 else (MSVC)
@@ -26,6 +33,7 @@ link_directories (${CMAKE_SOURCE_DIR}/lib)
 
 add_executable (SimpleApp
  main.cpp
+${PLATFORM_SOURCES}
 )
 
 if (APPLE)
