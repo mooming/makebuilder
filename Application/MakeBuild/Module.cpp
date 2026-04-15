@@ -297,6 +297,7 @@ void Module::ParseBuildSpecifiers(const Files& files)
     libraries.clear();
     linkDirectories.clear();
     frameworks.clear();
+    customCMake.clear();
     includePaths.clear();
 
     for (const auto& element : files)
@@ -343,6 +344,16 @@ void Module::ParseBuildSpecifiers(const Files& files)
             filePath.append(element.GetPath());
 
             ParseList(filePath.c_str(), frameworks);
+            continue;
+        }
+
+        if (EqualsIgnoreCase(element.GetPath(), "customCMake.txt"))
+        {
+            string filePath = GetPath();
+            filePath.append("/");
+            filePath.append(element.GetPath());
+
+            ParseList(filePath.c_str(), customCMake);
             continue;
         }
 

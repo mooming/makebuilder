@@ -82,12 +82,14 @@ Located in each module directory.
 
 Optional files placed in module directories:
 
-| File | Description |
-|------|-------------|
-| `include.txt` | Add directory to include paths. Existence adds module directory; each line adds a subdirectory path. |
-| `dependency.txt` | Module dependencies (one per line) |
-| `library.txt` | Required libraries (one per line) |
-| `framework.txt` | Required frameworks (macOS only) |
+| File | Description                                                                                  |
+|------|----------------------------------------------------------------------------------------------|
+| `include.txt` | Add directory and its contents to include paths. Paths are relative to the file's directory. |
+| `dependency.txt` | Module dependencies (one per line)                                                           |
+| `library.txt` | Required libraries (one per line)                                                            |
+| `linkDirectory.txt` | List linker directories (one per line). Paths are relative to the file's directory.          |
+| `framework.txt` | List required frameworks (OpenGL, Vulkan, Cocoa)                                             |
+| `customCMake.txt` | Its contents will be added to CMakeLists.txt for custom usage                                |
 
 ## File Detection
 

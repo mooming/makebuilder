@@ -48,6 +48,7 @@ namespace mb
         Strings libraries;
         Strings linkDirectories;
         Strings frameworks;
+        Strings customCMake;
 
         TString precompileDefinitions;
         TString optimizeLevel;
@@ -84,6 +85,7 @@ namespace mb
         [[nodiscard]] auto& GetLibraries() const { return libraries; }
         [[nodiscard]] auto& GetLinkDirectories() const { return linkDirectories; }
         [[nodiscard]] auto& GetFrameworks() const { return frameworks; }
+        [[nodiscard]] auto& GetCustomCMake() const { return customCMake; }
         [[nodiscard]] auto& GetIncludePaths() const { return includePaths; }
         [[nodiscard]] auto& GetPrecompileDefinitions() const { return precompileDefinitions; }
         [[nodiscard]] auto& GetOptimizeLevel() const { return optimizeLevel; }

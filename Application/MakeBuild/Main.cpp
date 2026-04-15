@@ -57,7 +57,8 @@ int main(int argc, const char* argv[])
         cout << "  dependency.txt     - List module dependencies (one per line)" << endl;
         cout << "  library.txt        - List required libraries (one per line)" << endl;
         cout << "  linkDirectory.txt  - List linker directories (one per line). Paths are relative to the file's directory." << endl;
-        cout << "  framework.txt      - List required frameworks (macOS only)" << endl;
+        cout << "  framework.txt      - List required frameworks (OpenGL, Vulkan, Cocoa)" << endl;
+        cout << "  customCMake.txt   - Its contents will be added to CMakeLists.txt for custom usage" << endl;
 
         return 0;
     }
