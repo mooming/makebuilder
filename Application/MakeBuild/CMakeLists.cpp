@@ -31,6 +31,8 @@ void AddFrameworks(ostream& os, const string& projName, const vector<string>& fr
 {
     os << "if (APPLE)" << endl;
     os << "\tinclude_directories ( /System/Library/Frameworks )" << endl;
+    os << "\tset(MACOSX_BUNDLE_TRUE TRUE)" << endl;
+    os << "\tset(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)" << endl;
     os << "endif (APPLE)" << endl << endl;
 
     auto handleOpenGL = [](ostream& os, const string& projName)
