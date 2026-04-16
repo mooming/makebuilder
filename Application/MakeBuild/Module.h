@@ -53,6 +53,7 @@ namespace mb
         TString precompileDefinitions;
         TString optimizeLevel;
         Strings ignoredSubdirectories;
+        Strings linkerGroupDependencies;
 
         EBuildType buildType;
         bool isIncludePath;
@@ -90,6 +91,8 @@ namespace mb
         [[nodiscard]] auto& GetPrecompileDefinitions() const { return precompileDefinitions; }
         [[nodiscard]] auto& GetOptimizeLevel() const { return optimizeLevel; }
         [[nodiscard]] auto& GetIgnoredSubdirectories() const { return ignoredSubdirectories; }
+
+        [[nodiscard]] auto& GetLinkerGroupDependencies() const { return linkerGroupDependencies; }
 
     private:
         void CollectFiles();

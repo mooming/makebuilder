@@ -4,6 +4,7 @@
 
 #include "StringUtil.h"
 #include <algorithm>
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -16,7 +17,7 @@ namespace mb
 const string& BuildTypeToString(EBuildType type)
 {
     constexpr auto arraySize = static_cast<size_t>(EBuildType::Max);
-    static array<string, arraySize> strings{
+    static std::array<string, arraySize> strings{
         "None", "Ignored", "HeaderOnly", "Executable", "StaticLibrary", "SharedLibrary", "ExternalLibrary"};
 
     const size_t index = static_cast<uint8_t>(type);
@@ -147,6 +148,26 @@ Module::Module(const Module* parent, const OS::Directory& dir)
             {
                 isIncludePath = true;
                 break;
+            }
+        }
+    }
+
+    {
+        auto value = config.GetValue("linkerGroupDependency");
+        if (value.has_value())
+        {
+            const std::string& deps = *value;
+            std::istringstream iss(deps);
+            std::string dep;
+
+            while (std::getline(iss, dep, ','))
+            {
+                dep = Util::Trim(dep);
+                if (dep.empty())
+                    continue;
+
+                std::ranges::transform(dep, dep.begin(), ::tolower);
+                linkerGroupDependencies.push_back(dep);
             }
         }
     }
