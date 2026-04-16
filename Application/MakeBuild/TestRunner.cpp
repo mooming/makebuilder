@@ -3,12 +3,9 @@
 // Runs test cases and updates TestResults.txt
 
 #include "TestRunner.h"
-#include "OSAbstractLayer.h"
-#include "StringUtil.h"
 
 #include "OSAbstractLayer.h"
 #include "StringUtil.h"
-
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
@@ -16,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
 
 using namespace std;
 
@@ -108,7 +106,12 @@ bool TestRunner::RunSingleTest(const TString& testPath, const TString& mbuildPat
                     continue;
 
                 cout << "[TestRunner] PreTestCMD: Execute) " << line.c_str() << endl;
-                system(line.c_str());
+                int rc = system(line.c_str());
+                if (rc != 0)
+                {
+                    result.message = "makebuild failed at pretest command: " + line;
+                    return false;
+                }
             }
         }
     }

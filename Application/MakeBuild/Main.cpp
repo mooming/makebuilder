@@ -31,7 +31,8 @@ int main(int argc, const char* argv[])
         cout << "    cxxStandard = <standard>            (default: 17)" << endl;
         cout << "    compileOptions = <options>         (default: -Wall -Werror)" << endl;
         cout << "    msvcCompileOptions = <options>     (default: /W3 /WX)" << endl;
-        cout << "    precompileDefinitions = <defs>     (optional)" << endl << endl;
+        cout << "    precompileDefinitions = <defs>     (optional)" << endl;
+        cout << "    linkerGroupDependency = <deps>     (comma-separated list, or 'all')" << endl << endl;
 
         cout << "== Module Configuration ==" << endl;
         cout << "Place .module.config in each module directory." << endl << endl;
@@ -41,7 +42,8 @@ int main(int argc, const char* argv[])
     cout << "    buildType = <type>                 (see below)" << endl;
     cout << "    precompileDefinitions = <defs>     (optional)" << endl;
     cout << "    optimizeLevel = <level>            (0-3, optional)" << endl;
-    cout << "    ignoreSubdirectories = <dirs>      (space-separated list of subdirs to skip)" << endl << endl;
+    cout << "    ignoreSubdirectories = <dirs>      (space-separated list of subdirs to skip)" << endl;
+    cout << "    linkerGroupDependency = <deps>     (comma-separated list, or 'all')" << endl << endl;
 
         cout << "  Build types:" << endl;
         cout << "    None           - Not a module, but may contain modules" << endl;

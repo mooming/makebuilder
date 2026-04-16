@@ -19,7 +19,7 @@ namespace mb
         CMakeGenerator(const mb::ProjectBuilder& build, const mb::Module& module);
         ~CMakeGenerator() = default;
 
-        void Generate();
-        std::string TranslatePath(std::string path);
+        void Generate() const;
+        std::string TranslatePath(std::string path) const;
     };
 } // namespace mb

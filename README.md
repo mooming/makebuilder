@@ -53,6 +53,7 @@ Located in the project root directory.
 | `compileOptions` | -Wall -Werror | Compiler flags (non-MSVC) |
 | `msvcCompileOptions` | /W3 /WX | Compiler flags (MSVC) |
 | `precompileDefinitions` | (none) | Preprocessor definitions |
+| `linkerGroupDependency` | (not set) | Comma-separated list of dependencies to wrap with --start-group/--end-group (or 'all' for all libraries) |
 
 ### .module.config (Each Module)
 
@@ -65,6 +66,7 @@ Located in each module directory.
 | `precompileDefinitions` | Module-specific definitions |
 | `optimizeLevel` | Optimization level override (0-3) |
 | `ignoreSubdirectories` | Space-separated list of subdirectories to skip |
+| `linkerGroupDependency` | Comma-separated list of dependencies to wrap with --start-group/--end-group (or 'all' for all libraries) |
 
 ### Build Types
 
@@ -77,6 +79,50 @@ Located in each module directory.
 | `StaticLibrary` | Static library (.a/.lib) |
 | `SharedLibrary` | Shared library (.so/.dll) |
 | `ExternalLibrary` | External library directory |
+
+### Circular Dependency Resolution
+
+Static library linking with gcc/g++ can fail with circular dependencies. The linker processes libraries left-to-right and may fail to resolve symbols that are defined later in the dependency chain.
+
+**Solution**: Use linker group flags (`--start-group`/`--end-group`) to let the linker repeatedly scan the group until all symbols are resolved.
+
+**Configuration Options**:
+
+| Option | Description |
+|--------|-------------|
+| `linkerGroupDependency` | Comma-separated list of dependency names to wrap. Use `all` to wrap all libraries. |
+
+**Examples**:
+
+```cmake
+# .project.config or .module.config
+# Option 1: Group all libraries (simplest)
+linkerGroupDependency = all
+
+# Option 2: Group specific dependencies (recommended)
+linkerGroupDependency = Core, Math, OSAL
+
+# Option 3: Disable linker group
+# (Simply do not set linkerGroupDependency)
+```
+
+**Generated CMakeLists.txt** (with Option 2):
+```cmake
+target_link_libraries (MyTarget
+  -Wl,--start-group
+  Core
+  Math
+  OSAL
+  -Wl,--end-group
+  ExternalLib
+  InternalLib
+)
+```
+
+**Configuration Hierarchy**:
+1. Check `.module.config` in the module directory
+2. Fall back to `.project.config` in the project root
+3. If neither is set, the feature is disabled
 
 ### Module Specifier Files
 

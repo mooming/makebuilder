@@ -3,24 +3,16 @@
 #include "CMakeLists.h"
 
 #include "StringUtil.h"
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <vector>
-
-using namespace std;
-using namespace mb;
-
-#include "CMakeLists.h"
-
-#include "StringUtil.h"
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 
 using namespace std;
 using namespace mb;
@@ -98,6 +90,7 @@ void AddOptimizeLevel(ostream& os, const string& projName, const string& optimiz
 
     os << "target_compile_options (" << projName << " PRIVATE -O" << optimizeLevel << ")" << endl;
 }
+
 } // anonymous namespace
 
 namespace mb
@@ -109,7 +102,7 @@ CMakeGenerator::CMakeGenerator(const ProjectBuilder& build, const Module& module
 {
 }
 
-void CMakeGenerator::Generate()
+void CMakeGenerator::Generate() const
 {
     const auto& buildConfig = build.config;
     const EBuildType buildType = module.GetBuildType();
@@ -132,9 +125,9 @@ void CMakeGenerator::Generate()
     ofs << "project (" << moduleName << ")" << endl;
     ofs << endl;
 
-    ofs << "set (CMAKE_CONFIGURATION_TYPES \"Debug;Dev;Release\" CACHE STRING \"\" FORCE)" << endl;
+    ofs << R"(set (CMAKE_CONFIGURATION_TYPES "Debug;Dev;Release" CACHE STRING "" FORCE))" << endl;
     ofs << "if (NOT CMAKE_BUILD_TYPE)" << endl;
-    ofs << "    set (CMAKE_BUILD_TYPE \"Release\" CACHE STRING \"Build type\" FORCE)" << endl;
+    ofs << R"(    set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE))" << endl;
     ofs << "endif ()" << endl;
     ofs << endl;
     ofs << "set (CMAKE_CXX_FLAGS_DEBUG \"${CMAKE_CXX_FLAGS_DEBUG} -g -O0\")" << endl;
@@ -247,7 +240,7 @@ void CMakeGenerator::Generate()
             continue;
         }
 
-        ofs << "add_subdirectory (" << PathToName(subModule.GetPath().c_str()) << ")" << endl;
+        ofs << "add_subdirectory (" << PathToName(subModule.GetPath()) << ")" << endl;
     }
 
     ofs << endl;
@@ -255,16 +248,16 @@ void CMakeGenerator::Generate()
     switch (buildType)
     {
     case EBuildType::Executable:
-        ofs << "add_executable (" << moduleName.c_str() << endl;
+        ofs << "add_executable (" << moduleName << endl;
 
         for (const auto& element : module.GetSourceFiles())
         {
-            ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+            ofs << " " << PathToName(element.GetPath()) << endl;
         }
 
         for (const auto& element : module.GetHeaderFiles())
         {
-            ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+            ofs << " " << PathToName(element.GetPath()) << endl;
         }
 
         ofs << "${PLATFORM_SOURCES}" << endl;
@@ -279,16 +272,16 @@ void CMakeGenerator::Generate()
 
     case EBuildType::StaticLibrary:
         ofs << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY " << basePath << "/lib)" << endl;
-        ofs << "add_library (" << moduleName.c_str() << " STATIC " << endl;
+        ofs << "add_library (" << moduleName << " STATIC " << endl;
 
         for (const auto& element : module.GetSourceFiles())
         {
-            ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+            ofs << " " << PathToName(element.GetPath()) << endl;
         }
 
         for (const auto& element : module.GetHeaderFiles())
         {
-            ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+            ofs << " " << PathToName(element.GetPath()) << endl;
         }
 
         ofs << "${PLATFORM_SOURCES}" << endl;
@@ -302,16 +295,16 @@ void CMakeGenerator::Generate()
         break;
 
     case EBuildType::SharedLibrary:
-        ofs << "add_library (" << moduleName.c_str() << " SHARED " << endl;
+        ofs << "add_library (" << moduleName << " SHARED " << endl;
 
         for (const auto& element : module.GetSourceFiles())
         {
-            ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+            ofs << " " << PathToName(element.GetPath()) << endl;
         }
 
         for (const auto& element : module.GetHeaderFiles())
         {
-            ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+            ofs << " " << PathToName(element.GetPath()) << endl;
         }
 
         ofs << "${PLATFORM_SOURCES}" << endl;
@@ -330,7 +323,7 @@ void CMakeGenerator::Generate()
 
         for (const auto& element : module.GetHeaderFiles())
         {
-            ofs << " " << PathToName(element.GetPath().c_str()) << endl;
+            ofs << " " << PathToName(element.GetPath()) << endl;
         }
 
         ofs << ")" << endl;
@@ -358,11 +351,9 @@ void CMakeGenerator::Generate()
     auto& libList = module.GetLibraries();
     auto& externalLibs = build.externalLibraries;
 
-    // FIX 2026-04-03: Skip target_link_libraries for None type modules
-    // Modules with None build type are just
-    // path containers and shouldn't have target_link_libraries generated.
-    // This prevents CMake errors like "Cannot specify link libraries for target
-    // which is not built by this project."
+    // FIX 2026-04-03: Skip target_link_libraries for None type modules - these are just path
+    // containers and shouldn't have target_link_libraries generated. This prevents CMake errors
+    // like "Cannot specify link libraries for target which is not built by this project."
     if (buildType == EBuildType::None)
     {
         // Don't generate target_link_libraries for placeholder modules
@@ -370,38 +361,70 @@ void CMakeGenerator::Generate()
     else if (!externalLibs.empty() || !dependencyList.empty() || !libList.empty())
     {
         bool isInterface = (buildType == EBuildType::HeaderOnly || buildType == EBuildType::ExternalLibrary);
+        const auto& groupDeps = module.GetLinkerGroupDependencies();
+
+        // Determine which libraries to wrap
+        bool wrapAll = false;
+        for (const auto& gd : groupDeps)
+        {
+            if (Util::EqualsIgnoreCase(gd, "all"))
+            {
+                wrapAll = true;
+                break;
+            }
+        }
+        
         ofs << "target_link_libraries (" << moduleName;
         if (isInterface)
         {
             ofs << " INTERFACE";
         }
 
-        // External libraries from library.txt in this module
-        for (const auto& extLib : externalLibs)
-        {
-            if (extLib.empty())
-                continue;
+        vector<string> inGroup;
+        vector<string> outsideGroup;
 
-            ofs << " " << extLib;
+        if (wrapAll)
+        {
+            for (const auto& d : dependencyList) if (!d.empty()) inGroup.push_back(d);
+            for (const auto& e : externalLibs)   if (!e.empty()) inGroup.push_back(e);
+            for (const auto& l : libList)        if (!l.empty()) inGroup.push_back(l);
         }
-
-        for (const auto& dependency : dependencyList)
+        else if (!groupDeps.empty())
         {
-            if (dependency.empty())
-                continue;
-
-            ofs << " " << dependency;
-        }
-
-        if (buildType != EBuildType::None)
-        {
-            for (const auto& library : libList)
+            for (const auto& d : dependencyList)
             {
-                if (library.empty())
-                    continue;
+                if (d.empty()) continue;
 
-                ofs << " " << library;
+                bool isGrouped = false;
+                for (const auto& gd : groupDeps)
+                {
+                    if (Util::EqualsIgnoreCase(d, gd)) { isGrouped = true; break; }
+                }
+
+                if (isGrouped) inGroup.push_back(d);
+                else           outsideGroup.push_back(d);
             }
+
+            for (const auto& e : externalLibs) if (!e.empty()) outsideGroup.push_back(e);
+            for (const auto& l : libList)      if (!l.empty()) outsideGroup.push_back(l);
+        }
+        else
+        {
+            for (const auto& d : dependencyList) if (!d.empty()) outsideGroup.push_back(d);
+            for (const auto& e : externalLibs)   if (!e.empty()) outsideGroup.push_back(e);
+            for (const auto& l : libList)        if (!l.empty()) outsideGroup.push_back(l);
+        }
+
+        if (!inGroup.empty())
+        {
+            ofs << " -Wl,--start-group";
+            for (const auto& item : inGroup) ofs << " " << item;
+            ofs << " -Wl,--end-group";
+        }
+
+        for (const auto& item : outsideGroup)
+        {
+            ofs << " " << item;
         }
 
         ofs << ")" << endl << endl;
@@ -413,6 +436,7 @@ void CMakeGenerator::Generate()
 
             ofs << "add_dependencies (" << moduleName.c_str() << " " << dependency << ")" << endl;
         }
+
         ofs << endl;
     }
 
@@ -429,12 +453,10 @@ void CMakeGenerator::Generate()
     }
 
     ofs << endl;
-
-    // flush and close
     ofs.close();
 }
 
-string CMakeGenerator::TranslatePath(string path)
+string CMakeGenerator::TranslatePath(string path) const
 {
     using namespace Util;
     path = TrimPath(path);
