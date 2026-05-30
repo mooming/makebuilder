@@ -121,6 +121,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
     }
 
     precompileDefinitions = config.GetValue("precompileDefinitions", "");
+    globalPrecompileDefinitions = config.GetValue("globalPrecompileDefinitions", "");
     optimizeLevel = config.GetValue("optimizeLevel", "");
 
     {

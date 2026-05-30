@@ -51,6 +51,7 @@ namespace mb
         Strings customCMake;
 
         TString precompileDefinitions;
+        TString globalPrecompileDefinitions; // definitions from .module.config that should be applied globally
         TString optimizeLevel;
         Strings ignoredSubdirectories;
 
@@ -88,6 +89,7 @@ namespace mb
         [[nodiscard]] auto& GetCustomCMake() const { return customCMake; }
         [[nodiscard]] auto& GetIncludePaths() const { return includePaths; }
         [[nodiscard]] auto& GetPrecompileDefinitions() const { return precompileDefinitions; }
+        [[nodiscard]] auto& GetGlobalPrecompileDefinitions() const { return globalPrecompileDefinitions; }
         [[nodiscard]] auto& GetOptimizeLevel() const { return optimizeLevel; }
         [[nodiscard]] auto& GetIgnoredSubdirectories() const { return ignoredSubdirectories; }
 

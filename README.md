@@ -63,6 +63,7 @@ Located in each module directory.
 | `name` | Module identifier (defaults to directory name) |
 | `buildType` | Module type (see below) |
 | `precompileDefinitions` | Module-specific definitions |
+| `globalPrecompileDefinitions` | Definitions that **this module exports globally** to every other module that participates in the build (owner‑module dependent) |
 | `optimizeLevel` | Optimization level override (0-3) |
 | `ignoreSubdirectories` | Space-separated list of subdirectories to skip |
 

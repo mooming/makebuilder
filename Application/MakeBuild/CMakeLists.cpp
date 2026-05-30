@@ -187,22 +187,39 @@ void CMakeGenerator::Generate()
     ofs << "endif (MSVC)" << endl;
     ofs << endl;
 
+    // Emit global precompile definitions from each module that defines them.
+    // For each owner module we generate a conditional block:
+    //   if (TARGET <ownerModule>)
+    //       add_compile_definitions (<owner's global defs>)
+    //   endif()
+    // This ensures the definitions are only applied when the owning module is part of the build.
+    for (auto* m : build.modules)
+    {
+        const auto& defs = m->GetGlobalPrecompileDefinitions();
+        if (defs.empty())
+            continue; // nothing to emit for this module
+        // Emit a conditional block for the owner module
+        ofs << "if (TARGET " << m->GetName() << ")" << endl;
+        ofs << "    add_compile_definitions (" << defs << ")" << endl;
+        ofs << "endif ()" << endl;
+    }
+
+    // Now emit the regular (non‑global) definitions for the current module
     auto precompileDefs = buildConfig.GetValue("precompileDefinitions");
     auto& moduleDefs = module.GetPrecompileDefinitions();
     if (precompileDefs.has_value() || !moduleDefs.empty())
     {
         ofs << "add_compile_definitions (";
-
+        // Module‑specific definitions from .module.config
         if (precompileDefs.has_value())
         {
             ofs << *precompileDefs << " ";
         }
-
+        // Additional definitions collected directly from the module object
         if (!moduleDefs.empty())
         {
             ofs << moduleDefs << " ";
         }
-
         ofs << ")" << endl;
     }
 
