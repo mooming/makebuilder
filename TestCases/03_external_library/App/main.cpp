@@ -3,7 +3,6 @@
 
 int main()
 {
-    TestSDK::SayHello();
-    return 0;
+	TestSDK::SayHello();
+	return 0;
 }
-

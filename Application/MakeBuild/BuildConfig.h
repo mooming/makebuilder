@@ -11,18 +11,22 @@ namespace mb
 class BuildConfig final
 {
 public:
-    using TString = std::string;
-    using TValue = ConfigParser::TValue;
+	using TString = std::string;
+	using TValue = ConfigParser::TValue;
 
 private:
-    ConfigParser parser;
+	ConfigParser parser;
 
 public:
-    BuildConfig(const char* path, const char* fileName);
-    ~BuildConfig() = default;
+	BuildConfig(const char* path, const char* fileName);
+	~BuildConfig() = default;
 
-    [[nodiscard]] TValue GetValue(const TString& key) const;
-    [[nodiscard]] TString GetValue(const TString& key, const TString& defaultValue) const;
-    [[nodiscard]] auto IsValid() const { return parser.IsValid(); }
+	[[nodiscard]] TValue GetValue(const TString& key) const;
+	[[nodiscard]] TString GetValue(const TString& key, const TString& defaultValue) const;
+
+	[[nodiscard]] auto IsValid() const
+	{
+		return parser.IsValid();
+	}
 };
 } // namespace mb

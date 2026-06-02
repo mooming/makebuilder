@@ -9,17 +9,16 @@ namespace mb
 
 BuildConfig::BuildConfig(const char* path, const char* fileName)
 {
-    parser.Load(path, fileName);
+	parser.Load(path, fileName);
 }
 
 BuildConfig::TValue BuildConfig::GetValue(const TString& key) const
 {
-    return parser.GetValue(key);
+	return parser.GetValue(key);
 }
 
-BuildConfig::TString BuildConfig::GetValue(
-    const TString& key, const TString& defaultValue) const
+BuildConfig::TString BuildConfig::GetValue(const TString& key, const TString& defaultValue) const
 {
-    return parser.GetValue(key, defaultValue);
+	return parser.GetValue(key, defaultValue);
 }
 } // namespace mb

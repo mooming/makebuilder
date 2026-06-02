@@ -2,29 +2,40 @@
 
 #pragma once
 
-#include "File.h"
 #include <string>
 #include <vector>
+#include "File.h"
 
 namespace OS
 {
-    class Directory
-    {
-        using Dirs = std::vector<Directory>;
+class Directory
+{
+	using Dirs = std::vector<Directory>;
 
-    private:
-        std::string path;
-        Files fileList;
-        Dirs dirList;
+private:
+	std::string path;
+	Files fileList;
+	Dirs dirList;
 
-    public:
-        Directory(const char* path);
-        virtual ~Directory() = default;
+public:
+	Directory(const char* path);
+	virtual ~Directory() = default;
 
-        const Files& FileList() const { return fileList; }
-        const Dirs& DirList() const { return dirList; }
-        const std::string& GetPath() const { return path; }
-    };
+	const Files& FileList() const
+	{
+		return fileList;
+	}
 
-    using Dirs = std::vector<Directory>;
+	const Dirs& DirList() const
+	{
+		return dirList;
+	}
+
+	const std::string& GetPath() const
+	{
+		return path;
+	}
+};
+
+using Dirs = std::vector<Directory>;
 } // namespace OS
