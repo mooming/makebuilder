@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include "BuildConfig.h"
-#include "Module.h"
 #include <string>
 #include <vector>
-
+#include "BuildConfig.h"
+#include "Module.h"
 
 namespace mb
 {
@@ -15,25 +14,25 @@ namespace mb
 class ProjectBuilder final
 {
 public:
-    using Modules = std::vector<Module*>;
-    using Paths = std::vector<std::string>;
+	using Modules = std::vector<Module*>;
+	using Paths = std::vector<std::string>;
 
 public:
-    const BuildConfig config;
-    Module baseModule;
-    Modules modules;
-    Paths includeDirs;
-    
-    // externalLibraries collected from library.txt files in modules
-    Module::Strings externalLibraries;
+	const BuildConfig config;
+	Module baseModule;
+	Modules modules;
+	Paths includeDirs;
+
+	// externalLibraries collected from library.txt files in modules
+	Module::Strings externalLibraries;
 
 public:
-    explicit ProjectBuilder(const char* rootPath);
-    ~ProjectBuilder() = default;
+	explicit ProjectBuilder(const char* rootPath);
+	~ProjectBuilder() = default;
 
-    void GenerateCMakeFiles();
+	void GenerateCMakeFiles();
 
 private:
-    bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
+	bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
 };
 } // namespace mb

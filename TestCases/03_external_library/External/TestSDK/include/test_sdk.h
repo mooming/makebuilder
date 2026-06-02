@@ -1,6 +1,7 @@
 #pragma once
 
-namespace TestSDK {
+namespace TestSDK
+{
 
 void SayHello();
 

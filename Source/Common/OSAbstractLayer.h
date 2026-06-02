@@ -19,8 +19,8 @@
 #endif // WINDOWS
 
 #ifdef POSIX
-#include <dirent.h>
 #include <climits>
+#include <dirent.h>
 // PATH_MAX may not be defined on all POSIX systems (e.g., macOS, BSD).
 // Added fallback definition to ensure TrimPath() and realpath() work correctly.
 // Previously caused compilation errors or buffer overflows on some platforms.
@@ -32,8 +32,8 @@
 
 namespace OS
 {
-    std::string GetFullPath(std::string path);
+std::string GetFullPath(std::string path);
 
-    bool IsDirectory(const char* path);
-    std::vector<std::string> ListFilesInDirectory(const char* path);
+bool IsDirectory(const char* path);
+std::vector<std::string> ListFilesInDirectory(const char* path);
 } // namespace OS
