@@ -34,5 +34,6 @@ public:
 
 private:
 	bool TraverseDirectoryTree(Module& dir, const std::string& logHeader);
+	void MigrateModuleSpecifiers(Module& module);
 };
 } // namespace mb

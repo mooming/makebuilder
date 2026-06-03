@@ -3,6 +3,7 @@
 #pragma once
 
 #include "BuildConfig.h"
+#include "ConfigParser.h"
 #include "Directory.h"
 #include "File.h"
 
@@ -60,6 +61,8 @@ public:
 	explicit Module(const OS::Directory& dir);
 	Module(const Module* parent, const OS::Directory& dir);
 	~Module() override = default;
+
+	void ReloadConfigValues();
 
 	bool operator<(const Module& rhs) const
 	{
@@ -164,6 +167,7 @@ public:
 private:
 	void CollectFiles();
 	void ParseBuildSpecifiers(const OS::Files& files);
+	void ParseListFromConfig(const TString& key, Strings& out);
 	void Sort();
 };
 } // namespace mb

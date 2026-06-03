@@ -52,6 +52,27 @@ ConfigParser::TString ConfigParser::GetValue(const TString& key, const TString& 
 	return (*found).second;
 }
 
+void ConfigParser::SetValue(const TString& key, const TString& value)
+{
+	keymap[key] = value;
+	isValid = true;
+}
+
+void ConfigParser::Save(const char* filePath)
+{
+	std::ofstream ofs(filePath);
+	if (!ofs.is_open())
+	{
+		std::cerr << "[ConfigParser] Failed to save config file, " << filePath << "." << std::endl;
+		return;
+	}
+
+	for (const auto& [key, value] : keymap)
+	{
+		ofs << key << "=" << value << "\n";
+	}
+}
+
 void ConfigParser::Parse(const char* filePath)
 {
 	using namespace std;

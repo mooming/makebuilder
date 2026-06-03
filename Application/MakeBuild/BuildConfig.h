@@ -28,5 +28,15 @@ public:
 	{
 		return parser.IsValid();
 	}
+
+	void SetValue(const TString& key, const TString& value)
+	{
+		parser.SetValue(key, value);
+	}
+
+	void Save(const char* filePath)
+	{
+		parser.Save(filePath);
+	}
 };
 } // namespace mb

@@ -141,13 +141,9 @@ Module::Module(const Module* parent, const OS::Directory& dir)
 	}
 	else
 	{
-		for (const auto& file : otherFiles)
+		if (!config.GetValue("include", "").empty())
 		{
-			if (Util::EqualsIgnoreCase(file.GetPath(), "include.txt"))
-			{
-				isIncludePath = true;
-				break;
-			}
+			isIncludePath = true;
 		}
 	}
 
@@ -170,6 +166,12 @@ Module::Module(const Module* parent, const OS::Directory& dir)
 			}
 		}
 	}
+
+	ParseListFromConfig("include", includePaths);
+	ParseListFromConfig("dependency", dependencies);
+	ParseListFromConfig("library", libraries);
+	ParseListFromConfig("linkDirectory", linkDirectories);
+	ParseListFromConfig("framework", frameworks);
 
 	ParseBuildSpecifiers(otherFiles);
 	Sort();
@@ -311,80 +313,126 @@ void Module::CollectFiles()
 	sort(otherFiles.begin(), otherFiles.end());
 }
 
-void Module::ParseBuildSpecifiers(const Files& files)
+void Module::ParseListFromConfig(const TString& key, Strings& out)
 {
+	TString value = config.GetValue(key, "");
+	if (value.empty())
+		return;
+
+	std::istringstream iss(value);
+	std::string item;
+	while (std::getline(iss, item, ';'))
+	{
+		item = Util::Trim(item);
+		if (!item.empty())
+		{
+			out.push_back(item);
+		}
+	}
+}
+
+void Module::ReloadConfigValues()
+{
+	includePaths.clear();
 	dependencies.clear();
 	libraries.clear();
 	linkDirectories.clear();
 	frameworks.clear();
+
+	ParseListFromConfig("include", includePaths);
+	ParseListFromConfig("dependency", dependencies);
+	ParseListFromConfig("library", libraries);
+	ParseListFromConfig("linkDirectory", linkDirectories);
+	ParseListFromConfig("framework", frameworks);
+
+	if (!config.GetValue("include", "").empty())
+	{
+		isIncludePath = true;
+	}
+}
+
+void Module::ParseBuildSpecifiers(const Files& files)
+{
 	customCMake.clear();
-	includePaths.clear();
+
+	struct SpecifierMap
+	{
+		TString fileName;
+		TString configKey;
+		Strings* member;
+	};
+
+	const std::array<SpecifierMap, 6> specifiers = {{
+		{"dependencies.txt", "dependency", &dependencies},
+		{"dependency.txt", "dependency", &dependencies},
+		{"library.txt", "library", &libraries},
+		{"include.txt", "include", &includePaths},
+		{"linkDirectory.txt", "linkDirectory", &linkDirectories},
+		{"framework.txt", "framework", &frameworks},
+	}};
 
 	for (const auto& element : files)
 	{
 		using namespace Util;
 
-		// std::cout << "[Module][" << moduleName << "] Check: " << element.GetPath() << std::endl;
+		const TString& filename = element.GetPath();
 
-		if (EqualsIgnoreCase(element.GetPath(), "dependency.txt"))
+		// Handle customCMake.txt (keep as file for now)
+		if (EqualsIgnoreCase(filename, "customCMake.txt"))
 		{
 			string filePath = GetPath();
 			filePath.append("/");
-			filePath.append(element.GetPath());
-
-			ParseList(filePath.c_str(), dependencies);
-			continue;
-		}
-
-		if (EqualsIgnoreCase(element.GetPath(), "library.txt"))
-		{
-			string filePath = GetPath();
-			filePath.append("/");
-			filePath.append(element.GetPath());
-
-			ParseList(filePath.c_str(), libraries);
-			continue;
-		}
-
-		if (EqualsIgnoreCase(element.GetPath(), "linkDirectory.txt"))
-		{
-			string filePath = GetPath();
-			filePath.append("/");
-			filePath.append(element.GetPath());
-
-			ParseList(filePath.c_str(), linkDirectories);
-
-			continue;
-		}
-
-		if (EqualsIgnoreCase(element.GetPath(), "framework.txt"))
-		{
-			string filePath = GetPath();
-			filePath.append("/");
-			filePath.append(element.GetPath());
-
-			ParseList(filePath.c_str(), frameworks);
-			continue;
-		}
-
-		if (EqualsIgnoreCase(element.GetPath(), "customCMake.txt"))
-		{
-			string filePath = GetPath();
-			filePath.append("/");
-			filePath.append(element.GetPath());
+			filePath.append(filename);
 
 			ParseList(filePath.c_str(), customCMake);
 			continue;
 		}
 
-		if (EqualsIgnoreCase(element.GetPath(), "include.txt"))
+		// Handle migration of other specifiers
+		for (const auto& spec : specifiers)
 		{
-			string filePath = GetPath();
-			filePath.append("/");
-			filePath.append(element.GetPath());
+			if (EqualsIgnoreCase(filename, spec.fileName))
+			{
+				string filePath = GetPath();
+				filePath.append("/");
+				filePath.append(filename);
 
-			ParseList(filePath.c_str(), includePaths);
-			continue;
+				// Temporary list to read from file
+				Strings fileList;
+				ParseList(filePath.c_str(), fileList);
+
+				if (fileList.empty())
+					continue;
+
+				cout << "[Module][" << moduleName << "] Migrating " << filename << " to .module.config" << endl;
+
+				// Merge file content into the member vector (avoiding duplicates)
+				for (const auto& item : fileList)
+				{
+					if (std::find(spec.member->begin(), spec.member->end(), item) == spec.member->end())
+					{
+						spec.member->push_back(item);
+					}
+				}
+
+				// Convert the updated member vector back to a semicolon-separated string for config
+				TString combinedValue;
+				for (size_t i = 0; i < spec.member->size(); ++i)
+				{
+					combinedValue += (*spec.member)[i];
+					if (i < spec.member->size() - 1)
+					{
+						combinedValue += ";";
+					}
+				}
+
+				// Update and save the config
+				config.SetValue(spec.configKey, combinedValue);
+				
+				string configPath = GetPath();
+				configPath.append("/.module.config");
+				config.Save(configPath.c_str());
+			}
 		}
 	}
 }
