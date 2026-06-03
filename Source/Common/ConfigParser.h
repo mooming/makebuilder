@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <fstream>
+#include <iostream>
 
 namespace mb
 {
@@ -58,6 +60,12 @@ public:
 	{
 		return isValid;
 	}
+
+	/// @brief Set a value in the config map
+	void SetValue(const TString& key, const TString& value);
+
+	/// @brief Save the current config map to a file
+	void Save(const char* filePath);
 
 	/// @brief Get the raw key-value map
 	[[nodiscard]] const TKeyMap& GetKeyMap() const

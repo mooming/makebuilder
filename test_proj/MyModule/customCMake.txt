@@ -1,0 +1,1 @@
+message("Custom CMake snippet worked!")

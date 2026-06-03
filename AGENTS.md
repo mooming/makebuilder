@@ -4,15 +4,16 @@ This is a C++23 CMake-based meta-build system that automatically generates CMake
 
 ## Build Commands
 
-### Configure and Build
+### Build the Tool
 ```bash
-cmake -B <build_dir> -S .
-cmake --build <build_dir>
+./build.sh [-dev] [-debug] [-release] [-clean]
+# Windows: build.bat [-dev] [-debug] [-release] [-clean]
 ```
 
 ### Run the Tool
 ```bash
-./bin/mbuild <projects_root_path>
+./run.sh <projects_root_path>
+# Windows: run.bat <projects_root_path>
 ```
 
 ### Format Code
@@ -32,9 +33,8 @@ clang-tidy <file.cpp> -- -std=c++23
 
 ### Clean Build
 ```bash
-rm -rf <build_dir>
-cmake -B <build_dir> -S .
-cmake --build <build_dir>
+./build.sh -clean
+# Windows: build.bat -clean
 ```
 
 ## Code Style
@@ -178,10 +178,7 @@ Use `OSAbstractLayer` for cross-platform operations:
 - `ExternalCMakeProject` - External CMake project
 
 ### Module Specifier Files
-- `include.txt` - Directory is an include path
-- `dependency.txt` - Module dependencies
-- `library.txt` - Required libraries
-- `framework.txt` - Required frameworks (macOS)
+- `customCMake.txt` - Its contents will be added to CMakeLists.txt for custom usage
 
 ## File Structure
 

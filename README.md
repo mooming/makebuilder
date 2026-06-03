@@ -10,14 +10,15 @@ MakeBuilder scans your project's directory structure and automatically generates
 
 1. **Build MakeBuilder:**
    ```bash
-   cmake -B build -S . -G "Ninja Multi-Config"
-   cmake --build build --config Release
+   ./build.sh -release
    ```
+
 
 2. **Run on your project:**
    ```bash
-   makebuild /path/to/your/project
+   ./run.sh /path/to/your/project
    ```
+
 
 3. **Build your project:**
    ```bash
@@ -67,6 +68,11 @@ Located in each module directory.
 | `optimizeLevel` | Optimization level override (0-3) |
 | `ignoreSubdirectories` | Space-separated list of subdirectories to skip |
 | `linkerGroupDependency` | Comma-separated list of dependencies to wrap with --start-group/--end-group (or 'all' for all libraries) |
+| `include` | Semicolon-separated include directories (relative to module) |
+| `dependency` | Semicolon-separated module dependencies |
+| `library` | Semicolon-separated libraries to link |
+| `linkDirectory` | Semicolon-separated linker directories |
+| `framework` | Semicolon-separated frameworks to link |
 
 ### Build Types
 
@@ -130,11 +136,6 @@ Optional files placed in module directories:
 
 | File | Description                                                                                  |
 |------|----------------------------------------------------------------------------------------------|
-| `include.txt` | Add directory and its contents to include paths. Paths are relative to the file's directory. |
-| `dependency.txt` | Module dependencies (one per line)                                                           |
-| `library.txt` | Required libraries (one per line)                                                            |
-| `linkDirectory.txt` | List linker directories (one per line). Paths are relative to the file's directory.          |
-| `framework.txt` | List required frameworks (OpenGL, Vulkan, Cocoa)                                             |
 | `customCMake.txt` | Its contents will be added to CMakeLists.txt for custom usage                                |
 
 ## File Detection
@@ -146,7 +147,13 @@ MakeBuilder automatically detects source and header files:
 
 ## Multi-Configuration Build
 
-Generate executables for Debug, Dev, and Release configurations:
+You can use the provided build script for convenience:
+
+```bash
+./build.sh -dev -debug -release
+```
+
+Alternatively, you can use CMake directly:
 
 ```bash
 cmake -B build -G "Ninja Multi-Config" -S .
@@ -162,16 +169,16 @@ cmake --build build --config Release
 | Dev | `-g -O1` | Optimized but with debug info |
 | Release | `-O3` | Full optimization |
 
-**Note:** Requires Ninja. On macOS: `brew install ninja`
+**Note:** For Windows, use the `.bat` versions of the scripts (e.g., `build.bat`, `run.bat`).
 
 ## Testing
 
-Run built-in test cases:
+Run built-in test cases using the provided scripts:
 
 ```bash
-./build/Application/MakeBuild/Debug/makebuild . --test-run
-./build/Application/MakeBuild/Dev/makebuild . --test-run
-./build/Application/MakeBuild/Release/makebuild . --test-run
+./runDebug.sh . --test-run
+./runDev.sh . --test-run
+./run.sh . --test-run
 ```
 
 Note: Test cases can specify pre-execution commands in a `pretest_commands.txt` file located within the test directory. Each line in this file is executed as a system command before running `makebuild`.
