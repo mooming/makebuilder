@@ -2,18 +2,20 @@
 
 #pragma once
 
+#include <fstream>
+#include <iostream>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <fstream>
-#include <iostream>
 
 namespace mb
 {
 /// @brief Parses key=value configuration files
 /// @details Loads and parses .config files in key=value format.
 /// Supports multiple file loading and provides access to parsed values.
+/// The key-value separator is always '='. Values can contain multiple items
+/// separated by common delimiters (comma, semicolon, colon, space).
 class ConfigParser final
 {
 public:
@@ -68,14 +70,42 @@ public:
 	void Save(const char* filePath);
 
 	/// @brief Get the raw key-value map
-	[[nodiscard]] const TKeyMap& GetKeyMap() const
+	[[nodiscard]] static const TKeyMap& GetKeyMap()
 	{
-		return keymap;
+		static const TKeyMap emptyMap;
+		return emptyMap;
 	}
+
+	/// @brief Split a string by a delimiter into a vector of trimmed substrings
+	/// @param str The string to split
+	/// @param delimiter The delimiter character
+	/// @return Vector of trimmed substrings
+	[[nodiscard]] static std::vector<TString> Split(const TString& str, char delimiter);
+
+	/// @brief Split a string by common delimiters (comma, semicolon, colon, space)
+	/// @param str The string to split
+	/// @return Vector of trimmed substrings
+	[[nodiscard]] static std::vector<TString> SplitByCommonDelimiters(const TString& str);
+
+	/// @brief Get all values for a key, split by common delimiters
+	/// @param key The key to look up
+	/// @return Vector of trimmed substrings (values)
+	[[nodiscard]] std::vector<TString> GetValues(const TString& key) const;
+
+	/// @brief Get the first value for a key, splitting by common delimiters
+	/// @param key The key to look up
+	/// @param defaultValue Value to return if key not found
+	/// @return The first value or defaultValue if not found
+	[[nodiscard]] TString GetFirstValue(const TString& key, const TString& defaultValue) const;
 
 private:
 	/// @brief Parse a single config file
 	/// @param filePath Path to the file to parse
 	void Parse(const char* filePath);
+
+	/// @brief Parse a line using '=' as the key-value separator
+	/// @param line The line to parse
+	/// @return Pair of key and value (empty if invalid)
+	[[nodiscard]] std::pair<TString, TString> ParseLine(const TString& line) const;
 };
 } // namespace mb

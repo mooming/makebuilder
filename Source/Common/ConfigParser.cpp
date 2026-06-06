@@ -73,6 +73,26 @@ void ConfigParser::Save(const char* filePath)
 	}
 }
 
+std::pair<ConfigParser::TString, ConfigParser::TString> ConfigParser::ParseLine(const TString& line) const
+{
+	TString key;
+	TString value;
+
+	if (line.empty())
+		return {key, value};
+
+	auto separatorPos = line.find('=');
+	if (separatorPos == TString::npos)
+		return {key, value};
+
+	key = line.substr(0, separatorPos);
+	value = line.substr(separatorPos + 1);
+	key = Util::Trim(key);
+	value = Util::Trim(value);
+
+	return {key, value};
+}
+
 void ConfigParser::Parse(const char* filePath)
 {
 	using namespace std;
@@ -86,29 +106,10 @@ void ConfigParser::Parse(const char* filePath)
 
 	cout << "[ConfigParser] Parse: " << filePath << endl;
 
-	string line;
+	TString line;
 	while (getline(ifs, line))
 	{
-		using TKeyValue = pair<string, string>;
-		auto ParseLine = [&line]() -> TKeyValue
-		{
-			TKeyValue keyValue;
-			if (line.empty())
-				return keyValue;
-
-			auto separator = line.find('=');
-			if (separator == string::npos)
-				return keyValue;
-
-			auto key = line.substr(0, separator);
-			auto value = line.substr(separator + 1);
-			keyValue.first = Util::Trim(key);
-			keyValue.second = Util::Trim(value);
-
-			return keyValue;
-		};
-
-		auto keyValue = ParseLine();
+		auto keyValue = ParseLine(line);
 		if (keyValue.first.empty() || keyValue.second.empty())
 			continue;
 
@@ -116,5 +117,89 @@ void ConfigParser::Parse(const char* filePath)
 	}
 
 	isValid = true;
+}
+
+std::vector<ConfigParser::TString> ConfigParser::Split(const TString& str, char delimiter)
+{
+	std::vector<TString> result;
+	TString token;
+
+	for (char ch : str)
+	{
+		if (ch == delimiter)
+		{
+			if (!token.empty())
+			{
+				result.push_back(Util::Trim(token));
+				token.clear();
+			}
+		}
+		else
+		{
+			token += ch;
+		}
+	}
+
+	if (!token.empty())
+	{
+		result.push_back(Util::Trim(token));
+	}
+
+	return result;
+}
+
+std::vector<ConfigParser::TString> ConfigParser::SplitByCommonDelimiters(const TString& str)
+{
+	std::vector<TString> result;
+	TString token;
+
+	for (char ch : str)
+	{
+		if (ch == ',' || ch == ';' || ch == ':' || ch == ' ')
+		{
+			if (!token.empty())
+			{
+				result.push_back(Util::Trim(token));
+				token.clear();
+			}
+		}
+		else
+		{
+			token += ch;
+		}
+	}
+
+	if (!token.empty())
+	{
+		result.push_back(Util::Trim(token));
+	}
+
+	return result;
+}
+
+std::vector<ConfigParser::TString> ConfigParser::GetValues(const TString& key) const
+{
+	TKeyMap::const_iterator found = keymap.find(key);
+	if (found == keymap.end())
+		return {};
+
+	return SplitByCommonDelimiters(found->second);
+}
+
+ConfigParser::TString ConfigParser::GetFirstValue(const TString& key, const TString& defaultValue) const
+{
+	TKeyMap::const_iterator found = keymap.find(key);
+	if (found == keymap.end())
+		return defaultValue;
+
+	TString trimmed = Util::Trim(found->second);
+	if (trimmed.empty())
+		return defaultValue;
+
+	auto values = SplitByCommonDelimiters(trimmed);
+	if (values.empty())
+		return defaultValue;
+
+	return values[0];
 }
 } // namespace mb
