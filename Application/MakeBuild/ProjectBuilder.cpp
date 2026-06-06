@@ -150,19 +150,37 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 	const vector<string> txtFiles = {"include.txt", "dependency.txt", "library.txt", "linkDirectory.txt",
 								 "framework.txt"};
 
-	// Read .txt files
 	Module::Strings includePaths, dependencies, libraries, linkDirectories, frameworks;
-	for (const auto& txtFile : txtFiles)
+
+	// Groups related migration data to eliminate duplication
+	struct MigrationTarget
 	{
+		string key;
+		string txtFile;
+		Module::Strings* list;
+	};
+
+	const vector<MigrationTarget> targets = {
+		{"include", "include.txt", &includePaths},
+		{"dependency", "dependency.txt", &dependencies},
+		{"library", "library.txt", &libraries},
+		{"linkDirectory", "linkDirectory.txt", &linkDirectories},
+		{"framework", "framework.txt", &frameworks}
+	};
+
+	// Unified loop: process all file types in one pass
+	for (const auto& target : targets)
+	{
+		// Build absolute path to .txt file
 		string filePath = modulePath;
 		auto lastChar = filePath.back();
 		if (lastChar != '/' && lastChar != '\\')
 		{
 			filePath.append("/");
 		}
-		filePath.append(txtFile);
+		filePath.append(target.txtFile);
 
-		cout << "[Migrate] Reading " << txtFile << " from " << modulePath << " (module: " << module.GetName() << ")" << endl;
+		cout << "[Migrate] Reading " << target.txtFile << " from " << modulePath << " (module: " << module.GetName() << ")" << endl;
 
 		ifstream ifs(filePath);
 		if (!ifs.is_open())
@@ -171,13 +189,10 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			continue;
 		}
 
-		// Special handling for include.txt: add the module directory to include paths
-		// (even if the file is empty - it's a marker), and also parse content for additional includes
-		if (txtFile == "include.txt")
+		if (target.key == "include")
 		{
 			includePaths.push_back(modulePath);
-			cout << "[Migrate] Marked include.txt found, added module directory to includes: "
-				 << modulePath << endl;
+			cout << "[Migrate] Marked include.txt found, added module directory to includes: " << modulePath << endl;
 		}
 
 		string line;
@@ -188,38 +203,24 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			line = Util::Trim(line);
 			if (!line.empty())
 			{
-				if (txtFile == "include.txt")
-				{
-					includePaths.push_back(line);
+				target.list->push_back(line);
+				if (target.key == "include")
 					cout << "[Migrate] Parsed include: " << line << endl;
-				}
-				else if (txtFile == "dependency.txt")
-				{
-					dependencies.push_back(line);
+				else if (target.key == "dependency")
 					cout << "[Migrate] Parsed dependency: " << line << endl;
-				}
-				else if (txtFile == "library.txt")
-				{
-					libraries.push_back(line);
+				else if (target.key == "library")
 					cout << "[Migrate] Parsed library: " << line << endl;
-				}
-				else if (txtFile == "linkDirectory.txt")
-				{
-					linkDirectories.push_back(line);
+				else if (target.key == "linkDirectory")
 					cout << "[Migrate] Parsed linkDirectory: " << line << endl;
-				}
-				else if (txtFile == "framework.txt")
-				{
-					frameworks.push_back(line);
+				else if (target.key == "framework")
 					cout << "[Migrate] Parsed framework: " << line << endl;
-				}
 			}
 			else
 			{
 				cout << "[Migrate] Skipped empty line (line " << lineNum << ") in " << filePath << endl;
 			}
 		}
-		cout << "[Migrate] Finished reading " << txtFile << " from " << modulePath << ", found " << lineNum << " lines" << endl;
+		cout << "[Migrate] Finished reading " << target.txtFile << " from " << modulePath << ", found " << lineNum << " lines" << endl;
 	}
 
 	cout << "[Migrate] Summary for " << module.GetName() << ": " << includePaths.size() << " includes, "
@@ -245,133 +246,64 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 		existingConfig = config.GetKeyMap();
 	}
 
-	// Read existing values for the keys we'll be merging
-	ConfigParser::TKeyMap existingValues;
-	for (const auto& key : {"include", "dependency", "library", "linkDirectory", "framework"})
+	if (!includePaths.empty() || !dependencies.empty() || !libraries.empty() || !linkDirectories.empty() || !frameworks.empty())
 	{
-		if (hasExistingConfig)
-		{
-			auto value = config.GetValue(key);
-			if (value.has_value())
-			{
-				existingValues[key] = value.value();
-			}
-		}
-	}
-
-	// Merge the data
-	if (!includePaths.empty() || !dependencies.empty() || !libraries.empty() || !linkDirectories.empty() ||
-		!frameworks.empty())
-	{
-		// Build the new config content
 		stringstream newConfig;
 
-		// Copy existing config (preserving name, buildType, etc.)
 		if (hasExistingConfig)
 		{
 			for (const auto& [key, value] : existingConfig)
 			{
-				if (key == "include" || key == "dependency" || key == "library" || key == "linkDirectory" ||
-					key == "framework")
+				if (key != "include" && key != "dependency" && key != "library" && key != "linkDirectory" && key != "framework")
 				{
-					continue;
+					newConfig << key << " = " << value << endl;
 				}
-				newConfig << key << " = " << value << endl;
 			}
 		}
 
-		// Add the migrated values (merging with existing values)
-		if (!includePaths.empty())
+		// Duplicate detection for merged config values
+		for (const auto& target : targets)
 		{
-			// Start with existing value if any
-			if (existingValues.count("include"))
+			vector<string> finalValues;
+
+			if (hasExistingConfig)
 			{
-				newConfig << "include = " << existingValues["include"];
+				auto val = config.GetValue(target.key);
+				if (val.has_value())
+				{
+					stringstream ss(val.value());
+					string item;
+					while (getline(ss, item, ';'))
+					{
+						item = Util::Trim(item);
+						if (!item.empty() && find(finalValues.begin(), finalValues.end(), item) == finalValues.end())
+						{
+							finalValues.push_back(item);
+						}
+					}
+				}
 			}
 
-			// Append new values
-			for (size_t i = 0; i < includePaths.size(); ++i)
+			// Append from .txt file, avoiding duplicates
+			for (const auto& newItem : *(target.list))
 			{
-				if (i > 0 || existingValues.count("include"))
-					newConfig << ";";
-				newConfig << includePaths[i];
+				if (find(finalValues.begin(), finalValues.end(), newItem) == finalValues.end())
+				{
+					finalValues.push_back(newItem);
+				}
 			}
-			newConfig << endl;
+
+			if (!finalValues.empty())
+			{
+				newConfig << target.key << " = ";
+				for (size_t i = 0; i < finalValues.size(); ++i)
+				{
+					newConfig << finalValues[i] << (i < finalValues.size() - 1 ? ";" : "");
+				}
+				newConfig << endl;
+			}
 		}
 
-		if (!dependencies.empty())
-		{
-			// Start with existing value if any
-			if (existingValues.count("dependency"))
-			{
-				newConfig << "dependency = " << existingValues["dependency"];
-			}
-
-			// Append new values
-			for (size_t i = 0; i < dependencies.size(); ++i)
-			{
-				if (i > 0 || existingValues.count("dependency"))
-					newConfig << ";";
-				newConfig << dependencies[i];
-			}
-			newConfig << endl;
-		}
-
-		if (!libraries.empty())
-		{
-			// Start with existing value if any
-			if (existingValues.count("library"))
-			{
-				newConfig << "library = " << existingValues["library"];
-			}
-
-			// Append new values
-			for (size_t i = 0; i < libraries.size(); ++i)
-			{
-				if (i > 0 || existingValues.count("library"))
-					newConfig << ";";
-				newConfig << libraries[i];
-			}
-			newConfig << endl;
-		}
-
-		if (!linkDirectories.empty())
-		{
-			// Start with existing value if any
-			if (existingValues.count("linkDirectory"))
-			{
-				newConfig << "linkDirectory = " << existingValues["linkDirectory"];
-			}
-
-			// Append new values
-			for (size_t i = 0; i < linkDirectories.size(); ++i)
-			{
-				if (i > 0 || existingValues.count("linkDirectory"))
-					newConfig << ";";
-				newConfig << linkDirectories[i];
-			}
-			newConfig << endl;
-		}
-
-		if (!frameworks.empty())
-		{
-			// Start with existing value if any
-			if (existingValues.count("framework"))
-			{
-				newConfig << "framework = " << existingValues["framework"];
-			}
-
-			// Append new values
-			for (size_t i = 0; i < frameworks.size(); ++i)
-			{
-				if (i > 0 || existingValues.count("framework"))
-					newConfig << ";";
-				newConfig << frameworks[i];
-			}
-			newConfig << endl;
-		}
-
-		// Write the merged config
 		string configFilePath = modulePath + "/.module.config";
 		ofstream configFile(configFilePath);
 		if (configFile.is_open())
@@ -389,16 +321,13 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 		}
 	}
 
-	// Remove the .txt files
-	for (const auto& txtFile : txtFiles)
+	// Cleanup: remove processed .txt files
+	for (const auto& target : targets)
 	{
 		string filePath = modulePath;
-		auto lastChar = filePath.back();
-		if (lastChar != '/' && lastChar != '\\')
-		{
+		if (filePath.back() != '/' && filePath.back() != '\\')
 			filePath.append("/");
-		}
-		filePath.append(txtFile);
+		filePath.append(target.txtFile);
 
 		if (access(filePath.c_str(), F_OK) == 0)
 		{
