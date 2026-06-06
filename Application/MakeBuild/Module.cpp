@@ -355,22 +355,6 @@ void Module::ParseBuildSpecifiers(const Files& files)
 {
 	customCMake.clear();
 
-	struct SpecifierMap
-	{
-		TString fileName;
-		TString configKey;
-		Strings* member;
-	};
-
-	const std::array<SpecifierMap, 6> specifiers = {{
-		{"dependencies.txt", "dependency", &dependencies},
-		{"dependency.txt", "dependency", &dependencies},
-		{"library.txt", "library", &libraries},
-		{"include.txt", "include", &includePaths},
-		{"linkDirectory.txt", "linkDirectory", &linkDirectories},
-		{"framework.txt", "framework", &frameworks},
-	}};
-
 	for (const auto& element : files)
 	{
 		using namespace Util;
@@ -386,53 +370,6 @@ void Module::ParseBuildSpecifiers(const Files& files)
 
 			ParseList(filePath.c_str(), customCMake);
 			continue;
-		}
-
-		// Handle migration of other specifiers
-		for (const auto& spec : specifiers)
-		{
-			if (EqualsIgnoreCase(filename, spec.fileName))
-			{
-				string filePath = GetPath();
-				filePath.append("/");
-				filePath.append(filename);
-
-				// Temporary list to read from file
-				Strings fileList;
-				ParseList(filePath.c_str(), fileList);
-
-				if (fileList.empty())
-					continue;
-
-				cout << "[Module][" << moduleName << "] Migrating " << filename << " to .module.config" << endl;
-
-				// Merge file content into the member vector (avoiding duplicates)
-				for (const auto& item : fileList)
-				{
-					if (std::find(spec.member->begin(), spec.member->end(), item) == spec.member->end())
-					{
-						spec.member->push_back(item);
-					}
-				}
-
-				// Convert the updated member vector back to a semicolon-separated string for config
-				TString combinedValue;
-				for (size_t i = 0; i < spec.member->size(); ++i)
-				{
-					combinedValue += (*spec.member)[i];
-					if (i < spec.member->size() - 1)
-					{
-						combinedValue += ";";
-					}
-				}
-
-				// Update and save the config
-				config.SetValue(spec.configKey, combinedValue);
-				
-				string configPath = GetPath();
-				configPath.append("/.module.config");
-				config.Save(configPath.c_str());
-			}
 		}
 	}
 }

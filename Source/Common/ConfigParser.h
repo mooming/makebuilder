@@ -70,10 +70,9 @@ public:
 	void Save(const char* filePath);
 
 	/// @brief Get the raw key-value map
-	[[nodiscard]] static const TKeyMap& GetKeyMap()
+	[[nodiscard]] const TKeyMap& GetKeyMap() const
 	{
-		static const TKeyMap emptyMap;
-		return emptyMap;
+		return keymap;
 	}
 
 	/// @brief Split a string by a delimiter into a vector of trimmed substrings
