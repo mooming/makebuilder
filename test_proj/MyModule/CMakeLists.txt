@@ -10,7 +10,7 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 set (CMAKE_CXX_FLAGS_DEV "${CMAKE_CXX_FLAGS_DEBUG} -O1")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 23)
 
 if (APPLE)
     set(PLATFORM_SOURCES
@@ -20,16 +20,16 @@ else()
 endif()
 
 if (MSVC)
-	add_compile_options (/W3 /WX)
+	add_compile_options (/W4 /WX)
 else (MSVC)
 	add_compile_options (-Wall -Werror)
 endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- ${CMAKE_SOURCE_DIR}/MyModule
- ${CMAKE_SOURCE_DIR}/MyModule/include1
- ${CMAKE_SOURCE_DIR}/MyModule/../include
+ ${CMAKE_SOURCE_DIR}/test_proj/MyModule
+ ${CMAKE_SOURCE_DIR}/test_proj/MyModule/include1
+ ${CMAKE_SOURCE_DIR}/test_proj/MyModule/../include
  )
 add_subdirectory (src)
 

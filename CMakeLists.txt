@@ -12,6 +12,13 @@ set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 set (CMAKE_CXX_STANDARD 23)
 
+if (APPLE)
+    set(PLATFORM_SOURCES
+    )
+else()
+    set(PLATFORM_SOURCES "")
+endif()
+
 if (MSVC)
 	add_compile_options (/W4 /WX)
 else (MSVC)
@@ -20,12 +27,10 @@ endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- ${CMAKE_SOURCE_DIR}/Source
- ${CMAKE_SOURCE_DIR}/Source/Common
+ ${CMAKE_SOURCE_DIR}/test_proj/MyModule
  )
-link_directories (${CMAKE_SOURCE_DIR}/lib)
-
 add_subdirectory (Application)
+add_subdirectory (test_proj)
 add_subdirectory (Source)
 
 
