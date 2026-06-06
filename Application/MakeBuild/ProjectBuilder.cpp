@@ -191,7 +191,7 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 
 		if (target.key == "include")
 		{
-			includePaths.push_back(modulePath);
+			includePaths.push_back(".");
 			cout << "[Migrate] Marked include.txt found, added module directory to includes: " << modulePath << endl;
 		}
 

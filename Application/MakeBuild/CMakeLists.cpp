@@ -203,11 +203,6 @@ void CMakeGenerator::Generate() const
 		ofs << " " << TranslatePath(element) << endl;
 	}
 
-	for (const auto& incPath : module.GetIncludePaths())
-	{
-		ofs << " " << TranslatePath(module.GetPath() + "/" + incPath) << endl;
-	}
-
 	ofs << " )" << endl;
 
 	if (buildType == EBuildType::Executable)
@@ -283,6 +278,16 @@ void CMakeGenerator::Generate() const
 
 			ofs << ")" << endl << endl;
 
+			if (!module.GetIncludePaths().empty())
+			{
+				ofs << "target_include_directories (" << moduleName << " PUBLIC" << endl;
+				for (const auto& incPath : module.GetIncludePaths())
+				{
+					ofs << " " << TranslatePath(module.GetPath() + "/" + incPath) << endl;
+				}
+				ofs << ")" << endl << endl;
+			}
+
 			AddFrameworks(ofs, moduleName, module.GetFrameworks());
 			AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
 
@@ -306,6 +311,16 @@ void CMakeGenerator::Generate() const
 
 			ofs << ")" << endl << endl;
 
+			if (!module.GetIncludePaths().empty())
+			{
+				ofs << "target_include_directories (" << moduleName << " PUBLIC" << endl;
+				for (const auto& incPath : module.GetIncludePaths())
+				{
+					ofs << " " << TranslatePath(module.GetPath() + "/" + incPath) << endl;
+				}
+				ofs << ")" << endl << endl;
+			}
+
 			AddFrameworks(ofs, moduleName, module.GetFrameworks());
 			AddOptimizeLevel(ofs, moduleName, module.GetOptimizeLevel());
 
@@ -322,6 +337,16 @@ void CMakeGenerator::Generate() const
 			}
 
 			ofs << ")" << endl;
+
+			if (!module.GetIncludePaths().empty())
+			{
+				ofs << "target_include_directories (" << moduleName.c_str() << " INTERFACE" << endl;
+				for (const auto& incPath : module.GetIncludePaths())
+				{
+					ofs << " " << TranslatePath(module.GetPath() + "/" + incPath) << endl;
+				}
+				ofs << ")" << endl;
+			}
 			break;
 
 		case EBuildType::ExternalLibrary:
