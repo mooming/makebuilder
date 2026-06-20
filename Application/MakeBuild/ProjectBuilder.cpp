@@ -217,7 +217,8 @@ void ProjectBuilder::MigrateModuleSpecifiers(const string& basePath, Module& mod
 		}
 
 		// If 'include.txt' exists
-		if (target.key == "include")
+		const bool isInclude = target.key == "include";
+		if (isInclude)
 		{
 			includePaths.emplace_back(relativePath);
 			includeDirs.push_back(relativePath);
@@ -231,6 +232,26 @@ void ProjectBuilder::MigrateModuleSpecifiers(const string& basePath, Module& mod
 		{
 			lineNum++;
 			line = Util::Trim(line);
+			if (isInclude)
+			{
+				string temp;
+				swap(temp, line);
+				line = modulePath;
+				line.append("/");
+				line.append(temp);
+				line = OS::GetFullPath(line);
+
+				if (line.starts_with(basePath))
+				{
+					line = line.substr(basePath.size());
+				}
+
+				if (line.starts_with('/') && line.size() > 1)
+				{
+					line = line.substr(1, line.size() - 1);
+				}
+			}
+
 			if (!line.empty())
 			{
 				target.list->push_back(line);

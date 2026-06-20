@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 #include "StringUtil.h"
 
@@ -23,6 +24,8 @@ string GetFullPath(string path)
 #endif // WINDOWS
 
 #ifdef POSIX
+	path = std::filesystem::weakly_canonical(path);
+
 	char fullPath[PATH_MAX];
 	void* ptr = realpath(path.c_str(), fullPath);
 	if (ptr != fullPath)
