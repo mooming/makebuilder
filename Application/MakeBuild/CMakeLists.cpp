@@ -281,10 +281,13 @@ void CMakeGenerator::Generate() const
 			if (!module.GetIncludePaths().empty())
 			{
 				ofs << "target_include_directories (" << moduleName << " PUBLIC" << endl;
-				for (const auto& incPath : module.GetIncludePaths())
+
+				auto& moduleInclduePaths = module.GetIncludePaths();
+				for (const auto& incPath : moduleInclduePaths)
 				{
-					ofs << " " << TranslatePath(module.GetPath() + "/" + incPath) << endl;
+					ofs << " " << TranslatePath(incPath) << endl;
 				}
+
 				ofs << ")" << endl << endl;
 			}
 

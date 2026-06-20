@@ -58,10 +58,11 @@ ProjectBuilder::ProjectBuilder(const char* path)
 		cout << i++ << " : " << element->GetPath() << endl;
 	}
 
+	auto basePath = Util::TrimPath(path);
 	// Migrate deprecated .txt specifiers
 	for (auto module : modules)
 	{
-		MigrateModuleSpecifiers(*module);
+		MigrateModuleSpecifiers(basePath, *module);
 	}
 }
 
@@ -151,9 +152,17 @@ bool ProjectBuilder::TraverseDirectoryTree(Module& module, const string& logHead
 	return isValidModule;
 }
 
-void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
+void ProjectBuilder::MigrateModuleSpecifiers(const string& basePath, Module& module)
 {
 	const string& modulePath = module.GetPath();
+	string relativePath = modulePath.starts_with(basePath)
+	? modulePath.substr(basePath.size()) : modulePath;
+
+	if (relativePath.starts_with('/'))
+	{
+		relativePath = relativePath.substr(1, relativePath.size() - 1);
+	}
+
 	const vector<string> txtFiles = {
 		"include.txt",
 		"dependency.txt",
@@ -210,9 +219,9 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 		// If 'include.txt' exists
 		if (target.key == "include")
 		{
-			includePaths.emplace_back(modulePath);
-			includeDirs.push_back(modulePath);
-			cout << "[Migrate] Marked include.txt found, added module directory to includes: " << modulePath << endl;
+			includePaths.emplace_back(relativePath);
+			includeDirs.push_back(relativePath);
+			cout << "[Migrate] Marked include.txt found, added module directory to includes: " << relativePath	 << endl;
 		}
 
 		string line;
