@@ -57,6 +57,12 @@ ProjectBuilder::ProjectBuilder(const char* path)
 
 		cout << i++ << " : " << element->GetPath() << endl;
 	}
+
+	// Migrate deprecated .txt specifiers
+	for (auto module : modules)
+	{
+		MigrateModuleSpecifiers(*module);
+	}
 }
 
 void ProjectBuilder::GenerateCMakeFiles()
@@ -65,7 +71,6 @@ void ProjectBuilder::GenerateCMakeFiles()
 	for (auto module : modules)
 	{
 		assert(module != nullptr);
-		MigrateModuleSpecifiers(*module);
 		module->ReloadConfigValues();
 	}
 
@@ -149,10 +154,18 @@ bool ProjectBuilder::TraverseDirectoryTree(Module& module, const string& logHead
 void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 {
 	const string& modulePath = module.GetPath();
-	const vector<string> txtFiles = {"include.txt", "dependency.txt", "library.txt", "linkDirectory.txt",
-								 "framework.txt"};
+	const vector<string> txtFiles = {
+		"include.txt",
+		"dependency.txt",
+		"library.txt",
+		"linkDirectory.txt",
+		"framework.txt"};
 
-	Module::Strings includePaths, dependencies, libraries, linkDirectories, frameworks;
+	Module::Strings includePaths;
+	Module::Strings dependencies;
+	Module::Strings libraries;
+	Module::Strings linkDirectories;
+	Module::Strings frameworks;
 
 	// Groups related migration data to eliminate duplication
 	struct MigrationTarget
@@ -175,11 +188,13 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 	{
 		// Build absolute path to .txt file
 		string filePath = modulePath;
+
 		auto lastChar = filePath.back();
 		if (lastChar != '/' && lastChar != '\\')
 		{
 			filePath.append("/");
 		}
+
 		filePath.append(target.txtFile);
 
 		cout << "[Migrate] Reading " << target.txtFile << " from " << modulePath << " (module: " << module.GetName() << ")" << endl;
@@ -191,12 +206,12 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			continue;
 		}
 
-	if (target.key == "include")
-	{
-		includePaths.emplace_back(".");
-		includeDirs.push_back(modulePath);
-		cout << "[Migrate] Marked include.txt found, added module directory to includes: " << modulePath << endl;
-	}
+		if (target.key == "include")
+		{
+			includePaths.emplace_back(modulePath);
+			includeDirs.push_back(modulePath);
+			cout << "[Migrate] Marked include.txt found, added module directory to includes: " << modulePath << endl;
+		}
 
 		string line;
 		size_t lineNum = 0;
@@ -315,8 +330,8 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			configFile << newConfig.str();
 			configFile.close();
 			cout << "[Migration] Wrote config to " << configFilePath << " for " << module.GetName() << endl;
-			cout << "[Migration] Migrated " << includePaths.size() << " includes, " << dependencies.size() 
-				 << " dependencies, " << libraries.size() << " libraries, " << linkDirectories.size() 
+			cout << "[Migration] Migrated " << includePaths.size() << " includes, " << dependencies.size()
+				 << " dependencies, " << libraries.size() << " libraries, " << linkDirectories.size()
 				 << " link directories, " << frameworks.size() << " frameworks" << endl;
 		}
 		else
