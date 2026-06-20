@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <climits>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -15,9 +14,6 @@
 #include "ConfigParser.h"
 #include "StringUtil.h"
 
-#ifdef POSIX
-#include <unistd.h>
-#endif
 
 using namespace std;
 
@@ -65,12 +61,18 @@ ProjectBuilder::ProjectBuilder(const char* path)
 
 void ProjectBuilder::GenerateCMakeFiles()
 {
+	// Phase 1: Migrate all module specifiers first to populate global includeDirs
 	for (auto module : modules)
 	{
 		assert(module != nullptr);
-
 		MigrateModuleSpecifiers(*module);
 		module->ReloadConfigValues();
+	}
+
+	// Phase 2: Generate CMakeLists.txt files now that all global paths are known
+	for (auto module : modules)
+	{
+		assert(module != nullptr);
 
 		CMakeGenerator generator(*this, *module);
 		generator.Generate();
@@ -114,7 +116,7 @@ bool ProjectBuilder::TraverseDirectoryTree(Module& module, const string& logHead
 		auto& ignoredSubDirs = module.GetIgnoredSubdirectories();
 		auto subModulePath = submodule.GetPath();
 		const bool isIgnoredSubDir =
-				std::find(ignoredSubDirs.begin(), ignoredSubDirs.end(), subModulePath) != ignoredSubDirs.end();
+				ranges::find(ignoredSubDirs, subModulePath) != ignoredSubDirs.end();
 		if (submodule.GetBuildType() == EBuildType::Ignored || isIgnoredSubDir)
 		{
 			cout << "[" << module.GetName() << "] SKIP: " << subModulePath << endl;
@@ -146,7 +148,7 @@ bool ProjectBuilder::TraverseDirectoryTree(Module& module, const string& logHead
 
 void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 {
-	const string modulePath = module.GetPath();
+	const string& modulePath = module.GetPath();
 	const vector<string> txtFiles = {"include.txt", "dependency.txt", "library.txt", "linkDirectory.txt",
 								 "framework.txt"};
 
@@ -189,11 +191,12 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			continue;
 		}
 
-		if (target.key == "include")
-		{
-			includePaths.push_back(".");
-			cout << "[Migrate] Marked include.txt found, added module directory to includes: " << modulePath << endl;
-		}
+	if (target.key == "include")
+	{
+		includePaths.emplace_back(".");
+		includeDirs.push_back(modulePath);
+		cout << "[Migrate] Marked include.txt found, added module directory to includes: " << modulePath << endl;
+	}
 
 		string line;
 		size_t lineNum = 0;
@@ -237,13 +240,14 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 	cout << "[Migrate] Starting migration for " << module.GetName() << endl;
 
 	// Check if .module.config exists
-	ConfigParser config;
-	config.Load(modulePath.c_str(), ".module.config");
-	bool hasExistingConfig = config.IsValid();
+	ConfigParser configParser;
+	configParser.Load(modulePath.c_str(), ".module.config");
+
+	bool hasExistingConfig = configParser.IsValid();
 	ConfigParser::TKeyMap existingConfig;
 	if (hasExistingConfig)
 	{
-		existingConfig = config.GetKeyMap();
+		existingConfig = configParser.GetKeyMap();
 	}
 
 	if (!includePaths.empty() || !dependencies.empty() || !libraries.empty() || !linkDirectories.empty() || !frameworks.empty())
@@ -276,7 +280,7 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 					while (getline(ss, item, ';'))
 					{
 						item = Util::Trim(item);
-						if (!item.empty() && find(finalValues.begin(), finalValues.end(), item) == finalValues.end())
+						if (!item.empty() && ranges::find(finalValues, item) == finalValues.end())
 						{
 							finalValues.push_back(item);
 						}
@@ -287,7 +291,7 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			// Append from .txt file, avoiding duplicates
 			for (const auto& newItem : *(target.list))
 			{
-				if (find(finalValues.begin(), finalValues.end(), newItem) == finalValues.end())
+				if (ranges::find(finalValues, newItem) == finalValues.end())
 				{
 					finalValues.push_back(newItem);
 				}
@@ -327,9 +331,10 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 		string filePath = modulePath;
 		if (filePath.back() != '/' && filePath.back() != '\\')
 			filePath.append("/");
+
 		filePath.append(target.txtFile);
 
-		if (access(filePath.c_str(), F_OK) == 0)
+		if (std::filesystem::exists(filePath.c_str()))
 		{
 			remove(filePath.c_str());
 			cout << "[Migration] Removed " << filePath << " for " << module.GetName() << endl;
