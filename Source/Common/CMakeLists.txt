@@ -27,7 +27,8 @@ endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- ${CMAKE_SOURCE_DIR}/test_proj/MyModule
+ Source
+ Source/Common
  )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
@@ -43,6 +44,10 @@ add_library (Common STATIC
  OSAbstractLayer.h
  StringUtil.h
 ${PLATFORM_SOURCES}
+)
+
+target_include_directories (Common PUBLIC
+ Source/Common
 )
 
 if (APPLE)
