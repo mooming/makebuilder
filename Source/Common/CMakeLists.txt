@@ -27,8 +27,8 @@ endif (MSVC)
 
 include_directories ( ${CMAKE_SOURCE_DIR}
  ${CMAKE_SOURCE_DIR}/include
- Source
- Source/Common
+ ${CMAKE_SOURCE_DIR}/Source
+ ${CMAKE_SOURCE_DIR}/Source/Common
  )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
