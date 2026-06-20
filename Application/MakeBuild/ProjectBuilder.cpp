@@ -197,7 +197,8 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 
 		filePath.append(target.txtFile);
 
-		cout << "[Migrate] Reading " << target.txtFile << " from " << modulePath << " (module: " << module.GetName() << ")" << endl;
+		cout << "[Migrate] Reading " << target.txtFile << " from " << modulePath
+			<< " (module: " << module.GetName() << ")" << endl;
 
 		ifstream ifs(filePath);
 		if (!ifs.is_open())
@@ -206,6 +207,7 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			continue;
 		}
 
+		// If 'include.txt' exists
 		if (target.key == "include")
 		{
 			includePaths.emplace_back(modulePath);
@@ -215,6 +217,7 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 
 		string line;
 		size_t lineNum = 0;
+
 		while (getline(ifs, line))
 		{
 			lineNum++;
@@ -222,6 +225,7 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 			if (!line.empty())
 			{
 				target.list->push_back(line);
+
 				if (target.key == "include")
 					cout << "[Migrate] Parsed include: " << line << endl;
 				else if (target.key == "dependency")
@@ -238,6 +242,7 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 				cout << "[Migrate] Skipped empty line (line " << lineNum << ") in " << filePath << endl;
 			}
 		}
+
 		cout << "[Migrate] Finished reading " << target.txtFile << " from " << modulePath << ", found " << lineNum << " lines" << endl;
 	}
 
@@ -245,7 +250,6 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 		 << dependencies.size() << " dependencies, " << libraries.size() << " libraries, "
 		 << linkDirectories.size() << " link directories, " << frameworks.size() << " frameworks" << endl;
 
-	// Log whether migration is needed
 	if (includePaths.empty() && dependencies.empty() && libraries.empty() && linkDirectories.empty() && frameworks.empty())
 	{
 		cout << "[Migrate] No module specifiers to migrate for " << module.GetName() << endl;
@@ -265,80 +269,79 @@ void ProjectBuilder::MigrateModuleSpecifiers(Module& module)
 		existingConfig = configParser.GetKeyMap();
 	}
 
-	if (!includePaths.empty() || !dependencies.empty() || !libraries.empty() || !linkDirectories.empty() || !frameworks.empty())
+	stringstream newConfig;
+
+	if (hasExistingConfig)
 	{
-		stringstream newConfig;
+		for (const auto& [key, value] : existingConfig)
+		{
+			if (key != "include" && key != "dependency" && key != "library" && key != "linkDirectory" && key != "framework")
+			{
+				newConfig << key << " = " << value << endl;
+			}
+		}
+	}
+
+	// Duplicate detection for merged config values
+	for (const auto& target : targets)
+	{
+		vector<string> finalValues;
 
 		if (hasExistingConfig)
 		{
-			for (const auto& [key, value] : existingConfig)
+			auto val = config.GetValue(target.key);
+			if (val.has_value())
 			{
-				if (key != "include" && key != "dependency" && key != "library" && key != "linkDirectory" && key != "framework")
+				stringstream ss(val.value());
+				string item;
+				while (getline(ss, item, ';'))
 				{
-					newConfig << key << " = " << value << endl;
-				}
-			}
-		}
-
-		// Duplicate detection for merged config values
-		for (const auto& target : targets)
-		{
-			vector<string> finalValues;
-
-			if (hasExistingConfig)
-			{
-				auto val = config.GetValue(target.key);
-				if (val.has_value())
-				{
-					stringstream ss(val.value());
-					string item;
-					while (getline(ss, item, ';'))
+					item = Util::Trim(item);
+					if (!item.empty() && ranges::find(finalValues, item) == finalValues.end())
 					{
-						item = Util::Trim(item);
-						if (!item.empty() && ranges::find(finalValues, item) == finalValues.end())
-						{
-							finalValues.push_back(item);
-						}
+						finalValues.push_back(item);
 					}
 				}
 			}
+		}
 
-			// Append from .txt file, avoiding duplicates
-			for (const auto& newItem : *(target.list))
+		// Append from .txt file, avoiding duplicates
+		for (const auto& newItem : *(target.list))
+		{
+			if (ranges::find(finalValues, newItem) == finalValues.end())
 			{
-				if (ranges::find(finalValues, newItem) == finalValues.end())
-				{
-					finalValues.push_back(newItem);
-				}
-			}
-
-			if (!finalValues.empty())
-			{
-				newConfig << target.key << " = ";
-				for (size_t i = 0; i < finalValues.size(); ++i)
-				{
-					newConfig << finalValues[i] << (i < finalValues.size() - 1 ? ";" : "");
-				}
-				newConfig << endl;
+				finalValues.push_back(newItem);
 			}
 		}
 
-		string configFilePath = modulePath + "/.module.config";
-		ofstream configFile(configFilePath);
-		if (configFile.is_open())
+		if (!finalValues.empty())
 		{
-			configFile << newConfig.str();
-			configFile.close();
-			cout << "[Migration] Wrote config to " << configFilePath << " for " << module.GetName() << endl;
-			cout << "[Migration] Migrated " << includePaths.size() << " includes, " << dependencies.size()
-				 << " dependencies, " << libraries.size() << " libraries, " << linkDirectories.size()
-				 << " link directories, " << frameworks.size() << " frameworks" << endl;
-		}
-		else
-		{
-			cout << "[Migration] ERROR: Failed to write config to " << configFilePath << endl;
+			newConfig << target.key << " = ";
+			for (size_t i = 0; i < finalValues.size(); ++i)
+			{
+				newConfig << finalValues[i] << (i < finalValues.size() - 1 ? ";" : "");
+			}
+			newConfig << endl;
 		}
 	}
+
+	string configFilePath = modulePath + "/.module.config";
+	ofstream configFile(configFilePath);
+	if (configFile.is_open())
+	{
+		configFile << newConfig.str();
+		configFile.close();
+		cout << "[Migration] Wrote config to " << configFilePath << " for " << module.GetName() << endl;
+		cout << "[Migration] Migrated " << includePaths.size() << " includes, " << dependencies.size()
+			 << " dependencies, " << libraries.size() << " libraries, " << linkDirectories.size()
+			 << " link directories, " << frameworks.size() << " frameworks" << endl;
+	}
+	else
+	{
+		cout << "[Migration] ERROR: Failed to write config to " << configFilePath << endl;
+	}
+
+	module.ReloadConfigFile();
 
 	// Cleanup: remove processed .txt files
 	for (const auto& target : targets)

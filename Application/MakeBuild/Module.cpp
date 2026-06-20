@@ -331,6 +331,14 @@ void Module::ParseListFromConfig(const TString& key, Strings& out)
 	}
 }
 
+void Module::ReloadConfigFile()
+{
+	config.~BuildConfig();
+	new (&config)BuildConfig(GetPath().c_str(), ".module.config");
+
+	ReloadConfigValues();
+}
+
 void Module::ReloadConfigValues()
 {
 	includePaths.clear();

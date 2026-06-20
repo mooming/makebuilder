@@ -62,6 +62,7 @@ public:
 	Module(const Module* parent, const OS::Directory& dir);
 	~Module() override = default;
 
+	void ReloadConfigFile();
 	void ReloadConfigValues();
 
 	bool operator<(const Module& rhs) const
