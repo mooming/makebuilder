@@ -154,7 +154,7 @@ bool ProjectBuilder::TraverseDirectoryTree(Module& module, const string& logHead
 
 void ProjectBuilder::MigrateModuleSpecifiers(const string& basePath, Module& module)
 {
-	const string& modulePath = module.GetPath();
+	const string modulePath = Util::TrimPath(OS::GetFullPath(module.GetPath()));
 	string relativePath = modulePath.starts_with(basePath)
 	? modulePath.substr(basePath.size()) : modulePath;
 
