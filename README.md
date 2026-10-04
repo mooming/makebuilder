@@ -54,7 +54,28 @@ Located in the project root directory.
 | `compileOptions` | -Wall -Werror | Compiler flags (non-MSVC) |
 | `msvcCompileOptions` | /W3 /WX | Compiler flags (MSVC) |
 | `precompileDefinitions` | (none) | Preprocessor definitions |
+| `precompileDefinitionsDebug` | (none) | Definitions for the Debug configuration only, emitted onto `CMAKE_CXX_FLAGS_DEBUG` |
+| `precompileDefinitionsDev` | (none) | Definitions for the Dev configuration only, emitted onto `CMAKE_CXX_FLAGS_DEV` |
+| `precompileDefinitionsRelease` | (none) | Definitions for the Release configuration only, emitted onto `CMAKE_CXX_FLAGS_RELEASE` |
 | `linkerGroupDependency` | (not set) | Comma-separated list of dependencies to wrap with --start-group/--end-group (or 'all' for all libraries) |
+
+#### Configuration macros
+
+Every generated `CMakeLists.txt` puts exactly one macro on each configuration's own flag line:
+`DEBUG_BUILD=1` on `CMAKE_CXX_FLAGS_DEBUG`, `DEV_BUILD=1` on `CMAKE_CXX_FLAGS_DEV`,
+`RELEASE_BUILD=1` on `CMAKE_CXX_FLAGS_RELEASE`. Source asks which configuration it is in with
+`#if DEV_BUILD`, and anything-but-Release reads `#if !RELEASE_BUILD`. Each of the three lines reads
+only its own variable, so no configuration inherits another's definitions; the resulting flags are
+`-g -O0` for Debug, `-g -O1` for Dev, `-O3` for Release.
+
+#### Per-configuration definitions
+
+`precompileDefinitionsDebug`, `precompileDefinitionsDev` and `precompileDefinitionsRelease` append
+`-D` tokens to those same three lines, for macros that are not about the configuration itself. A
+project that compiles its test bodies into Debug and Dev only writes the same value into the first
+two keys and leaves the third empty — the two lists are independent, so both say it.
+`precompileDefinitions` without a suffix is an `add_compile_definitions` and so belongs to all three
+configurations.
 
 ### .module.config (Each Module)
 

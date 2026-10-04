@@ -21,4 +21,9 @@ BuildConfig::TString BuildConfig::GetValue(const TString& key, const TString& de
 {
 	return parser.GetValue(key, defaultValue);
 }
+
+std::vector<BuildConfig::TString> BuildConfig::GetValues(const TString& key) const
+{
+	return parser.GetValues(key);
+}
 } // namespace mb

@@ -87,6 +87,12 @@ void AddOptimizeLevel(ostream& os, const string& projName, const string& optimiz
 	os << "target_compile_options (" << projName << " PRIVATE -O" << optimizeLevel << ")" << endl;
 }
 
+void AddConfigDefinitions(ostream& os, const BuildConfig& config, const string& key)
+{
+	for (const auto& definition : config.GetValues(key))
+		os << " -D" << definition;
+}
+
 } // anonymous namespace
 
 namespace mb
@@ -125,9 +131,17 @@ void CMakeGenerator::Generate() const
 	ofs << R"(    set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE))" << endl;
 	ofs << "endif ()" << endl;
 	ofs << endl;
-	ofs << "set (CMAKE_CXX_FLAGS_DEBUG \"${CMAKE_CXX_FLAGS_DEBUG} -g -O0\")" << endl;
-	ofs << "set (CMAKE_CXX_FLAGS_DEV \"${CMAKE_CXX_FLAGS_DEBUG} -O1\")" << endl;
-	ofs << "set (CMAKE_CXX_FLAGS_RELEASE \"${CMAKE_CXX_FLAGS_RELEASE} -O3\")" << endl;
+	ofs << "set (CMAKE_CXX_FLAGS_DEBUG \"${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -DDEBUG_BUILD=1";
+	AddConfigDefinitions(ofs, buildConfig, "precompileDefinitionsDebug");
+	ofs << "\")" << endl;
+
+	ofs << "set (CMAKE_CXX_FLAGS_DEV \"${CMAKE_CXX_FLAGS_DEV} -g -O1 -DDEV_BUILD=1";
+	AddConfigDefinitions(ofs, buildConfig, "precompileDefinitionsDev");
+	ofs << "\")" << endl;
+
+	ofs << "set (CMAKE_CXX_FLAGS_RELEASE \"${CMAKE_CXX_FLAGS_RELEASE} -O3 -DRELEASE_BUILD=1";
+	AddConfigDefinitions(ofs, buildConfig, "precompileDefinitionsRelease");
+	ofs << "\")" << endl;
 	ofs << endl;
 
 	auto cxxStandard = buildConfig.GetValue("cxxStandard", "17");
