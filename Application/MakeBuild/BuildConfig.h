@@ -5,6 +5,7 @@
 #include "Common/ConfigParser.h"
 
 #include <string>
+#include <vector>
 
 namespace mb
 {
@@ -23,6 +24,7 @@ public:
 
 	[[nodiscard]] TValue GetValue(const TString& key) const;
 	[[nodiscard]] TString GetValue(const TString& key, const TString& defaultValue) const;
+	[[nodiscard]] std::vector<TString> GetValues(const TString& key) const;
 
 	[[nodiscard]] auto IsValid() const
 	{

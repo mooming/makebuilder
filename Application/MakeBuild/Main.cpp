@@ -31,6 +31,11 @@ int main(int argc, const char* argv[])
 		cout << "    compileOptions = <options>         (default: -Wall -Werror)" << endl;
 		cout << "    msvcCompileOptions = <options>     (default: /W3 /WX)" << endl;
 		cout << "    precompileDefinitions = <defs>     (optional)" << endl;
+		cout << "    precompileDefinitionsDebug = <defs> (optional; Debug only)" << endl;
+		cout << "    precompileDefinitionsDev = <defs>   (optional; Dev only)" << endl;
+		cout << "    precompileDefinitionsRelease = <defs> (optional; Release only)" << endl;
+		cout << "  Each configuration also gets its own macro: DEBUG_BUILD=1, DEV_BUILD=1," << endl;
+		cout << "  RELEASE_BUILD=1." << endl;
 		cout << "    linkerGroupDependency = <deps>     (comma-separated list, or 'all')" << endl << endl;
 
 		cout << "== Module Configuration ==" << endl;
