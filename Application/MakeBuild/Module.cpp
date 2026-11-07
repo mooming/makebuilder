@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -86,7 +87,7 @@ Module::Module(const Directory& dir)
 	: Module(nullptr, dir)
 {}
 
-Module::Module(const Module* parent, const OS::Directory& dir)
+Module::Module([[maybe_unused]] const Module* parent, const OS::Directory& dir)
 	: Directory(dir)
 	, config(dir.GetPath().c_str(), ".module.config")
 	, buildType(EBuildType::Ignored)
@@ -130,8 +131,8 @@ Module::Module(const Module* parent, const OS::Directory& dir)
 		std::string token;
 		while (std::getline(ss, token, ' '))
 		{
-			auto path = Util::TrimPath(GetPath() + '/' + token);
-			ignoredSubdirectories.push_back(path);
+			auto trimmed = Util::TrimPath(GetPath() + '/' + token);
+			ignoredSubdirectories.push_back(trimmed);
 		}
 	}
 
@@ -161,7 +162,7 @@ Module::Module(const Module* parent, const OS::Directory& dir)
 				if (dep.empty())
 					continue;
 
-				std::ranges::transform(dep, dep.begin(), ::tolower);
+				std::ranges::transform(dep, dep.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 				linkerGroupDependencies.push_back(dep);
 			}
 		}

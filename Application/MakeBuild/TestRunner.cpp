@@ -213,7 +213,13 @@ TestRunner::TString TestRunner::GetTimestamp()
 	time_t nowTime = chrono::system_clock::to_time_t(now);
 
 	char buffer[128];
-	struct tm* timeinfo = localtime(&nowTime);
+#ifdef WINDOWS
+	struct tm timeInfo = {};
+	localtime_s(&timeInfo, &nowTime);
+	const struct tm* timeinfo = &timeInfo;
+#else // WINDOWS
+	const struct tm* timeinfo = localtime(&nowTime);
+#endif // WINDOWS
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
 
 	return TString(buffer);

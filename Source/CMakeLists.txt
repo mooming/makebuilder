@@ -6,9 +6,9 @@ if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 endif ()
 
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
-set (CMAKE_CXX_FLAGS_DEV "${CMAKE_CXX_FLAGS_DEBUG} -O1")
-set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -DDEBUG_BUILD=1")
+set (CMAKE_CXX_FLAGS_DEV "${CMAKE_CXX_FLAGS_DEV} -g -O1 -DDEV_BUILD=1")
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DRELEASE_BUILD=1")
 
 set (CMAKE_CXX_STANDARD 23)
 
@@ -20,7 +20,7 @@ else()
 endif()
 
 if (MSVC)
-	add_compile_options (/W4 /WX)
+	add_compile_options (/W4 /WX /EHsc /DWIN32 /DNOMINMAX /utf-8)
 else (MSVC)
 	add_compile_options (-Wall -Werror)
 endif (MSVC)
